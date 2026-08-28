@@ -52,6 +52,7 @@ Mewmory giúp người học tiếng Anh ghi chép từ vựng nhanh chóng, th�
 | ---------------------------------- | --------------------------- | -------- | -------- |
 | Từ vựng (word)                     | User nhập                   | ✅       | ✅       |
 | Phiên âm IPA (phonetic)            | Dictionary API              | ❌       | ✅       |
+| Audio phát âm (audio_url)          | Dictionary API              | ❌       | ✅       |
 | Loại từ (part of speech)           | Dictionary API              | ❌       | ✅       |
 | Level (CEFR: A1→C2)                | AI                          | ❌       | ✅       |
 | Usage (formal, informal, slang...) | AI                          | ❌       | ✅       |
@@ -59,22 +60,26 @@ Mewmory giúp người học tiếng Anh ghi chép từ vựng nhanh chóng, th�
 | Ví dụ (examples)                   | Dictionary API + AI         | ❌       | ✅       |
 | Collection gợi ý                   | AI                          | ❌       | ✅       |
 
+> [!NOTE]
+> **Một từ có nhiều loại từ (part of speech):** Ví dụ "run" vừa là verb vừa là noun. Mỗi vocabulary entry lưu 1 `part_of_speech`, nên nếu từ có nhiều loại từ, user sẽ thấy nhiều kết quả và có thể lưu thành nhiều entries riêng biệt. UI sẽ hiển thị kèm part_of_speech để phân biệt.
+
 **Luồng xử lý:**
 
 1. User nhập từ tiếng Anh vào input field.
 2. User nhấn nút "Lookup" (hoặc Enter).
 3. App gọi song song:
-   - **Free Dictionary API** → lấy phonetic, part of speech, definitions (EN), examples.
+   - **Free Dictionary API** → lấy phonetic, audio_url, part of speech, definitions (EN), examples.
    - **AI API** → lấy CEFR level, usage, nghĩa tiếng Việt, collection gợi ý.
 4. App hiển thị kết quả với TẤT CẢ các nghĩa của từ.
 5. User tích chọn những nghĩa muốn lưu.
-6. User review/chỉnh sửa bất kỳ field nào.
+6. User review/chỉnh sửa bất kỳ field nào (có thể bấm nghe phát âm thử).
 7. User nhấn "Save" → lưu vào local database.
 8. Khi có mạng → sync lên Supabase.
 
 **Xử lý từ trùng:**
 
-- Khi user nhập từ đã có trong sổ, app kiểm tra:
+- Khi user nhập từ vào input field, app **kiểm tra real-time** (debounced) xem từ đã tồn tại trong local database chưa. Nếu có, hiển thị badge nhỏ: _"Từ này đã có X entries"_ ngay dưới input field.
+- Khi user nhấn Save, app kiểm tra:
   - Nếu trùng từ **và** trùng nghĩa đã lưu → hiển thị cảnh báo: _"Bạn đã lưu từ này với nghĩa tương tự!"_
   - Vẫn cho phép lưu bản mới song song nếu user muốn.
   - Nếu trùng từ nhưng khác nghĩa → không cảnh báo, lưu bình thường.
@@ -99,25 +104,27 @@ Mewmory giúp người học tiếng Anh ghi chép từ vựng nhanh chóng, th�
 - Một từ vựng có thể thuộc nhiều Collection (many-to-many).
 - Có Collection mặc định "Uncategorized" cho từ chưa được phân loại.
 
-### 2.3 F03 — Thông báo từ vựng hàng ngày (Daily Vocabulary Reminder)
+### 2.3 F03 — Ôn tập & Thông báo từ vựng hàng ngày (Daily Vocabulary Review & Reminder)
 
-**Mô tả:** App gửi push notification random 1 từ vựng mỗi ngày từ sổ từ vựng của user.
+**Mô tả:** Giúp người dùng chủ động hoặc thụ động ôn lại ngẫu nhiên 1 từ vựng cũ đã lưu mỗi ngày.
 
-**Hai chế độ:**
+**Hình thức triển khai:**
 
-1. **Nhắc nhở nhẹ (Gentle Reminder):** Notification hiển thị từ + nghĩa ngắn gọn.
-2. **Quiz nhanh (Quick Quiz):** Notification chỉ hiển thị từ tiếng Anh → user nhấn vào để xem nghĩa (kiểu flashcard).
+1. **In-App Daily Review Widget (Phase 1 - Web & Dashboard):**
+   - Widget nổi bật ngay đầu trang Dashboard hiển thị 1 từ ngẫu nhiên trong ngày kèm 2 chế độ:
+     - **Nhắc nhở nhẹ (Gentle Card):** Hiển thị từ + phiên âm + nút loa phát âm + nghĩa rút gọn.
+     - **Quiz nhanh (Flashcard Mode):** Chỉ hiển thị từ tiếng Anh → bấm "Xem nghĩa / Lật thẻ" để kiểm tra trí nhớ.
+   - Nút "Từ khác (Next Word)" để ôn thêm nhiều từ liên tục.
+2. **Push Notification:**
+   - **Phase 1 (Web):** Hỗ trợ Web Push Notification (nếu trình duyệt hỗ trợ và người dùng cấp quyền).
+   - **Phase 2 (Mobile App):** Native Push Notification (FCM/APNs) định kỳ theo khung giờ đã chọn.
 
 **Cấu hình trong Settings:**
 
-- Bật/tắt thông báo.
-- Chọn chế độ (nhắc nhở nhẹ / quiz nhanh).
+- Bật/tắt thông báo / Daily widget.
+- Chọn chế độ hiển thị mặc định (nhắc nhở nhẹ / quiz nhanh).
 - Chọn thời gian nhận thông báo.
-- Chọn Collection nguồn (tất cả hoặc chọn Collection cụ thể).
-
-> [!NOTE]
-> Phase 1 (Web App): Dùng Web Push Notification (nếu browser hỗ trợ).
-> Phase 2 (Mobile App): Dùng native push notification (FCM/APNs).
+- Chọn Collection nguồn (tất cả hoặc chỉ định một số Collection).
 
 ### 2.4 F04 — Tìm kiếm và Lọc từ vựng (Search & Filter)
 
@@ -167,7 +174,7 @@ Mewmory giúp người học tiếng Anh ghi chép từ vựng nhanh chóng, th�
 - **AI Provider:** Chọn giữa Gemini và OpenRouter.
 - **AI Model:** Chọn model cụ thể từ provider đã chọn.
 - **Notification:** Cấu hình thông báo (xem F03).
-- **Data:** Export/Import dữ liệu (tùy chọn, nice-to-have).
+- **Data:** Export/Import dữ liệu (CSV/JSON) — hỗ trợ migrate từ Notion hoặc các nguồn khác. (nice-to-have, Phase 1).
 
 ### 2.7 F07 — Offline & Sync (Offline-First Architecture)
 
@@ -212,12 +219,12 @@ Mewmory giúp người học tiếng Anh ghi chép từ vựng nhanh chóng, th�
 | US-08 | Là người dùng, tôi muốn xem tất cả từ trong một Collection.         | **Must**   |
 | US-09 | Là người dùng, tôi muốn gán/bỏ gán từ khỏi Collection.              | **Should** |
 
-### 3.3 Thông báo
+### 3.3 Ôn tập & Thông báo
 
-| ID    | User Story                                                             | Priority   |
-| ----- | ---------------------------------------------------------------------- | ---------- |
-| US-10 | Là người dùng, tôi muốn nhận thông báo random 1 từ mỗi ngày để ôn tập. | **Should** |
-| US-11 | Là người dùng, tôi muốn chọn chế độ nhắc nhở nhẹ hoặc quiz nhanh.      | **Should** |
+| ID    | User Story                                                                                                      | Priority   |
+| ----- | --------------------------------------------------------------------------------------------------------------- | ---------- |
+| US-10 | Là người dùng, tôi muốn ôn tập ngẫu nhiên 1 từ mỗi ngày qua Daily Widget trên Dashboard hoặc Push Notification. | **Should** |
+| US-11 | Là người dùng, tôi muốn chọn chế độ nhắc nhở nhẹ hoặc quiz nhanh (flashcard).                                   | **Should** |
 
 ### 3.4 Tìm kiếm & Thống kê
 
@@ -241,7 +248,7 @@ Mewmory giúp người học tiếng Anh ghi chép từ vựng nhanh chóng, th�
 | ID     | Yêu cầu                 | Mô tả                                                                                                    |
 | ------ | ----------------------- | -------------------------------------------------------------------------------------------------------- |
 | NFR-01 | **Performance**         | Thời gian load app < 5 giây. Lookup từ vựng < 8 giây.                                                    |
-| NFR-02 | **Offline**             | Mobile App phải hoạt động đầy đủ CRUD khi không có mạng, Web App thì không cần (có hay không cũng được). |
+| NFR-02 | **Offline**             | Cả Web App và Mobile App đều hỗ trợ offline CRUD thông qua local database (IndexedDB cho Web, SQLite cho Mobile). Sync khi có mạng. |
 | NFR-03 | **Security**            | API key AI quản lý trên server, không expose cho client.                                                 |
 | NFR-04 | **Scalability**         | Hỗ trợ tối thiểu 10 users đồng thời.                                                                     |
 | NFR-05 | **Cost**                | Toàn bộ hạ tầng phải nằm trong free tier (Vercel, Supabase, AI APIs).                                    |

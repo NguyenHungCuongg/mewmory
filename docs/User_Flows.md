@@ -56,7 +56,10 @@ flowchart TD
     A["Dashboard / Vocabulary List"] --> B["Nhấn nút '+ Thêm từ mới'"]
     B --> C["Trang Add Word"]
     C --> D["Gõ từ tiếng Anh: 'resilient'"]
-    D --> E["Nhấn 'Lookup' hoặc Enter"]
+    D --> D1{"Từ đã tồn tại?\n(kiểm tra real-time)"}
+    D1 -->|"Có"| D2["Hiển thị badge:\n'Từ này đã có X entries'"]
+    D2 --> E["Nhấn 'Lookup' hoặc Enter"]
+    D1 -->|"Không / Bỏ qua"| E
     E --> F{"Có mạng?"}
     F -->|Có| G["Loading... gọi Edge Function"]
     G --> H["Edge Function gọi song song:\n• Dictionary API\n• AI API"]
@@ -202,21 +205,24 @@ flowchart TD
 
 ---
 
-## 7. Statistics Dashboard Flow
+## 7. Dashboard & Daily Review Flow
 
 ```mermaid
 flowchart TD
     A["Sidebar: nhấn 'Dashboard'"] --> B["Trang Dashboard"]
-    B --> C["Load statistics từ IndexedDB"]
-    C --> D["Hiển thị:"]
-    D --> E["📊 Tổng từ vựng: 247"]
-    D --> F["🔥 Streak Chart\n(30 ngày gần nhất)"]
-    D --> G["📈 Phân bố Level\nPie: B1=30%, B2=40%, C1=25%, C2=5%"]
-    D --> H["📚 Phân bố Collection\nBar: Travel=50, Business=40, ..."]
+    B --> C["Load dữ liệu từ IndexedDB"]
+    C --> D["Hiển thị 2 khu vực chính:"]
+    D --> W["💡 1. Daily Review Widget (Flashcard / Gentle)"]
+    W --> W1["Nghe phát âm / Lật thẻ xem nghĩa / Next Word"]
+    D --> S["📊 2. Statistics Overview"]
+    S --> E["Tổng từ vựng: 247"]
+    S --> F["🔥 Streak Chart (30 ngày gần nhất)"]
+    S --> G["📈 Phân bố Level (Pie Chart)"]
+    S --> H["📚 Phân bố Collection (Bar Chart)"]
     E --> I{"Click vào số?"}
     I -->|Có| J["→ Vocabulary List (tất cả)"]
     G --> K{"Click vào segment?"}
-    K -->|Có| L["→ Vocabulary List\n(filtered by level)"]
+    K -->|Có| L["→ Vocabulary List (filtered by level)"]
     H --> M{"Click vào bar?"}
     M -->|Có| N["→ Collection Detail"]
 ```

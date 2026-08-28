@@ -263,9 +263,43 @@ main          ← production (auto-deploy to Vercel)
 
 | Area                 | Convention                                                          |
 | -------------------- | ------------------------------------------------------------------- |
-| **File naming**      | `camelCase.jsx` for components, `kebab-case.js` for utilities       |
+| **File naming**      | `PascalCase.jsx` for components (e.g., `WordCard.jsx`), `camelCase.js` for utilities |
 | **Component naming** | PascalCase (e.g., `WordCard.jsx`)                                   |
 | **State management** | Zustand stores in `stores/` directory                               |
 | **Services**         | Business logic in `services/` — components don't call APIs directly |
 | **CSS**              | TailwindCSS utility classes, no inline styles                       |
 | **Constants**        | All constants in `utils/constants.js`                               |
+
+---
+
+## 10. Testing Strategy
+
+### Unit Tests
+
+| Layer | Tool | Scope |
+|---|---|---|
+| Services | Vitest | Business logic, data transformations |
+| Utilities | Vitest | Formatters, validators, helpers |
+| Components | Vitest + React Testing Library | Component rendering, user interactions |
+
+### Integration Tests
+
+| Scope | Tool | Description |
+|---|---|---|
+| Sync Engine | Vitest | Test sync queue processing, conflict resolution |
+| Dexie.js CRUD | Vitest + fake-indexeddb | Test local database operations |
+
+### npm Scripts
+
+```json
+{
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  }
+}
+```
+
+> [!NOTE]
+> E2E testing (Cypress/Playwright) là nice-to-have cho Phase 1. Ưu tiên unit test cho services và sync engine trước.

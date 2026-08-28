@@ -11,6 +11,7 @@
 ## 1. Tổng quan
 
 Hệ thống sử dụng 2 database song song:
+
 - **PostgreSQL (Supabase)** — Server-side, source of truth, RLS-protected.
 - **IndexedDB (Dexie.js)** — Client-side, offline-first, sync với server.
 
@@ -22,14 +23,14 @@ Cả hai database có **cùng schema** (trừ bảng `sync_queue` chỉ tồn t�
 
 ```mermaid
 erDiagram
-    USERS ||--o{ VOCABULARIES : "owns"
-    USERS ||--o{ COLLECTIONS : "owns"
-    USERS ||--o{ USER_SETTINGS : "has"
+    PROFILES ||--o{ VOCABULARIES : "owns"
+    PROFILES ||--o{ COLLECTIONS : "owns"
+    PROFILES ||--o{ USER_SETTINGS : "has"
     VOCABULARIES ||--o{ DEFINITIONS : "has"
     VOCABULARIES }o--o{ COLLECTIONS : "belongs to"
     VOCABULARIES }o--o{ COLLECTIONS : "through VOCABULARY_COLLECTIONS"
 
-    USERS {
+    PROFILES {
         uuid id PK
         string email
         string display_name
@@ -42,6 +43,7 @@ erDiagram
         uuid user_id FK
         string word
         string phonetic
+        string audio_url
         string part_of_speech
         string cefr_level
         string usage_register
@@ -79,6 +81,7 @@ erDiagram
         uuid vocabulary_id FK
         uuid collection_id FK
         timestamp created_at
+        timestamp updated_at
         boolean is_deleted
     }
 
@@ -155,6 +158,7 @@ CREATE TABLE vocabularies (
     user_id         UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     word            TEXT NOT NULL,
     phonetic        TEXT,                -- IPA phonetic transcription
+    audio_url       TEXT,                -- Audio pronunciation URL (.mp3)
     part_of_speech  TEXT,                -- noun, verb, adjective, adverb, etc.
     cefr_level      TEXT,                -- A1, A2, B1, B2, C1, C2
     usage_register  TEXT,                -- formal, informal, slang, neutral, vulgar, technical
@@ -201,6 +205,17 @@ CREATE POLICY "Users can CRUD own vocabularies"
     USING (auth.uid() = user_id)
     WITH CHECK (auth.uid() = user_id);
 ```
+
+> [!NOTE]
+> **Design Decision: `part_of_speech` nằm ở bảng `vocabularies`**
+>
+> Một từ tiếng Anh có thể có nhiều `part_of_speech` (ví dụ: "run" vừa là verb vừa là noun). Thiết kế hiện tại lưu `part_of_speech` ở bảng `vocabularies` (không phải `definitions`), nghĩa là mỗi vocabulary entry = 1 word + 1 part_of_speech.
+>
+> Nếu từ có nhiều loại từ, user sẽ tạo nhiều vocabulary entries riêng biệt (ví dụ: "run" (verb) và "run" (noun)). Cách tiếp cận này:
+> - ✅ Khớp với cấu trúc của Free Dictionary API (mỗi `meaning` gắn với 1 `partOfSpeech`)
+> - ✅ Đơn giản hóa query và filter theo loại từ
+> - ✅ Cho phép mỗi entry có phonetic, CEFR level, usage riêng
+> - ⚠️ Từ có thể xuất hiện nhiều lần trong danh sách — UI cần hiển thị kèm part_of_speech để phân biệt
 
 ---
 
@@ -313,6 +328,7 @@ CREATE TABLE vocabulary_collections (
     vocabulary_id   UUID NOT NULL REFERENCES vocabularies(id) ON DELETE CASCADE,
     collection_id   UUID NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     is_deleted      BOOLEAN NOT NULL DEFAULT FALSE,
 
     CONSTRAINT unique_vocab_collection UNIQUE (vocabulary_id, collection_id)
@@ -321,7 +337,11 @@ CREATE TABLE vocabulary_collections (
 -- Indexes
 CREATE INDEX idx_vocab_collections_vocabulary ON vocabulary_collections(vocabulary_id);
 CREATE INDEX idx_vocab_collections_collection ON vocabulary_collections(collection_id);
-CREATE INDEX idx_vocab_collections_updated ON vocabulary_collections(created_at);
+CREATE INDEX idx_vocab_collections_updated ON vocabulary_collections(updated_at);
+
+CREATE TRIGGER vocab_collections_updated_at
+    BEFORE UPDATE ON vocabulary_collections
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- RLS (through vocabulary and collection ownership)
 ALTER TABLE vocabulary_collections ENABLE ROW LEVEL SECURITY;
@@ -374,6 +394,8 @@ CREATE TRIGGER user_settings_updated_at
     BEFORE UPDATE ON user_settings
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+CREATE INDEX idx_user_settings_updated_at ON user_settings(updated_at);
+
 -- RLS
 ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY;
 
@@ -404,20 +426,21 @@ CREATE TRIGGER on_profile_created_settings
 ### 4.1 Database Definition
 
 ```javascript
-import Dexie from 'dexie';
+import Dexie from "dexie";
 
-const db = new Dexie('mewmory');
+const db = new Dexie("mewmory");
 
 db.version(1).stores({
   // Same structure as server, plus sync metadata
-  vocabularies: 'id, user_id, word, cefr_level, part_of_speech, usage_register, created_at, updated_at, is_deleted',
-  definitions: 'id, vocabulary_id, sort_order, updated_at, is_deleted',
-  collections: 'id, user_id, name, is_default, updated_at, is_deleted',
-  vocabulary_collections: 'id, vocabulary_id, collection_id, is_deleted',
-  user_settings: 'id, user_id',
+  vocabularies:
+    "id, user_id, word, cefr_level, part_of_speech, usage_register, created_at, updated_at, is_deleted",
+  definitions: "id, vocabulary_id, sort_order, updated_at, is_deleted",
+  collections: "id, user_id, name, is_default, updated_at, is_deleted",
+  vocabulary_collections: "id, vocabulary_id, collection_id, updated_at, is_deleted",
+  user_settings: "id, user_id",
 
   // Client-only: sync queue
-  sync_queue: '++id, table_name, record_id, operation, created_at, synced',
+  sync_queue: "++id, table_name, record_id, operation, created_at, synced",
 });
 
 export default db;
@@ -452,6 +475,7 @@ SELECT
     v.user_id,
     v.word,
     v.phonetic,
+    v.audio_url,
     v.part_of_speech,
     v.cefr_level,
     v.usage_register,
@@ -569,15 +593,15 @@ $$ LANGUAGE sql SECURITY DEFINER;
 
 ## 7. Data Size Estimation
 
-| Table | Est. rows/user | Est. row size | Est. total (10 users) |
-|---|---|---|---|
-| profiles | 1 | ~200B | ~2KB |
-| vocabularies | 1,000 | ~300B | ~3MB |
-| definitions | 3,000 | ~500B | ~15MB |
-| collections | 20 | ~200B | ~40KB |
-| vocabulary_collections | 2,000 | ~100B | ~2MB |
-| user_settings | 1 | ~300B | ~3KB |
-| **Total** | | | **~20MB** |
+| Table                  | Est. rows/user | Est. row size | Est. total (10 users) |
+| ---------------------- | -------------- | ------------- | --------------------- |
+| profiles               | 1              | ~200B         | ~2KB                  |
+| vocabularies           | 1,000          | ~300B         | ~3MB                  |
+| definitions            | 3,000          | ~500B         | ~15MB                 |
+| collections            | 20             | ~200B         | ~40KB                 |
+| vocabulary_collections | 2,000          | ~100B         | ~2MB                  |
+| user_settings          | 1              | ~300B         | ~3KB                  |
+| **Total**              |                |               | **~20MB**             |
 
 > [!TIP]
 > Supabase free tier cho phép 500MB database. Với ước tính ~20MB cho 10 users, headroom rất lớn.
@@ -587,6 +611,27 @@ $$ LANGUAGE sql SECURITY DEFINER;
 ## 8. Migration Strategy
 
 Khi cần thay đổi schema:
+
 1. **Server:** Dùng Supabase Migrations (SQL files trong `supabase/migrations/`).
 2. **Client:** Dùng Dexie.js versioning (`db.version(N).stores(...)` + `.upgrade()`).
 3. **Cả hai phải đồng bộ schema version** — thêm field vào server trước, client sau.
+
+---
+
+## 9. Soft-Delete Cleanup Strategy
+
+Các bản ghi bị soft delete (`is_deleted = TRUE`) vẫn tồn tại trong database. Để tránh DB phình theo thời gian:
+
+- **Phase 1:** Không cần cleanup — với ước tính ~20MB cho 10 users, storage không phải vấn đề.
+- **Phase 2 (nếu cần):** Tạo scheduled Supabase Edge Function chạy hàng tháng để xóa vĩnh viễn (hard delete) các bản ghi có `is_deleted = TRUE` và `updated_at` > 30 ngày.
+
+```sql
+-- Example cleanup query (chạy định kỳ nếu cần)
+DELETE FROM vocabulary_collections WHERE is_deleted = TRUE AND updated_at < NOW() - INTERVAL '30 days';
+DELETE FROM definitions WHERE is_deleted = TRUE AND updated_at < NOW() - INTERVAL '30 days';
+DELETE FROM vocabularies WHERE is_deleted = TRUE AND updated_at < NOW() - INTERVAL '30 days';
+DELETE FROM collections WHERE is_deleted = TRUE AND updated_at < NOW() - INTERVAL '30 days';
+```
+
+> [!IMPORTANT]
+> Cleanup phải chạy theo đúng thứ tự dependency: `vocabulary_collections` → `definitions` → `vocabularies` → `collections`.

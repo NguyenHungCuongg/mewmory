@@ -11,11 +11,11 @@
 
 ### 1.1 API Types
 
-| Type | Provider | Usage |
-|---|---|---|
-| **Supabase Client API** | Supabase JS SDK | CRUD trực tiếp vào PostgreSQL (RLS-protected) |
-| **Supabase Edge Functions** | Supabase Edge (Deno) | AI proxy, Dictionary proxy |
-| **Free Dictionary API** | dictionaryapi.dev | Lookup từ tiếng Anh |
+| Type                        | Provider             | Usage                                         |
+| --------------------------- | -------------------- | --------------------------------------------- |
+| **Supabase Client API**     | Supabase JS SDK      | CRUD trực tiếp vào PostgreSQL (RLS-protected) |
+| **Supabase Edge Functions** | Supabase Edge (Deno) | AI proxy, Dictionary proxy                    |
+| **Free Dictionary API**     | dictionaryapi.dev    | Lookup từ tiếng Anh                           |
 
 ### 1.2 Authentication
 
@@ -34,6 +34,7 @@ Authorization: Bearer <supabase_access_token>
 **Mô tả:** Tra cứu từ vựng — gọi song song Dictionary API + AI API, merge kết quả trả về structured data.
 
 **Request:**
+
 ```json
 {
   "word": "resilient",
@@ -42,13 +43,14 @@ Authorization: Bearer <supabase_access_token>
 }
 ```
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `word` | string | ✅ | Từ tiếng Anh cần tra cứu |
-| `provider` | string | ❌ | `"gemini"` \| `"openrouter"` (default: user's setting) |
-| `model` | string | ❌ | Model cụ thể (default: provider's default model) |
+| Field      | Type   | Required | Description                                            |
+| ---------- | ------ | -------- | ------------------------------------------------------ |
+| `word`     | string | ✅       | Từ tiếng Anh cần tra cứu                               |
+| `provider` | string | ❌       | `"gemini"` \| `"openrouter"` (default: user's setting) |
+| `model`    | string | ❌       | Model cụ thể (default: provider's default model)       |
 
 **Response (200):**
+
 ```json
 {
   "word": "resilient",
@@ -87,15 +89,16 @@ Authorization: Bearer <supabase_access_token>
 
 **Error Responses:**
 
-| Code | Description |
-|---|---|
-| 400 | `{ "error": "Word is required" }` |
-| 401 | `{ "error": "Unauthorized" }` |
-| 404 | `{ "error": "Word not found in dictionary", "ai_only": true, ... }` — AI vẫn trả kết quả |
-| 429 | `{ "error": "AI API rate limit exceeded. Try again later." }` |
-| 500 | `{ "error": "Internal server error" }` |
+| Code | Description                                                                              |
+| ---- | ---------------------------------------------------------------------------------------- |
+| 400  | `{ "error": "Word is required" }`                                                        |
+| 401  | `{ "error": "Unauthorized" }`                                                            |
+| 404  | `{ "error": "Word not found in dictionary", "ai_only": true, ... }` — AI vẫn trả kết quả |
+| 429  | `{ "error": "AI API rate limit exceeded. Try again later." }`                            |
+| 500  | `{ "error": "Internal server error" }`                                                   |
 
 **Fallback behavior:**
+
 - Dictionary API fails → chỉ trả AI data, `source.dictionary = false`.
 - AI API fails → chỉ trả Dictionary data, `source.ai = false`. Level/Usage/Vietnamese trống.
 - Cả hai fails → 503 `{ "error": "All lookup services unavailable" }`.
@@ -107,6 +110,7 @@ Authorization: Bearer <supabase_access_token>
 **Mô tả:** Phân loại từ vựng vào Collection bằng AI (gọi riêng khi cần reclassify).
 
 **Request:**
+
 ```json
 {
   "word": "resilient",
@@ -116,6 +120,7 @@ Authorization: Bearer <supabase_access_token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "suggested_collections": ["Personality", "IELTS Writing"],
@@ -135,43 +140,49 @@ Authorization: Bearer <supabase_access_token>
 ### 3.1 Vocabularies
 
 #### Create Vocabulary
+
 ```javascript
 const { data, error } = await supabase
-  .from('vocabularies')
+  .from("vocabularies")
   .insert({
     user_id: userId,
-    word: 'resilient',
-    phonetic: '/rɪˈzɪl.i.ənt/',
-    part_of_speech: 'adjective',
-    cefr_level: 'C1',
-    usage_register: 'formal'
+    word: "resilient",
+    phonetic: "/rɪˈzɪl.i.ənt/",
+    audio_url:
+      "https://api.dictionaryapi.dev/media/pronunciations/en/resilient-us.mp3",
+    part_of_speech: "adjective",
+    cefr_level: "C1",
+    usage_register: "formal",
   })
   .select()
   .single();
 ```
 
 #### Get Vocabularies (with filters)
+
 ```javascript
 let query = supabase
-  .from('vocabularies')
-  .select(`
+  .from("vocabularies")
+  .select(
+    `
     *,
     definitions(*),
     vocabulary_collections(collection_id, collections(name))
-  `)
-  .eq('user_id', userId)
-  .eq('is_deleted', false);
+  `,
+  )
+  .eq("user_id", userId)
+  .eq("is_deleted", false);
 
 // Optional filters
-if (cefrLevel) query = query.eq('cefr_level', cefrLevel);
-if (partOfSpeech) query = query.eq('part_of_speech', partOfSpeech);
-if (usageRegister) query = query.eq('usage_register', usageRegister);
+if (cefrLevel) query = query.eq("cefr_level", cefrLevel);
+if (partOfSpeech) query = query.eq("part_of_speech", partOfSpeech);
+if (usageRegister) query = query.eq("usage_register", usageRegister);
 
 // Search
-if (searchTerm) query = query.ilike('word', `%${searchTerm}%`);
+if (searchTerm) query = query.ilike("word", `%${searchTerm}%`);
 
 // Sort
-query = query.order('created_at', { ascending: false });
+query = query.order("created_at", { ascending: false });
 
 // Pagination
 query = query.range(offset, offset + limit - 1);
@@ -179,48 +190,57 @@ query = query.range(offset, offset + limit - 1);
 const { data, error } = await query;
 ```
 
+> [!NOTE]
+> **Pagination defaults:**
+> - `limit` mặc định: **20** items/page
+> - `limit` tối đa: **100** items/page
+> - `offset` mặc định: **0**
+
 #### Update Vocabulary
+
 ```javascript
 const { data, error } = await supabase
-  .from('vocabularies')
+  .from("vocabularies")
   .update({
-    cefr_level: 'B2',
-    usage_register: 'informal'
+    cefr_level: "B2",
+    usage_register: "informal",
   })
-  .eq('id', vocabularyId)
+  .eq("id", vocabularyId)
   .select()
   .single();
 ```
 
 #### Soft Delete Vocabulary
+
 ```javascript
 const { error } = await supabase
-  .from('vocabularies')
+  .from("vocabularies")
   .update({ is_deleted: true })
-  .eq('id', vocabularyId);
+  .eq("id", vocabularyId);
 ```
 
 ### 3.2 Definitions
 
 #### Create Definitions (batch)
+
 ```javascript
 const { data, error } = await supabase
-  .from('definitions')
+  .from("definitions")
   .insert([
     {
       vocabulary_id: vocabId,
-      definition_en: 'able to quickly return to a previous good condition',
-      definition_vi: 'có khả năng phục hồi, kiên cường',
+      definition_en: "able to quickly return to a previous good condition",
+      definition_vi: "có khả năng phục hồi, kiên cường",
       example: "She's a resilient girl.",
-      sort_order: 0
+      sort_order: 0,
     },
     {
       vocabulary_id: vocabId,
-      definition_en: 'able to return to its original shape',
-      definition_vi: 'đàn hồi',
-      example: 'This rubber is extremely resilient.',
-      sort_order: 1
-    }
+      definition_en: "able to return to its original shape",
+      definition_vi: "đàn hồi",
+      example: "This rubber is extremely resilient.",
+      sort_order: 1,
+    },
   ])
   .select();
 ```
@@ -228,108 +248,117 @@ const { data, error } = await supabase
 ### 3.3 Collections
 
 #### Create Collection
+
 ```javascript
 const { data, error } = await supabase
-  .from('collections')
+  .from("collections")
   .insert({
     user_id: userId,
-    name: 'IELTS Writing Task 2',
-    description: 'Từ vựng cho IELTS Writing Task 2',
-    is_ai_generated: false
+    name: "IELTS Writing Task 2",
+    description: "Từ vựng cho IELTS Writing Task 2",
+    is_ai_generated: false,
   })
   .select()
   .single();
 ```
 
 #### Get Collections with Word Count
+
 ```javascript
 const { data, error } = await supabase
-  .from('collections')
-  .select(`
+  .from("collections")
+  .select(
+    `
     *,
     vocabulary_collections(count)
-  `)
-  .eq('user_id', userId)
-  .eq('is_deleted', false)
-  .order('name');
+  `,
+  )
+  .eq("user_id", userId)
+  .eq("is_deleted", false)
+  .order("name");
 ```
 
 ### 3.4 Vocabulary-Collection Assignment
 
 #### Assign Word to Collection
+
 ```javascript
-const { error } = await supabase
-  .from('vocabulary_collections')
-  .insert({
-    vocabulary_id: vocabId,
-    collection_id: collectionId
-  });
+const { error } = await supabase.from("vocabulary_collections").insert({
+  vocabulary_id: vocabId,
+  collection_id: collectionId,
+});
 ```
 
 #### Remove Word from Collection
+
 ```javascript
 const { error } = await supabase
-  .from('vocabulary_collections')
+  .from("vocabulary_collections")
   .update({ is_deleted: true })
-  .eq('vocabulary_id', vocabId)
-  .eq('collection_id', collectionId);
+  .eq("vocabulary_id", vocabId)
+  .eq("collection_id", collectionId);
 ```
 
 ### 3.5 User Settings
 
 #### Get Settings
+
 ```javascript
 const { data, error } = await supabase
-  .from('user_settings')
-  .select('*')
-  .eq('user_id', userId)
+  .from("user_settings")
+  .select("*")
+  .eq("user_id", userId)
   .single();
 ```
 
 #### Update Settings
+
 ```javascript
 const { error } = await supabase
-  .from('user_settings')
+  .from("user_settings")
   .update({
-    ai_provider: 'openrouter',
-    ai_model: 'meta-llama/llama-3.1-8b-instruct:free',
-    notification_mode: 'quiz'
+    ai_provider: "openrouter",
+    ai_model: "meta-llama/llama-3.1-8b-instruct:free",
+    notification_mode: "quiz",
   })
-  .eq('user_id', userId);
+  .eq("user_id", userId);
 ```
 
 ### 3.6 Statistics (RPC calls)
 
 ```javascript
 // Total word count
-const { data: count } = await supabase.rpc('get_vocab_count', {
-  p_user_id: userId
+const { data: count } = await supabase.rpc("get_vocab_count", {
+  p_user_id: userId,
 });
 
 // Level distribution
-const { data: levels } = await supabase.rpc('get_level_distribution', {
-  p_user_id: userId
+const { data: levels } = await supabase.rpc("get_level_distribution", {
+  p_user_id: userId,
 });
 
 // Collection distribution
-const { data: collections } = await supabase.rpc('get_collection_distribution', {
-  p_user_id: userId
-});
+const { data: collections } = await supabase.rpc(
+  "get_collection_distribution",
+  {
+    p_user_id: userId,
+  },
+);
 
 // Daily word count (streak)
-const { data: daily } = await supabase.rpc('get_daily_word_count', {
+const { data: daily } = await supabase.rpc("get_daily_word_count", {
   p_user_id: userId,
-  p_days: 30
+  p_days: 30,
 });
 ```
 
 ### 3.7 Duplicate Check
 
 ```javascript
-const { data: duplicates } = await supabase.rpc('check_duplicate_word', {
+const { data: duplicates } = await supabase.rpc("check_duplicate_word", {
   p_user_id: userId,
-  p_word: 'resilient',
-  p_definitions_vi: ['có khả năng phục hồi', 'đàn hồi']
+  p_word: "resilient",
+  p_definitions_vi: ["có khả năng phục hồi", "đàn hồi"],
 });
 
 if (duplicates && duplicates.length > 0) {
@@ -351,14 +380,17 @@ async function pushChanges(syncQueue) {
     const { table_name, record_id, operation, payload } = entry;
 
     switch (operation) {
-      case 'CREATE':
+      case "CREATE":
         await supabase.from(table_name).upsert(payload);
         break;
-      case 'UPDATE':
-        await supabase.from(table_name).update(payload).eq('id', record_id);
+      case "UPDATE":
+        await supabase.from(table_name).update(payload).eq("id", record_id);
         break;
-      case 'DELETE':
-        await supabase.from(table_name).update({ is_deleted: true }).eq('id', record_id);
+      case "DELETE":
+        await supabase
+          .from(table_name)
+          .update({ is_deleted: true })
+          .eq("id", record_id);
         break;
     }
 
@@ -372,13 +404,19 @@ async function pushChanges(syncQueue) {
 
 ```javascript
 async function pullChanges(lastSyncTimestamp) {
-  const tables = ['vocabularies', 'definitions', 'collections', 'vocabulary_collections', 'user_settings'];
+  const tables = [
+    "vocabularies",
+    "definitions",
+    "collections",
+    "vocabulary_collections",
+    "user_settings",
+  ];
 
   for (const table of tables) {
     const { data } = await supabase
       .from(table)
-      .select('*')
-      .gt('updated_at', lastSyncTimestamp);
+      .select("*")
+      .gt("updated_at", lastSyncTimestamp);
 
     if (data && data.length > 0) {
       await db[table].bulkPut(data);
@@ -386,7 +424,7 @@ async function pullChanges(lastSyncTimestamp) {
   }
 
   // Update last sync timestamp
-  localStorage.setItem('last_sync', new Date().toISOString());
+  localStorage.setItem("last_sync", new Date().toISOString());
 }
 ```
 
@@ -399,6 +437,7 @@ async function pullChanges(lastSyncTimestamp) {
 **Endpoint:** `GET https://api.dictionaryapi.dev/api/v2/entries/en/{word}`
 
 **Response structure (simplified):**
+
 ```json
 [
   {
@@ -465,10 +504,10 @@ Rules:
 
 ## 6. Rate Limits & Quotas
 
-| Service | Limit | Impact |
-|---|---|---|
-| Free Dictionary API | No known rate limit | Safe for our usage |
-| Gemini API (free) | 15 RPM, 1M tokens/min | ~10 lookups/min → OK |
-| OpenRouter (free models) | Varies by model | Backup option |
-| Supabase Edge Functions | 500K/month | ~3K/month estimated → OK |
-| Supabase Database | 500MB | ~20MB estimated → OK |
+| Service                  | Limit                 | Impact                   |
+| ------------------------ | --------------------- | ------------------------ |
+| Free Dictionary API      | No known rate limit   | Safe for our usage       |
+| Gemini API (free)        | 15 RPM, 1M tokens/min | ~10 lookups/min → OK     |
+| OpenRouter (free models) | Varies by model       | Backup option            |
+| Supabase Edge Functions  | 500K/month            | ~3K/month estimated → OK |
+| Supabase Database        | 500MB                 | ~20MB estimated → OK     |

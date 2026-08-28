@@ -225,11 +225,16 @@ Client                    Edge Function              External APIs
   │ <─────────────────────────│                           │
 ```
 
-#### `ai-proxy`
+#### `ai-classify`
 
-- **Trigger:** POST request từ `lookup-word` hoặc trực tiếp từ client cho các tác vụ AI khác.
-- **Logic:** Route request đến AI provider được chọn (Gemini / OpenRouter).
+- **Trigger:** POST request từ client khi cần phân loại/reclassify từ vựng vào Collection.
+- **Input:** `{ word: string, definitions_vi: string[], existing_collections: string[] }`
+- **Logic:** Gọi AI API (Gemini/OpenRouter tùy user settings) để gợi ý Collection phù hợp.
+- **Output:** `{ suggested_collections[], new_collections[], existing_matches[] }`
 - **Security:** API keys lưu trong Supabase Secrets (environment variables).
+
+> [!NOTE]
+> AI logic cho word lookup (CEFR level, usage, Vietnamese translation) được tích hợp trực tiếp trong `lookup-word` function, không tách thành function riêng.
 
 ### 3.3 Row Level Security (RLS)
 

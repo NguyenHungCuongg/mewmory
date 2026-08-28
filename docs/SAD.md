@@ -10,7 +10,9 @@
 ## 1. Tổng quan kiến trúc
 
 ### 1.1 Architecture Style
+
 **Offline-First Client-Server Architecture** với:
+
 - **Client (Web):** Vite + React SPA — xử lý UI, local storage, offline CRUD.
 - **Client (Mobile):** Flutter (Phase 2) — offline-first với SQLite.
 - **Backend:** Supabase (BaaS) — Auth, PostgreSQL, Edge Functions, Realtime.
@@ -68,17 +70,18 @@
 ## 2. Client Architecture (Web App — Phase 1)
 
 ### 2.1 Tech Stack
-| Layer | Technology | Lý do |
-|---|---|---|
-| **Build Tool** | Vite | Nhanh, nhẹ, HMR tốt |
-| **UI Framework** | React 18+ | Thành thạo, ecosystem lớn |
-| **Styling** | TailwindCSS | Thành thạo, nhanh |
-| **Routing** | React Router v6 | SPA routing |
-| **State Management** | Zustand | Nhẹ, đơn giản, ít boilerplate |
-| **Local Database** | Dexie.js (IndexedDB) | Offline-first, reactive queries |
-| **Supabase Client** | @supabase/supabase-js | Auth, DB operations, Realtime |
-| **Charts** | Recharts | Lightweight, React-native charts |
-| **HTTP Client** | Fetch API (built-in) | Đơn giản, không cần thêm lib |
+
+| Layer                | Technology            | Lý do                            |
+| -------------------- | --------------------- | -------------------------------- |
+| **Build Tool**       | Vite                  | Nhanh, nhẹ, HMR tốt              |
+| **UI Framework**     | React 18+             | Thành thạo, ecosystem lớn        |
+| **Styling**          | TailwindCSS           | Thành thạo, nhanh                |
+| **Routing**          | React Router v6       | SPA routing                      |
+| **State Management** | Zustand               | Nhẹ, đơn giản, ít boilerplate    |
+| **Local Database**   | Dexie.js (IndexedDB)  | Offline-first, reactive queries  |
+| **Supabase Client**  | @supabase/supabase-js | Auth, DB operations, Realtime    |
+| **Charts**           | Recharts              | Lightweight, React-native charts |
+| **HTTP Client**      | Fetch API (built-in)  | Đơn giản, không cần thêm lib     |
 
 ### 2.2 Project Structure
 
@@ -163,16 +166,16 @@ src/
 
 ### 2.3 Routing
 
-| Route | Page | Auth Required |
-|---|---|---|
-| `/login` | LoginPage | ❌ |
-| `/` | DashboardPage | ✅ |
-| `/vocabulary` | VocabularyPage | ✅ |
-| `/vocabulary/add` | AddWordPage | ✅ |
-| `/vocabulary/:id` | WordDetailPage | ✅ |
-| `/collections` | CollectionsPage | ✅ |
-| `/collections/:id` | CollectionDetailPage | ✅ |
-| `/settings` | SettingsPage | ✅ |
+| Route              | Page                 | Auth Required |
+| ------------------ | -------------------- | ------------- |
+| `/login`           | LoginPage            | ❌            |
+| `/`                | DashboardPage        | ✅            |
+| `/vocabulary`      | VocabularyPage       | ✅            |
+| `/vocabulary/add`  | AddWordPage          | ✅            |
+| `/vocabulary/:id`  | WordDetailPage       | ✅            |
+| `/collections`     | CollectionsPage      | ✅            |
+| `/collections/:id` | CollectionDetailPage | ✅            |
+| `/settings`        | SettingsPage         | ✅            |
 
 ---
 
@@ -180,17 +183,18 @@ src/
 
 ### 3.1 Supabase Services Used
 
-| Service | Usage |
-|---|---|
-| **Auth** | Email/Password + Google OAuth |
-| **Database (PostgreSQL)** | Persistent storage, RLS policies |
-| **Edge Functions** | AI API proxy, Dictionary API proxy |
-| **Realtime** | Sync giữa devices (Phase 2 - optional) |
-| **Storage** | Không cần trong Phase 1 |
+| Service                   | Usage                                  |
+| ------------------------- | -------------------------------------- |
+| **Auth**                  | Email/Password + Google OAuth          |
+| **Database (PostgreSQL)** | Persistent storage, RLS policies       |
+| **Edge Functions**        | AI API proxy, Dictionary API proxy     |
+| **Realtime**              | Sync giữa devices (Phase 2 - optional) |
+| **Storage**               | Không cần trong Phase 1                |
 
 ### 3.2 Edge Functions
 
 #### `lookup-word`
+
 - **Trigger:** POST request từ client.
 - **Input:** `{ word: string, provider: "gemini" | "openrouter", model?: string }`
 - **Logic:**
@@ -222,6 +226,7 @@ Client                    Edge Function              External APIs
 ```
 
 #### `ai-proxy`
+
 - **Trigger:** POST request từ `lookup-word` hoặc trực tiếp từ client cho các tác vụ AI khác.
 - **Logic:** Route request đến AI provider được chọn (Gemini / OpenRouter).
 - **Security:** API keys lưu trong Supabase Secrets (environment variables).
@@ -296,6 +301,7 @@ Nguyên tắc: **Mỗi user chỉ CRUD được dữ liệu của mình.**
    - Hợp lý vì <10 users, mỗi user chỉ sửa data của mình.
 
 **sync_queue record:**
+
 ```json
 {
   "id": "uuid",
@@ -391,12 +397,12 @@ Client                 Supabase Auth              Google OAuth
 
 ### 6.2 API Key Security
 
-| Key | Storage | Exposure |
-|---|---|---|
-| Supabase `anon` key | Client-side (public) | OK — RLS protects data |
-| Supabase `service_role` key | Edge Function env var | Server-only |
-| Gemini API key | Edge Function env var | Server-only |
-| OpenRouter API key | Edge Function env var | Server-only |
+| Key                         | Storage               | Exposure               |
+| --------------------------- | --------------------- | ---------------------- |
+| Supabase `anon` key         | Client-side (public)  | OK — RLS protects data |
+| Supabase `service_role` key | Edge Function env var | Server-only            |
+| Gemini API key              | Edge Function env var | Server-only            |
+| OpenRouter API key          | Edge Function env var | Server-only            |
 
 ---
 
@@ -431,14 +437,14 @@ Client                 Supabase Auth              Google OAuth
 
 ### 7.1 Free Tier Estimation
 
-| Service | Free Tier | Estimated Usage (10 users) | Headroom |
-|---|---|---|---|
-| **Vercel** | 100GB bandwidth/month | ~1GB | ✅ Rất dư |
-| **Supabase DB** | 500MB | ~50MB (10K words × 10 users) | ✅ Rất dư |
-| **Supabase Auth** | 50K MAU | 10 | ✅ Rất dư |
-| **Supabase Edge** | 500K invocations/month | ~3K (10 users × 10 words/day) | ✅ Rất dư |
-| **Gemini API** | 15 RPM (free) | ~10 RPM peak | ✅ Đủ dùng |
-| **OpenRouter** | Varies by model | Backup option | ✅ Backup |
+| Service           | Free Tier              | Estimated Usage (10 users)    | Headroom   |
+| ----------------- | ---------------------- | ----------------------------- | ---------- |
+| **Vercel**        | 100GB bandwidth/month  | ~1GB                          | ✅ Rất dư  |
+| **Supabase DB**   | 500MB                  | ~50MB (10K words × 10 users)  | ✅ Rất dư  |
+| **Supabase Auth** | 50K MAU                | 10                            | ✅ Rất dư  |
+| **Supabase Edge** | 500K invocations/month | ~3K (10 users × 10 words/day) | ✅ Rất dư  |
+| **Gemini API**    | 15 RPM (free)          | ~10 RPM peak                  | ✅ Đủ dùng |
+| **OpenRouter**    | Varies by model        | Backup option                 | ✅ Backup  |
 
 ---
 
@@ -446,13 +452,13 @@ Client                 Supabase Auth              Google OAuth
 
 ### 8.1 Graceful Degradation
 
-| Scenario | Behavior |
-|---|---|
-| Dictionary API down | Chỉ dùng AI cho tất cả fields. Hiển thị warning. |
-| AI API down | Chỉ dùng Dictionary API. Level/Usage/Vietnamese trống, user tự điền. |
-| Cả hai API down | Cho phép nhập thủ công hoàn toàn. |
-| Supabase down | App vẫn hoạt động offline. Queue sync cho khi server khả dụng. |
-| Network lost mid-sync | Rollback partial sync. Retry khi có mạng. |
+| Scenario              | Behavior                                                             |
+| --------------------- | -------------------------------------------------------------------- |
+| Dictionary API down   | Chỉ dùng AI cho tất cả fields. Hiển thị warning.                     |
+| AI API down           | Chỉ dùng Dictionary API. Level/Usage/Vietnamese trống, user tự điền. |
+| Cả hai API down       | Cho phép nhập thủ công hoàn toàn.                                    |
+| Supabase down         | App vẫn hoạt động offline. Queue sync cho khi server khả dụng.       |
+| Network lost mid-sync | Rollback partial sync. Retry khi có mạng.                            |
 
 ### 8.2 User Feedback
 
@@ -465,10 +471,10 @@ Client                 Supabase Auth              Google OAuth
 
 ## 9. Technology Decisions Log
 
-| Decision | Chosen | Alternatives Considered | Rationale |
-|---|---|---|---|
-| Local DB (Web) | Dexie.js (IndexedDB) | localStorage, PouchDB | Dexie: reactive queries, lớn hơn localStorage (>5MB), nhẹ hơn PouchDB |
-| State Management | Zustand | Redux, Jotai, Context API | Zustand: minimal boilerplate, đơn giản, đủ cho app size này |
-| AI Abstraction | Custom provider pattern | LangChain.js | LangChain quá nặng cho use case đơn giản này |
-| Sync Strategy | Custom sync queue | PouchDB+CouchDB, PowerSync | Đơn giản hơn, không cần thêm service, phù hợp <10 users |
-| Charts | Recharts | Chart.js, D3 | Recharts: React-native, declarative, nhẹ |
+| Decision         | Chosen                  | Alternatives Considered    | Rationale                                                             |
+| ---------------- | ----------------------- | -------------------------- | --------------------------------------------------------------------- |
+| Local DB (Web)   | Dexie.js (IndexedDB)    | localStorage, PouchDB      | Dexie: reactive queries, lớn hơn localStorage (>5MB), nhẹ hơn PouchDB |
+| State Management | Zustand                 | Redux, Jotai, Context API  | Zustand: minimal boilerplate, đơn giản, đủ cho app size này           |
+| AI Abstraction   | Custom provider pattern | LangChain.js               | LangChain quá nặng cho use case đơn giản này                          |
+| Sync Strategy    | Custom sync queue       | PouchDB+CouchDB, PowerSync | Đơn giản hơn, không cần thêm service, phù hợp <10 users               |
+| Charts           | Recharts                | Chart.js, D3               | Recharts: React-native, declarative, nhẹ                              |

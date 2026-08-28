@@ -9,36 +9,38 @@
 
 ## 1. Prerequisites
 
-| Tool | Version | Purpose |
-|---|---|---|
-| **Node.js** | ≥ 18.x | Runtime |
-| **npm** | ≥ 9.x | Package manager |
-| **Git** | ≥ 2.x | Version control |
-| **Supabase CLI** | latest | Database migrations, Edge Functions |
+| Tool             | Version | Purpose                             |
+| ---------------- | ------- | ----------------------------------- |
+| **Node.js**      | ≥ 18.x  | Runtime                             |
+| **npm**          | ≥ 9.x   | Package manager                     |
+| **Git**          | ≥ 2.x   | Version control                     |
+| **Supabase CLI** | latest  | Database migrations, Edge Functions |
 
 ---
 
 ## 2. Tech Stack Summary
 
 ### Web App (Phase 1)
-| Layer | Technology | Version |
-|---|---|---|
-| Build Tool | Vite | ^5.x |
-| UI Framework | React | ^18.x |
-| Styling | TailwindCSS | ^3.x |
-| Routing | React Router | ^6.x |
-| State | Zustand | ^4.x |
-| Local DB | Dexie.js | ^4.x |
-| Backend Client | @supabase/supabase-js | ^2.x |
-| Charts | Recharts | ^2.x |
+
+| Layer          | Technology            | Version |
+| -------------- | --------------------- | ------- |
+| Build Tool     | Vite                  | ^5.x    |
+| UI Framework   | React                 | ^18.x   |
+| Styling        | TailwindCSS           | ^3.x    |
+| Routing        | React Router          | ^6.x    |
+| State          | Zustand               | ^4.x    |
+| Local DB       | Dexie.js              | ^4.x    |
+| Backend Client | @supabase/supabase-js | ^2.x    |
+| Charts         | Recharts              | ^2.x    |
 
 ### Backend
-| Service | Technology |
-|---|---|
-| Auth | Supabase Auth |
-| Database | Supabase PostgreSQL |
+
+| Service    | Technology                     |
+| ---------- | ------------------------------ |
+| Auth       | Supabase Auth                  |
+| Database   | Supabase PostgreSQL            |
 | Serverless | Supabase Edge Functions (Deno) |
-| Hosting | Vercel |
+| Hosting    | Vercel                         |
 
 ---
 
@@ -106,18 +108,21 @@ mewmory/
 ## 4. Environment Variables
 
 ### Web App (`.env.local`)
+
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
 ```
 
 ### Supabase Edge Functions (Supabase Dashboard → Settings → Secrets)
+
 ```env
 GEMINI_API_KEY=AIzaSy...
 OPENROUTER_API_KEY=sk-or-...
 ```
 
 ### `.env.example`
+
 ```env
 # Supabase
 VITE_SUPABASE_URL=
@@ -207,6 +212,7 @@ supabase start
 ## 7. Development Workflow
 
 ### Git Branching
+
 ```
 main          ← production (auto-deploy to Vercel)
 └── develop   ← development integration
@@ -218,23 +224,23 @@ main          ← production (auto-deploy to Vercel)
 
 ### Recommended Development Order
 
-| Order | Feature | Dependencies | Estimated Effort |
-|---|---|---|---|
-| 1 | **Project Setup** | None | 1 day |
-| 2 | **Auth (Login/Register)** | Supabase Auth | 1 day |
-| 3 | **Database Schema + Migrations** | Supabase | 1 day |
-| 4 | **Vocabulary CRUD (basic)** | Auth, DB | 2 days |
-| 5 | **Local DB (Dexie.js) + Offline** | Vocabulary CRUD | 2 days |
-| 6 | **Edge Functions (lookup-word)** | Supabase | 2 days |
-| 7 | **Smart Input (AI + Dictionary)** | Edge Functions | 2 days |
-| 8 | **Collections** | Vocabulary | 2 days |
-| 9 | **Search & Filter** | Vocabulary, Collections | 1 day |
-| 10 | **Sync Engine** | Local DB, Supabase | 2 days |
-| 11 | **Statistics Dashboard** | Vocabulary data | 1 day |
-| 12 | **Settings** | Auth | 1 day |
-| 13 | **Notifications (Web Push)** | Settings | 1 day |
-| 14 | **Polish & Testing** | All | 2 days |
-| | **Total Estimated** | | **~21 days** |
+| Order | Feature                           | Dependencies            | Estimated Effort |
+| ----- | --------------------------------- | ----------------------- | ---------------- |
+| 1     | **Project Setup**                 | None                    | 1 day            |
+| 2     | **Auth (Login/Register)**         | Supabase Auth           | 1 day            |
+| 3     | **Database Schema + Migrations**  | Supabase                | 1 day            |
+| 4     | **Vocabulary CRUD (basic)**       | Auth, DB                | 2 days           |
+| 5     | **Local DB (Dexie.js) + Offline** | Vocabulary CRUD         | 2 days           |
+| 6     | **Edge Functions (lookup-word)**  | Supabase                | 2 days           |
+| 7     | **Smart Input (AI + Dictionary)** | Edge Functions          | 2 days           |
+| 8     | **Collections**                   | Vocabulary              | 2 days           |
+| 9     | **Search & Filter**               | Vocabulary, Collections | 1 day            |
+| 10    | **Sync Engine**                   | Local DB, Supabase      | 2 days           |
+| 11    | **Statistics Dashboard**          | Vocabulary data         | 1 day            |
+| 12    | **Settings**                      | Auth                    | 1 day            |
+| 13    | **Notifications (Web Push)**      | Settings                | 1 day            |
+| 14    | **Polish & Testing**              | All                     | 2 days           |
+|       | **Total Estimated**               |                         | **~21 days**     |
 
 ---
 
@@ -255,11 +261,11 @@ main          ← production (auto-deploy to Vercel)
 
 ## 9. Coding Conventions
 
-| Area | Convention |
-|---|---|
-| **File naming** | `camelCase.jsx` for components, `kebab-case.js` for utilities |
-| **Component naming** | PascalCase (e.g., `WordCard.jsx`) |
-| **State management** | Zustand stores in `stores/` directory |
-| **Services** | Business logic in `services/` — components don't call APIs directly |
-| **CSS** | TailwindCSS utility classes, no inline styles |
-| **Constants** | All constants in `utils/constants.js` |
+| Area                 | Convention                                                          |
+| -------------------- | ------------------------------------------------------------------- |
+| **File naming**      | `camelCase.jsx` for components, `kebab-case.js` for utilities       |
+| **Component naming** | PascalCase (e.g., `WordCard.jsx`)                                   |
+| **State management** | Zustand stores in `stores/` directory                               |
+| **Services**         | Business logic in `services/` — components don't call APIs directly |
+| **CSS**              | TailwindCSS utility classes, no inline styles                       |
+| **Constants**        | All constants in `utils/constants.js`                               |

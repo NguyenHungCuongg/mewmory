@@ -6,6 +6,7 @@ import { authService } from "./services/auth.service";
 import LoginPage from "./pages/LoginPage";
 import Toast from "./components/common/Toast";
 import LoadingSpinner from "./components/common/LoadingSpinner";
+import MainLayout from "./components/layout/MainLayout";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -69,61 +70,32 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
-          path="/"
           element={
             <ProtectedRoute>
-              <PlaceholderPage title="Dashboard" />
+              <MainLayout />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/vocabulary"
-          element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Vocabulary" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/vocabulary/add"
-          element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Add Word" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/vocabulary/:id"
-          element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Word Detail" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/collections"
-          element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Collections" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/collections/:id"
-          element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Collection Detail" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Settings" />
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route path="/" element={<PlaceholderPage title="Dashboard" />} />
+          <Route path="/vocabulary" element={<PlaceholderPage title="Vocabulary" />} />
+          <Route
+            path="/vocabulary/add"
+            element={<PlaceholderPage title="Add Word" />}
+          />
+          <Route
+            path="/vocabulary/:id"
+            element={<PlaceholderPage title="Word Detail" />}
+          />
+          <Route
+            path="/collections"
+            element={<PlaceholderPage title="Collections" />}
+          />
+          <Route
+            path="/collections/:id"
+            element={<PlaceholderPage title="Collection Detail" />}
+          />
+          <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

@@ -4,6 +4,7 @@ import { useAuthStore } from "./stores/auth.store";
 import { useUIStore } from "./stores/ui.store";
 import { authService } from "./services/auth.service";
 import LoginPage from "./pages/LoginPage";
+import AddWordPage from "./pages/AddWordPage";
 import Toast from "./components/common/Toast";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import MainLayout from "./components/layout/MainLayout";
@@ -78,10 +79,7 @@ export default function App() {
         >
           <Route path="/" element={<PlaceholderPage title="Dashboard" />} />
           <Route path="/vocabulary" element={<PlaceholderPage title="Vocabulary" />} />
-          <Route
-            path="/vocabulary/add"
-            element={<PlaceholderPage title="Add Word" />}
-          />
+          <Route path="/vocabulary/add" element={<AddWordPage />} />
           <Route
             path="/vocabulary/:id"
             element={<PlaceholderPage title="Word Detail" />}

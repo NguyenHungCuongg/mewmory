@@ -8,6 +8,7 @@ import LoadingSpinner from "../components/common/LoadingSpinner";
 import ConfirmDialog from "../components/common/ConfirmDialog";
 import CollectionCard from "../components/collection/CollectionCard";
 import CollectionForm from "../components/collection/CollectionForm";
+import EmptyState from "../components/common/EmptyState";
 
 export default function CollectionsPage() {
   const { user } = useAuthStore();
@@ -83,19 +84,18 @@ export default function CollectionsPage() {
             <LoadingSpinner size="lg" />
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-16 card-taupe rounded-card-lg">
-            <h3 className="text-heading-sm font-display font-light text-ink">
-              Chưa có bộ sưu tập nào
-            </h3>
-            <p className="text-body-sm text-smoke mt-2 max-w-sm mx-auto">
-              Nhóm từ vựng của bạn theo chủ đề, kỳ thi hoặc sở thích cá nhân.
-            </p>
-            <Button onClick={handleOpenCreate} className="mt-6">
-              + Tạo bộ sưu tập đầu tiên
-            </Button>
-          </div>
+          <EmptyState
+            icon="📁"
+            title="Chưa có bộ sưu tập nào"
+            description="Nhóm từ vựng của bạn theo chủ đề, kỳ thi hoặc sở thích cá nhân để dễ dàng ôn tập."
+            action={
+              <Button onClick={handleOpenCreate}>
+                + Tạo bộ sưu tập đầu tiên
+              </Button>
+            }
+          />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
             {items.map((col) => (
               <CollectionCard
                 key={col.id}

@@ -10,6 +10,7 @@ import Input from "../components/common/Input";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import WordCard from "../components/vocabulary/WordCard";
 import FilterBar from "../components/vocabulary/FilterBar";
+import EmptyState from "../components/common/EmptyState";
 
 const PAGE_SIZE = 12;
 
@@ -142,23 +143,24 @@ export default function VocabularyPage() {
             <LoadingSpinner size="lg" />
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-16 card-taupe rounded-card-lg">
-            <h3 className="text-heading-sm font-display font-light text-ink">
-              Không tìm thấy từ vựng nào
-            </h3>
-            <p className="text-body-sm text-smoke mt-2 max-w-md mx-auto">
-              {searchInput || Object.keys(filters).length > 0
-                ? "Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc của bạn."
-                : "Bắt đầu học bằng cách thêm từ vựng đầu tiên vào sổ tay của bạn."}
-            </p>
-            {!searchInput && Object.keys(filters).length === 0 && (
-              <Link to="/vocabulary/add" className="inline-block mt-6">
-                <Button>+ Thêm từ mới ngay</Button>
-              </Link>
-            )}
-          </div>
+          <EmptyState
+            icon="🔍"
+            title="Không tìm thấy từ vựng nào"
+            description={
+              searchInput || Object.keys(filters).length > 0
+                ? "Thử thay đổi từ khóa tìm kiếm hoặc bỏ bớt các bộ lọc của bạn."
+                : "Bắt đầu học bằng cách thêm từ vựng đầu tiên vào sổ tay của bạn."
+            }
+            action={
+              !searchInput && Object.keys(filters).length === 0 ? (
+                <Link to="/vocabulary/add">
+                  <Button>+ Thêm từ mới ngay</Button>
+                </Link>
+              ) : null
+            }
+          />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
             {items.map((vocab) => (
               <WordCard key={vocab.id} vocabulary={vocab} />
             ))}

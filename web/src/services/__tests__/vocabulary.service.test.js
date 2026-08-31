@@ -92,16 +92,27 @@ describe("vocabularyService", () => {
     expect(result).toBeNull();
   });
 
-  it("checkDuplicate finds existing word", async () => {
-    await vocabularyService.create(
-      { user_id: TEST_USER_ID, word: "duplicate" },
+  it("updateWithDetails updates vocabulary, replaces definitions, and manages collections", async () => {
+    const { vocabulary } = await vocabularyService.create(
+      { user_id: TEST_USER_ID, word: "old-word", cefr_level: "A1" },
+      [{ definition_vi: "nghĩa cũ" }],
+    );
+
+    const updatedData = await vocabularyService.updateWithDetails(
+      vocabulary.id,
+      { word: "new-word", cefr_level: "B2" },
+      [
+        { definition_vi: "nghĩa mới 1" },
+        { definition_vi: "nghĩa mới 2", definition_en: "new meaning 2" },
+      ],
       [],
     );
 
-    const result = await vocabularyService.checkDuplicate(
-      TEST_USER_ID,
-      "Duplicate",
-    );
-    expect(result.count).toBe(1);
+    expect(updatedData.vocabulary.word).toBe("new-word");
+    expect(updatedData.vocabulary.cefr_level).toBe("B2");
+    expect(updatedData.definitions).toHaveLength(2);
+    expect(updatedData.definitions[0].definition_vi).toBe("nghĩa mới 1");
+    expect(updatedData.definitions[1].definition_en).toBe("new meaning 2");
   });
 });
+

@@ -4,6 +4,7 @@ import { useAuthStore } from "./stores/auth.store";
 import { useUIStore } from "./stores/ui.store";
 import { authService } from "./services/auth.service";
 import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/DashboardPage";
 import AddWordPage from "./pages/AddWordPage";
 import VocabularyPage from "./pages/VocabularyPage";
 import WordDetailPage from "./pages/WordDetailPage";
@@ -81,7 +82,7 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<PlaceholderPage title="Dashboard" />} />
+          <Route path="/" element={<DashboardPage />} />
           <Route path="/vocabulary" element={<VocabularyPage />} />
           <Route path="/vocabulary/add" element={<AddWordPage />} />
           <Route

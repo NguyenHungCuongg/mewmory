@@ -10,6 +10,7 @@ import VocabularyPage from "./pages/VocabularyPage";
 import WordDetailPage from "./pages/WordDetailPage";
 import CollectionsPage from "./pages/CollectionsPage";
 import CollectionDetailPage from "./pages/CollectionDetailPage";
+import SettingsPage from "./pages/SettingsPage";
 import Toast from "./components/common/Toast";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import MainLayout from "./components/layout/MainLayout";
@@ -94,7 +95,7 @@ export default function App() {
             path="/collections/:id"
             element={<CollectionDetailPage />}
           />
-          <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

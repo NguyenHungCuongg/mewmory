@@ -5,6 +5,8 @@ import { useUIStore } from "./stores/ui.store";
 import { authService } from "./services/auth.service";
 import LoginPage from "./pages/LoginPage";
 import AddWordPage from "./pages/AddWordPage";
+import CollectionsPage from "./pages/CollectionsPage";
+import CollectionDetailPage from "./pages/CollectionDetailPage";
 import Toast from "./components/common/Toast";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import MainLayout from "./components/layout/MainLayout";
@@ -84,13 +86,10 @@ export default function App() {
             path="/vocabulary/:id"
             element={<PlaceholderPage title="Word Detail" />}
           />
-          <Route
-            path="/collections"
-            element={<PlaceholderPage title="Collections" />}
-          />
+          <Route path="/collections" element={<CollectionsPage />} />
           <Route
             path="/collections/:id"
-            element={<PlaceholderPage title="Collection Detail" />}
+            element={<CollectionDetailPage />}
           />
           <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
         </Route>

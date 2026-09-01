@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+web/node_modules/
+
+# Production build
+dist/
+web/dist/
+
+# Environment variables
+.env
+.env.local
+web/.env
+web/.env.local
+
+# Supabase local cache & temp
+.temp/
+supabase/.temp/
+
+# Logs & System files
+*.log
+.DS_Store
+Thumbs.db

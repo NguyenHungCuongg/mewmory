@@ -224,13 +224,22 @@ export default function WordDetailPage() {
 
             {/* Collections Assigned */}
             <div className="card-taupe flex flex-col gap-3">
-              <h2 className="text-subheading font-display font-light text-ink">
-                Bộ sưu tập
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-subheading font-display font-light text-ink">
+                  Bộ sưu tập
+                </h2>
+                <Button
+                  size="sm"
+                  variant={collections.length === 0 ? "secondary" : "ghost"}
+                  onClick={() => setIsEditing(true)}
+                >
+                  {collections.length === 0 ? "+ Gán vào bộ sưu tập" : "✏️ Chỉnh sửa"}
+                </Button>
+              </div>
 
               {collections.length === 0 ? (
                 <p className="text-smoke text-body-sm">
-                  Từ này chưa được gán vào bộ sưu tập nào. Nhấn "Chỉnh sửa" để phân loại.
+                  Từ này chưa được gán vào bộ sưu tập nào. Nhấn "+ Gán vào bộ sưu tập" để phân loại.
                 </p>
               ) : (
                 <div className="flex flex-wrap gap-2">

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../stores/auth.store";
+import { useCollectionStore } from "../stores/collection.store";
 import { useUIStore } from "../stores/ui.store";
 import { vocabularyService } from "../services/vocabulary.service";
 import { lookupService } from "../services/lookup.service";
@@ -17,13 +18,19 @@ import DuplicateWarning from "../components/vocabulary/DuplicateWarning";
 
 export default function AddWordPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const defaultColId = searchParams.get("collectionId");
   const { user } = useAuthStore();
+  const { items: collections, fetchCollections } = useCollectionStore();
   const addToast = useUIStore((s) => s.addToast);
   const { isOnline } = useOnlineStatus();
 
   const [word, setWord] = useState("");
   const [lookupResult, setLookupResult] = useState(null);
   const [selectedMeanings, setSelectedMeanings] = useState({});
+  const [selectedColIds, setSelectedColIds] = useState(
+    defaultColId ? [defaultColId] : [],
+  );
   const [isLooking, setIsLooking] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [duplicateCount, setDuplicateCount] = useState(0);
@@ -37,6 +44,13 @@ export default function AddWordPage() {
   });
 
   const debouncedWord = useDebouncedSearch(word, 300);
+
+  // Fetch collections
+  useEffect(() => {
+    if (user) {
+      fetchCollections(user.id);
+    }
+  }, [user, fetchCollections]);
 
   // Check for duplicates on debounced word change
   useEffect(() => {
@@ -121,11 +135,11 @@ export default function AddWordPage() {
 
         const definitions = defIndices.map((dIdx) => meaning.definitions[dIdx]);
 
-        await vocabularyService.create(vocabData, definitions);
+        await vocabularyService.create(vocabData, definitions, selectedColIds);
       }
 
       addToast("Đã lưu thành công!", "success");
-      navigate("/vocabulary");
+      navigate(defaultColId ? `/collections/${defaultColId}` : "/vocabulary");
     } catch (err) {
       addToast(err.message || "Lỗi lưu từ vựng", "error");
     } finally {
@@ -255,6 +269,44 @@ export default function AddWordPage() {
                 onSelectionChange={setSelectedMeanings}
               />
             </div>
+
+            {/* Collection assignment */}
+            {collections.length > 0 && (
+              <div className="card-taupe flex flex-col gap-3">
+                <h3 className="text-subheading font-display font-light text-ink">
+                  Bộ sưu tập (tùy chọn)
+                </h3>
+                <p className="text-caption text-smoke">
+                  Chọn một hoặc nhiều bộ sưu tập để gán từ này vào:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {collections.map((col) => {
+                    const isSelected = selectedColIds.includes(col.id);
+                    return (
+                      <button
+                        key={col.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedColIds((prev) =>
+                            isSelected
+                              ? prev.filter((id) => id !== col.id)
+                              : [...prev, col.id],
+                          )
+                        }
+                        className={`px-3 py-1.5 rounded-pill text-body-sm transition-all ${
+                          isSelected
+                            ? "bg-ink text-eggshell font-medium"
+                            : "bg-eggshell text-smoke border border-stone hover:border-graphite/40"
+                        }`}
+                      >
+                        {isSelected ? "✓ " : "+ "}
+                        {col.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Save */}
             <div className="flex justify-end gap-3 pt-4 border-t border-stone">

@@ -114,5 +114,25 @@ describe("vocabularyService", () => {
     expect(updatedData.definitions[0].definition_vi).toBe("nghĩa mới 1");
     expect(updatedData.definitions[1].definition_en).toBe("new meaning 2");
   });
+
+  it("creates vocabulary and assigns to collections immediately", async () => {
+    const fakeColId = "col-123";
+    const result = await vocabularyService.create(
+      {
+        user_id: TEST_USER_ID,
+        word: "serendipity",
+      },
+      [{ definition_vi: "sự may mắn tình cờ" }],
+      [fakeColId],
+    );
+
+    expect(result.vocabulary.word).toBe("serendipity");
+    const links = await db.vocabulary_collections
+      .where("vocabulary_id")
+      .equals(result.vocabulary.id)
+      .toArray();
+    expect(links).toHaveLength(1);
+    expect(links[0].collection_id).toBe(fakeColId);
+  });
 });
 

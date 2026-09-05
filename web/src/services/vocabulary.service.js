@@ -2,7 +2,7 @@ import db from "../db/database";
 import { PAGINATION } from "../utils/constants";
 
 export const vocabularyService = {
-  async create(vocabularyData, definitions = []) {
+  async create(vocabularyData, definitions = [], collectionIds = []) {
     const vocabId = crypto.randomUUID();
     const now = new Date().toISOString();
 
@@ -32,13 +32,30 @@ export const vocabularyService = {
       is_deleted: false,
     }));
 
+    const collectionRecords = collectionIds.map((colId) => ({
+      id: crypto.randomUUID(),
+      vocabulary_id: vocabId,
+      collection_id: colId,
+      created_at: now,
+      updated_at: now,
+      is_deleted: false,
+    }));
+
     await db.transaction(
       "rw",
-      [db.vocabularies, db.definitions, db.sync_queue],
+      [
+        db.vocabularies,
+        db.definitions,
+        db.vocabulary_collections,
+        db.sync_queue,
+      ],
       async () => {
         await db.vocabularies.put(vocabulary);
         if (definitionRecords.length > 0) {
           await db.definitions.bulkPut(definitionRecords);
+        }
+        if (collectionRecords.length > 0) {
+          await db.vocabulary_collections.bulkPut(collectionRecords);
         }
 
         // Add to sync queue
@@ -61,10 +78,25 @@ export const vocabularyService = {
             synced: false,
           });
         }
+
+        for (const colRec of collectionRecords) {
+          await db.sync_queue.add({
+            table_name: "vocabulary_collections",
+            record_id: colRec.id,
+            operation: "CREATE",
+            payload: colRec,
+            created_at: now,
+            synced: false,
+          });
+        }
       },
     );
 
-    return { vocabulary, definitions: definitionRecords };
+    return {
+      vocabulary,
+      definitions: definitionRecords,
+      collectionIds,
+    };
   },
 
   async getAll(

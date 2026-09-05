@@ -196,7 +196,7 @@ export default function CollectionDetailPage() {
 
                 <button
                   onClick={() => setRemovingWordId(vocab.id)}
-                  className="text-caption text-red-600 hover:text-red-800 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                  className="text-caption text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
                   title="Bỏ khỏi bộ sưu tập"
                 >
                   Bỏ ra
@@ -282,7 +282,7 @@ export default function CollectionDetailPage() {
                       </div>
 
                       {isAlreadyIn ? (
-                        <span className="text-caption text-emerald-700 font-medium px-2 py-1 bg-emerald-50 rounded border border-emerald-200">
+                        <span className="text-caption text-emerald-700 dark:text-emerald-300 font-medium px-2 py-1 bg-emerald-50 dark:bg-emerald-950/70 rounded border border-emerald-200 dark:border-emerald-800">
                           ✓ Đã thêm
                         </span>
                       ) : (

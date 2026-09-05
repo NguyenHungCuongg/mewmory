@@ -3,6 +3,7 @@ import { useAuthStore } from "../stores/auth.store";
 import { useSettingsStore } from "../stores/settings.store";
 import { useCollectionStore } from "../stores/collection.store";
 import { useUIStore } from "../stores/ui.store";
+import { useThemeStore } from "../stores/theme.store";
 import { authService } from "../services/auth.service";
 import Header from "../components/layout/Header";
 import Button from "../components/common/Button";
@@ -15,6 +16,7 @@ export default function SettingsPage() {
   const { settings, isLoading, fetchSettings, updateSettings } = useSettingsStore();
   const { items: collections, fetchCollections } = useCollectionStore();
   const addToast = useUIStore((s) => s.addToast);
+  const { theme, setTheme } = useThemeStore();
 
   const [formData, setFormData] = useState({
     ai_provider: "gemini",
@@ -102,6 +104,41 @@ export default function SettingsPage() {
 
       <div className="p-6 max-w-3xl mx-auto">
         <form onSubmit={handleSave} className="flex flex-col gap-8">
+          {/* Appearance / Theme */}
+          <div className="card-taupe flex flex-col gap-4">
+            <div>
+              <h3 className="text-subheading font-display font-light text-ink">
+                🎨 Giao diện (Appearance)
+              </h3>
+              <p className="text-body-sm text-smoke mt-1">
+                Tùy chỉnh chế độ hiển thị sáng, tối hoặc tự động theo thiết bị.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                { value: "light", icon: "☀️", label: "Sáng", desc: "Màu ấm sáng sủa" },
+                { value: "dark", icon: "🌙", label: "Tối", desc: "Dịu mắt ban đêm" },
+                { value: "system", icon: "💻", label: "Tự động", desc: "Theo hệ thống" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setTheme(opt.value)}
+                  className={`flex flex-col items-center text-center gap-2 p-4 rounded-xl border transition-all ${
+                    theme === opt.value
+                      ? "bg-eggshell border-ink ring-2 ring-ink text-ink font-medium shadow-sm"
+                      : "bg-eggshell/40 border-stone text-smoke hover:text-ink hover:border-graphite/40"
+                  }`}
+                >
+                  <span className="text-2xl">{opt.icon}</span>
+                  <span className="text-body-sm font-medium">{opt.label}</span>
+                  <span className="text-caption text-ash">{opt.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* AI Configuration */}
           <div className="card-taupe flex flex-col gap-4">
             <div>
@@ -274,7 +311,7 @@ export default function SettingsPage() {
                 type="button"
                 variant="secondary"
                 onClick={() => setShowSignOutConfirm(true)}
-                className="text-red-600 hover:text-red-800"
+                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
               >
                 Đăng xuất tài khoản
               </Button>

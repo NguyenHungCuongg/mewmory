@@ -6,8 +6,12 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import { useChartColors } from "../../hooks/useChartColors";
 
 export default function StreakChart({ data = [] }) {
+  const { axisStroke, axisLine, tooltipBg, tooltipBorder, tooltipText, tooltipShadow, barFillPrimary } =
+    useChartColors();
+
   if (!data || data.length === 0) return null;
 
   return (
@@ -23,33 +27,35 @@ export default function StreakChart({ data = [] }) {
           <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <XAxis
               dataKey="date"
-              stroke="#a59f97"
+              stroke={axisStroke}
               fontSize={12}
               tickLine={false}
-              axisLine={{ stroke: "#ebe8e4" }}
+              axisLine={{ stroke: axisLine }}
             />
             <YAxis
               allowDecimals={false}
-              stroke="#a59f97"
+              stroke={axisStroke}
               fontSize={12}
               tickLine={false}
-              axisLine={{ stroke: "#ebe8e4" }}
+              axisLine={{ stroke: axisLine }}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#fdfcfc",
-                borderColor: "#ebe8e4",
+                backgroundColor: tooltipBg,
+                borderColor: tooltipBorder,
                 borderRadius: "12px",
-                boxShadow: "rgba(0, 0, 0, 0.04) 0px 2px 4px",
+                boxShadow: tooltipShadow,
                 fontSize: "13px",
-                color: "#000000",
+                color: tooltipText,
               }}
+              itemStyle={{ color: tooltipText }}
+              labelStyle={{ color: tooltipText, fontWeight: 500 }}
               formatter={(val) => [`${val} từ`, "Đã thêm"]}
               labelFormatter={(label) => `Ngày ${label}`}
             />
             <Bar
               dataKey="count"
-              fill="#000000"
+              fill={barFillPrimary}
               radius={[4, 4, 0, 0]}
               maxBarSize={32}
             />

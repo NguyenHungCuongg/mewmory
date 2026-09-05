@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useAuthStore } from "../../stores/auth.store";
 import { authService } from "../../services/auth.service";
 import { useUIStore } from "../../stores/ui.store";
+import { useThemeStore } from "../../stores/theme.store";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: "📊" },
@@ -10,9 +11,17 @@ const navItems = [
   { to: "/settings", label: "Cài đặt", icon: "⚙️" },
 ];
 
+const themeConfig = {
+  light: { icon: "☀️", label: "Sáng" },
+  dark: { icon: "🌙", label: "Tối" },
+  system: { icon: "💻", label: "Tự động" },
+};
+
 export default function Sidebar() {
   const { user, signOut: clearAuth } = useAuthStore();
   const addToast = useUIStore((s) => s.addToast);
+  const { theme, toggleTheme } = useThemeStore();
+  const currentTheme = themeConfig[theme] || themeConfig.system;
 
   const handleSignOut = async () => {
     try {
@@ -54,6 +63,24 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Theme toggle */}
+      <div className="px-4 py-2">
+        <button
+          onClick={toggleTheme}
+          title={`Giao diện: ${currentTheme.label} (Nhấn để đổi)`}
+          aria-label={`Chuyển chế độ giao diện, hiện tại là ${currentTheme.label}`}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-body-sm text-smoke hover:text-ink hover:bg-eggshell/60 transition-colors"
+        >
+          <span className="flex items-center gap-2.5">
+            <span>{currentTheme.icon}</span>
+            <span>Giao diện</span>
+          </span>
+          <span className="text-caption text-smoke font-medium capitalize bg-stone/50 px-2 py-0.5 rounded-full">
+            {currentTheme.label}
+          </span>
+        </button>
+      </div>
 
       {/* User section */}
       <div className="p-4 border-t border-stone">

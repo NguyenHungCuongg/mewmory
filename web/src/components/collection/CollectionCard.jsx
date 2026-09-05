@@ -18,7 +18,7 @@ export default function CollectionCard({ collection, onEdit, onDelete }) {
               </span>
             )}
             {collection.is_ai_generated && (
-              <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-pill text-caption font-medium">
+              <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800 rounded-pill text-caption font-medium">
                 AI
               </span>
             )}
@@ -50,7 +50,7 @@ export default function CollectionCard({ collection, onEdit, onDelete }) {
           {onDelete && !collection.is_default && (
             <button
               onClick={() => onDelete(collection)}
-              className="text-caption text-red-600 hover:text-red-800 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
+              className="text-caption text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
             >
               Xóa
             </button>

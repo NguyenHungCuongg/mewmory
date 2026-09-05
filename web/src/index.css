@@ -32,12 +32,39 @@
   --shadow-subtle-inset: rgba(0, 0, 0, 0.075) 0px 0px 0px 0.5px inset;
 }
 
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+:root {
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Inverted warm palette for dark mode */
+  --color-eggshell: #141413;
+  --color-warm-taupe: #1c1c1a;
+  --color-stone: #2e2e2b;
+  --color-ink: #f0f0ee;
+  --color-graphite: #c8c8c4;
+  --color-smoke: #8c8c87;
+  --color-ash: #60605c;
+  --color-violet-spark: #4a72ff;
+  --color-ember-orange: #ff7a52;
+
+  /* Inverted shadows */
+  --shadow-subtle: none;
+  --shadow-subtle-inset: rgba(255, 255, 255, 0.04) 0px 0px 0px 0.5px inset;
+}
+
+
 @layer base {
   body {
     background-color: var(--color-eggshell);
     color: var(--color-ink);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   /* Display headings use Inter 300 (substitute for Waldenburg) */

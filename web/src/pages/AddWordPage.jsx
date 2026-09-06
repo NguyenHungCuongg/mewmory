@@ -22,7 +22,8 @@ export default function AddWordPage() {
   const [searchParams] = useSearchParams();
   const defaultColId = searchParams.get("collectionId");
   const { user } = useAuthStore();
-  const { items: collections, fetchCollections } = useCollectionStore();
+  const { items: collections, fetchCollections, addCollection } =
+    useCollectionStore();
   const addToast = useUIStore((s) => s.addToast);
   const { isOnline } = useOnlineStatus();
 
@@ -38,12 +39,59 @@ export default function AddWordPage() {
   const [duplicateCount, setDuplicateCount] = useState(0);
   const [wordError, setWordError] = useState("");
 
+  // Quick collection creation
+  const [isCreatingCol, setIsCreatingCol] = useState(false);
+  const [newColName, setNewColName] = useState("");
+  const [isSubmittingCol, setIsSubmittingCol] = useState(false);
+
   // Manual field overrides
   const [editFields, setEditFields] = useState({
     phonetic: "",
     cefr_level: "",
     usage_register: "",
   });
+
+  const handleQuickCreateCollection = async (e) => {
+    if (e) e.preventDefault();
+    if (!user || !newColName.trim() || isSubmittingCol) return;
+    setIsSubmittingCol(true);
+    try {
+      const newCol = await addCollection({
+        user_id: user.id,
+        name: newColName.trim(),
+      });
+      if (newCol?.id) {
+        setSelectedColIds((prev) => [...prev, newCol.id]);
+      }
+      setNewColName("");
+      setIsCreatingCol(false);
+      addToast(`Đã tạo bộ sưu tập "${newCol?.name || newColName}"!`, "success");
+    } catch (err) {
+      addToast(err.message || "Lỗi tạo bộ sưu tập", "error");
+    } finally {
+      setIsSubmittingCol(false);
+    }
+  };
+
+  const handleCreateFromSuggestion = async (suggestedName) => {
+    if (!user || isSubmittingCol) return;
+    setIsSubmittingCol(true);
+    try {
+      const newCol = await addCollection({
+        user_id: user.id,
+        name: suggestedName.trim(),
+        is_ai_generated: true,
+      });
+      if (newCol?.id) {
+        setSelectedColIds((prev) => [...prev, newCol.id]);
+      }
+      addToast(`Đã tạo bộ sưu tập "${suggestedName}"!`, "success");
+    } catch (err) {
+      addToast(err.message || "Lỗi tạo bộ sưu tập", "error");
+    } finally {
+      setIsSubmittingCol(false);
+    }
+  };
 
   const handleManualSave = async ({
     vocabulary,
@@ -148,6 +196,7 @@ export default function AddWordPage() {
       for (const [mIdxStr, defIndices] of Object.entries(groupedByMeaning)) {
         const mIdx = parseInt(mIdxStr);
         const meaning = lookupResult.meanings[mIdx];
+        if (!meaning) continue;
 
         const vocabData = {
           user_id: user.id,
@@ -160,9 +209,13 @@ export default function AddWordPage() {
             editFields.usage_register || meaning.usage_register || null,
         };
 
-        const definitions = defIndices.map((dIdx) => meaning.definitions[dIdx]);
+        const definitions = defIndices
+          .map((dIdx) => meaning.definitions?.[dIdx])
+          .filter(Boolean);
 
-        await vocabularyService.create(vocabData, definitions, selectedColIds);
+        if (definitions.length > 0) {
+          await vocabularyService.create(vocabData, definitions, selectedColIds);
+        }
       }
 
       addToast("Đã lưu thành công!", "success");
@@ -239,7 +292,11 @@ export default function AddWordPage() {
             collections={collections}
             assignedCollectionIds={selectedColIds}
             onSubmit={handleManualSave}
-            onCancel={() => navigate(defaultColId ? `/collections/${defaultColId}` : "/vocabulary")}
+            onCancel={() =>
+              navigate(
+                defaultColId ? `/collections/${defaultColId}` : "/vocabulary",
+              )
+            }
             isSubmitting={isSaving}
             submitLabel="Tạo từ vựng"
           />
@@ -268,9 +325,12 @@ export default function AddWordPage() {
             {!isOnline && (
               <div className="mt-4 p-4 bg-amber-50 border border-amber-200 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800 rounded-card text-body-sm text-amber-800 flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-medium">📡 Bạn đang ngoại tuyến (Offline)</p>
+                  <p className="font-medium">
+                    📡 Bạn đang ngoại tuyến (Offline)
+                  </p>
                   <p className="text-caption mt-0.5 opacity-90">
-                    Tính năng tra cứu từ điển & AI cần mạng. Bạn có thể chuyển sang tự nhập thủ công để lưu từ offline.
+                    Tính năng tra cứu từ điển & AI cần mạng. Bạn có thể chuyển
+                    sang tự nhập thủ công để lưu từ offline.
                   </p>
                 </div>
                 <Button
@@ -283,127 +343,249 @@ export default function AddWordPage() {
               </div>
             )}
 
-        {/* Loading */}
-        {isLooking && (
-          <div className="flex items-center justify-center py-12">
-            <LoadingSpinner size="lg" />
-          </div>
-        )}
-
-        {/* Results */}
-        {lookupResult && !isLooking && (
-          <div className="mt-6 flex flex-col gap-6">
-            <LookupResult result={lookupResult} onPlayAudio={handlePlayAudio} />
-
-            {/* Editable fields */}
-            <div className="grid grid-cols-3 gap-4">
-              <Input
-                id="phonetic"
-                label="Phiên âm (IPA)"
-                value={editFields.phonetic}
-                onChange={(e) =>
-                  setEditFields({ ...editFields, phonetic: e.target.value })
-                }
-              />
-              <div className="flex flex-col gap-1.5">
-                <label className="text-body-sm text-graphite font-medium">
-                  CEFR Level
-                </label>
-                <select
-                  value={editFields.cefr_level}
-                  onChange={(e) =>
-                    setEditFields({ ...editFields, cefr_level: e.target.value })
-                  }
-                  className="w-full px-3 py-2 rounded border border-stone bg-eggshell text-body"
-                >
-                  <option value="">—</option>
-                  {["A1", "A2", "B1", "B2", "C1", "C2"].map((l) => (
-                    <option key={l} value={l}>
-                      {l}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-body-sm text-graphite font-medium">
-                  Usage
-                </label>
-                <select
-                  value={editFields.usage_register}
-                  onChange={(e) =>
-                    setEditFields({
-                      ...editFields,
-                      usage_register: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 rounded border border-stone bg-eggshell text-body"
-                >
-                  <option value="">—</option>
-                  {[
-                    "formal",
-                    "informal",
-                    "slang",
-                    "neutral",
-                    "vulgar",
-                    "technical",
-                  ].map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Meaning selection */}
-            <div>
-              <h3 className="text-subheading font-display font-light mb-3">
-                Chọn nghĩa muốn lưu
-              </h3>
-              <MeaningSelector
-                meanings={lookupResult.meanings}
-                selectedMeanings={selectedMeanings}
-                onSelectionChange={setSelectedMeanings}
-              />
-            </div>
-
-            {/* Collection assignment */}
-            {collections.length > 0 && (
-              <div className="card-taupe flex flex-col gap-3">
-                <h3 className="text-subheading font-display font-light text-ink">
-                  Bộ sưu tập (tùy chọn)
-                </h3>
-                <p className="text-caption text-smoke">
-                  Chọn một hoặc nhiều bộ sưu tập để gán từ này vào:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {collections.map((col) => {
-                    const isSelected = selectedColIds.includes(col.id);
-                    return (
-                      <button
-                        key={col.id}
-                        type="button"
-                        onClick={() =>
-                          setSelectedColIds((prev) =>
-                            isSelected
-                              ? prev.filter((id) => id !== col.id)
-                              : [...prev, col.id],
-                          )
-                        }
-                        className={`px-3 py-1.5 rounded-pill text-body-sm transition-all ${
-                          isSelected
-                            ? "bg-ink text-eggshell font-medium"
-                            : "bg-eggshell text-smoke border border-stone hover:border-graphite/40"
-                        }`}
-                      >
-                        {isSelected ? "✓ " : "+ "}
-                        {col.name}
-                      </button>
-                    );
-                  })}
-                </div>
+            {/* Loading */}
+            {isLooking && (
+              <div className="flex items-center justify-center py-12">
+                <LoadingSpinner size="lg" />
               </div>
             )}
+
+            {/* Results */}
+            {lookupResult && !isLooking && (
+              <div className="mt-6 flex flex-col gap-6">
+                <LookupResult
+                  result={lookupResult}
+                  onPlayAudio={handlePlayAudio}
+                />
+
+                {/* Editable fields */}
+                <div className="grid grid-cols-3 gap-4">
+                  <Input
+                    id="phonetic"
+                    label="Phiên âm (IPA)"
+                    value={editFields.phonetic}
+                    onChange={(e) =>
+                      setEditFields({ ...editFields, phonetic: e.target.value })
+                    }
+                  />
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-body-sm text-graphite font-medium">
+                      CEFR Level
+                    </label>
+                    <select
+                      value={editFields.cefr_level}
+                      onChange={(e) =>
+                        setEditFields({
+                          ...editFields,
+                          cefr_level: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded border border-stone bg-eggshell text-body"
+                    >
+                      <option value="">—</option>
+                      {["A1", "A2", "B1", "B2", "C1", "C2"].map((l) => (
+                        <option key={l} value={l}>
+                          {l}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-body-sm text-graphite font-medium">
+                      Usage
+                    </label>
+                    <select
+                      value={editFields.usage_register}
+                      onChange={(e) =>
+                        setEditFields({
+                          ...editFields,
+                          usage_register: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded border border-stone bg-eggshell text-body"
+                    >
+                      <option value="">—</option>
+                      {[
+                        "formal",
+                        "informal",
+                        "slang",
+                        "neutral",
+                        "vulgar",
+                        "technical",
+                      ].map((u) => (
+                        <option key={u} value={u}>
+                          {u}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Meaning selection */}
+                <div>
+                  <h3 className="text-subheading font-display font-light mb-3">
+                    Chọn nghĩa muốn lưu
+                  </h3>
+                  <MeaningSelector
+                    meanings={lookupResult.meanings}
+                    selectedMeanings={selectedMeanings}
+                    word={lookupResult.word || word}
+                    onSelectionChange={setSelectedMeanings}
+                    onMeaningsChange={(newMeanings) =>
+                      setLookupResult((prev) => ({
+                        ...prev,
+                        meanings: newMeanings,
+                      }))
+                    }
+                  />
+                </div>
+
+                {/* Collection assignment */}
+                <div className="card-taupe flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-subheading font-display font-light text-ink">
+                      Bộ sưu tập (tùy chọn)
+                    </h3>
+                    {!isCreatingCol && (
+                      <button
+                        type="button"
+                        onClick={() => setIsCreatingCol(true)}
+                        className="text-caption text-ink font-medium px-2.5 py-1 rounded-pill border border-stone bg-eggshell hover:bg-warm-taupe transition-colors flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>+ Tạo mới</span>
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-caption text-smoke">
+                    Chọn một hoặc nhiều bộ sưu tập để gán từ này vào:
+                  </p>
+
+                  {/* Inline quick create collection form */}
+                  {isCreatingCol && (
+                    <form
+                      onSubmit={handleQuickCreateCollection}
+                      className="flex items-center gap-2 p-2 rounded-card bg-eggshell border border-stone"
+                    >
+                      <input
+                        type="text"
+                        value={newColName}
+                        onChange={(e) => setNewColName(e.target.value)}
+                        placeholder="Tên bộ sưu tập mới..."
+                        autoFocus
+                        className="flex-1 px-3 py-1 text-body-sm bg-warm-taupe/40 dark:bg-stone/30 border border-stone rounded outline-none text-ink placeholder:text-ash focus:border-ink"
+                      />
+                      <Button
+                        size="sm"
+                        type="submit"
+                        disabled={!newColName.trim() || isSubmittingCol}
+                      >
+                        {isSubmittingCol ? "..." : "Tạo"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        type="button"
+                        onClick={() => {
+                          setIsCreatingCol(false);
+                          setNewColName("");
+                        }}
+                      >
+                        Hủy
+                      </Button>
+                    </form>
+                  )}
+
+                  {collections.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {collections.map((col) => {
+                        const isSelected = selectedColIds.includes(col.id);
+                        const isAiSuggested =
+                          lookupResult?.suggested_collections?.some(
+                            (sc) => sc.toLowerCase() === col.name.toLowerCase(),
+                          );
+
+                        return (
+                          <button
+                            key={col.id}
+                            type="button"
+                            onClick={() =>
+                              setSelectedColIds((prev) =>
+                                isSelected
+                                  ? prev.filter((id) => id !== col.id)
+                                  : [...prev, col.id],
+                              )
+                            }
+                            className={`px-3 py-1.5 rounded-pill text-body-sm transition-all flex items-center gap-1.5 cursor-pointer ${
+                              isSelected
+                                ? "bg-ink text-eggshell font-medium"
+                                : "bg-eggshell text-smoke border border-stone hover:border-graphite/40"
+                            }`}
+                          >
+                            <span>{isSelected ? "✓ " : "+ "}</span>
+                            <span>{col.name}</span>
+                            {isAiSuggested && (
+                              <span
+                                className={`text-caption px-1.5 py-0.2 rounded-pill font-medium ${
+                                  isSelected
+                                    ? "bg-white/20 text-white"
+                                    : "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                                }`}
+                                title="Được AI gợi ý cho từ này"
+                              >
+                                ✨ Gợi ý
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    !isCreatingCol && (
+                      <p className="text-caption text-ash italic">
+                        Chưa có bộ sưu tập nào. Bấm "+ Tạo mới" để tạo bộ sưu
+                        tập đầu tiên.
+                      </p>
+                    )
+                  )}
+
+                  {/* AI Suggested Collections that don't exist yet */}
+                  {lookupResult?.suggested_collections?.filter(
+                    (sName) =>
+                      !collections.some(
+                        (c) =>
+                          c.name.toLowerCase() === sName.trim().toLowerCase(),
+                      ),
+                  )?.length > 0 && (
+                    <div className="pt-2 border-t border-stone/60 flex flex-col gap-1.5">
+                      <span className="text-caption text-smoke flex items-center gap-1">
+                        <span>✨ Gợi ý từ AI:</span>
+                        <span className="text-ash">(Bấm để tạo nhanh)</span>
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {lookupResult.suggested_collections
+                          .filter(
+                            (sName) =>
+                              !collections.some(
+                                (c) =>
+                                  c.name.toLowerCase() ===
+                                  sName.trim().toLowerCase(),
+                              ),
+                          )
+                          .map((sName) => (
+                            <button
+                              key={sName}
+                              type="button"
+                              onClick={() => handleCreateFromSuggestion(sName)}
+                              disabled={isSubmittingCol}
+                              className="px-2.5 py-1 rounded-pill text-caption bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition-all flex items-center gap-1 cursor-pointer"
+                            >
+                              <span>+ ✨ {sName}</span>
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
             {/* Save */}
             <div className="flex justify-end gap-3 pt-4 border-t border-stone">

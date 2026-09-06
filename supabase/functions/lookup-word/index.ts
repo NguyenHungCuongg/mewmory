@@ -87,7 +87,7 @@ async function fetchDictionary(word: string) {
 }
 
 async function fetchAI(word: string, provider: string, model?: string) {
-  const prompt = `You are a vocabulary analysis assistant. Given an English word, provide additional information in JSON format.
+  const prompt = `You are a vocabulary analysis assistant. Given an English word, provide CEFR level, usage register, and suggested collection topics in JSON format. Also provide basic English definitions in case the word is not in standard dictionaries.
 
 Word: "${word}"
 
@@ -95,22 +95,22 @@ Return a JSON object with:
 {
   "cefr_level": "A1|A2|B1|B2|C1|C2",
   "usage_register": "formal|informal|slang|neutral|vulgar|technical",
-  "vietnamese_definitions": [
+  "suggested_collections": ["<topic categories like Travel, Business, Daily Life, etc.>"],
+  "definitions": [
     {
-      "part_of_speech": "<part of speech>",
-      "original_en": "<English definition>",
-      "translation_vi": "<Vietnamese translation>",
-      "example": "<example sentence>"
+      "part_of_speech": "noun|verb|adjective|adverb|etc",
+      "definition_en": "<clear English definition>",
+      "example": "<natural English example sentence>"
     }
-  ],
-  "suggested_collections": ["<topic categories like Travel, Business, etc.>"]
+  ]
 }
 
 Rules:
-- CEFR level should reflect the word's difficulty for learners.
-- Vietnamese translations should be natural and contextual, not literal.
-- Suggested collections should be broad topic categories.
-- Return ONLY valid JSON, no markdown or explanation.`;
+- CEFR level should reflect the word's general difficulty for English learners.
+- usage_register must be one of: formal, informal, slang, neutral, vulgar, technical.
+- suggested_collections should contain 1-3 broad topic names.
+- definitions should provide 1 to 3 primary meanings (used as fallback if dictionary is unavailable).
+- Return ONLY valid JSON, no markdown formatting or extra text.`;
 
   if (provider === "gemini") {
     return callGemini(prompt, model);
@@ -175,7 +175,7 @@ function mergeResults(word: string, dictData: any, aiData: any) {
     phonetic: null,
     audio_url: null,
     meanings: [],
-    suggested_collections: [],
+    suggested_collections: aiData?.suggested_collections || [],
     source: { dictionary: !!dictData, ai: !!aiData },
   };
 
@@ -189,43 +189,26 @@ function mergeResults(word: string, dictData: any, aiData: any) {
 
     for (const meaning of entry.meanings || []) {
       const m: any = {
-        part_of_speech: meaning.partOfSpeech,
+        part_of_speech: meaning.partOfSpeech || "other",
         cefr_level: aiData?.cefr_level || null,
         usage_register: aiData?.usage_register || null,
-        definitions: [],
-      };
-
-      for (const def of meaning.definitions || []) {
-        const aiVi = aiData?.vietnamese_definitions?.find(
-          (v: any) =>
-            v.original_en &&
-            def.definition &&
-            (v.original_en
-              .toLowerCase()
-              .includes(def.definition.substring(0, 30).toLowerCase()) ||
-              def.definition
-                .toLowerCase()
-                .includes(v.original_en.substring(0, 30).toLowerCase())),
-        );
-
-        m.definitions.push({
+        definitions: (meaning.definitions || []).map((def: any) => ({
           definition_en: def.definition || null,
-          definition_vi: aiVi?.translation_vi || null,
-          example: def.example || aiVi?.example || null,
+          definition_vi: null, // User translates on demand
+          example: def.example || null,
           synonyms: def.synonyms || [],
           antonyms: def.antonyms || [],
-        });
-      }
-
+        })),
+      };
       result.meanings.push(m);
     }
-  } else if (aiData?.vietnamese_definitions) {
-    // AI-only mode
+  } else if (aiData?.definitions && Array.isArray(aiData.definitions)) {
+    // Fallback if Dictionary API returned no entry
     const grouped: Record<string, any[]> = {};
-    for (const viDef of aiData.vietnamese_definitions) {
-      const pos = viDef.part_of_speech || "unknown";
+    for (const d of aiData.definitions) {
+      const pos = d.part_of_speech || "other";
       if (!grouped[pos]) grouped[pos] = [];
-      grouped[pos].push(viDef);
+      grouped[pos].push(d);
     }
     for (const [pos, defs] of Object.entries(grouped)) {
       result.meanings.push({
@@ -233,8 +216,8 @@ function mergeResults(word: string, dictData: any, aiData: any) {
         cefr_level: aiData.cefr_level || null,
         usage_register: aiData.usage_register || null,
         definitions: defs.map((d: any) => ({
-          definition_en: d.original_en || null,
-          definition_vi: d.translation_vi || null,
+          definition_en: d.definition_en || null,
+          definition_vi: null,
           example: d.example || null,
           synonyms: [],
           antonyms: [],
@@ -242,8 +225,6 @@ function mergeResults(word: string, dictData: any, aiData: any) {
       });
     }
   }
-
-  result.suggested_collections = aiData?.suggested_collections || [];
 
   return result;
 }

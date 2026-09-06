@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { authService } from "../services/auth.service";
 import { useUIStore } from "../stores/ui.store";
 import { validateEmail, validatePassword } from "../utils/validators";
+import { getAuthErrorMessage } from "../utils/authErrors";
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
 
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -24,6 +26,14 @@ export default function LoginPage() {
     if (!emailResult.valid) newErrors.email = emailResult.error;
     if (!passwordResult.valid) newErrors.password = passwordResult.error;
 
+    if (isSignUp) {
+      if (!confirmPassword) {
+        newErrors.confirmPassword = "Vui lòng nhập lại mật khẩu";
+      } else if (password !== confirmPassword) {
+        newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
+      }
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -34,16 +44,37 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        const { error } = await authService.signUp(email, password);
+        const { session, error } = await authService.signUp(email, password);
         if (error) throw error;
-        addToast("Tạo tài khoản thành công!", "success");
+
+        if (!session) {
+          addToast(
+            "Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.",
+            "info",
+          );
+          setIsSignUp(false);
+          setPassword("");
+          setConfirmPassword("");
+        } else {
+          addToast("Tạo tài khoản thành công!", "success");
+          navigate("/");
+        }
       } else {
         const { error } = await authService.signIn(email, password);
         if (error) throw error;
+        navigate("/");
       }
-      navigate("/");
     } catch (err) {
-      addToast(err.message || "Đã xảy ra lỗi", "error");
+      const msg = getAuthErrorMessage(err);
+      addToast(msg, "error");
+      if (
+        err?.code === "user_already_exists" ||
+        msg.includes("đã được đăng ký")
+      ) {
+        setIsSignUp(false);
+        setPassword("");
+        setConfirmPassword("");
+      }
     } finally {
       setLoading(false);
     }
@@ -52,7 +83,7 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     const { error } = await authService.signInWithGoogle();
     if (error) {
-      addToast(error.message || "Lỗi đăng nhập Google", "error");
+      addToast(getAuthErrorMessage(error), "error");
     }
   };
 
@@ -94,6 +125,17 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               error={errors.password}
             />
+            {isSignUp && (
+              <Input
+                id="confirm-password"
+                type="password"
+                label="Nhập lại mật khẩu"
+                placeholder="••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                error={errors.confirmPassword}
+              />
+            )}
 
             <Button type="submit" disabled={loading} className="w-full mt-2">
               {loading
@@ -127,6 +169,8 @@ export default function LoginPage() {
               type="button"
               onClick={() => {
                 setIsSignUp(!isSignUp);
+                setPassword("");
+                setConfirmPassword("");
                 setErrors({});
               }}
               className="text-ink font-medium hover:underline"

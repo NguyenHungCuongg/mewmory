@@ -6,7 +6,29 @@ export const authService = {
       email,
       password,
     });
-    return { user: data?.user, error };
+
+    if (error) {
+      return { user: null, session: null, error };
+    }
+
+    // Supabase returns an empty identities array if the user already exists (User Enumeration Protection)
+    if (
+      data?.user &&
+      Array.isArray(data.user.identities) &&
+      data.user.identities.length === 0
+    ) {
+      return {
+        user: null,
+        session: null,
+        error: {
+          message:
+            "Email này đã được đăng ký. Vui lòng đăng nhập bằng mật khẩu của bạn.",
+          code: "user_already_exists",
+        },
+      };
+    }
+
+    return { user: data?.user, session: data?.session, error: null };
   },
 
   async signIn(email, password) {

@@ -15,6 +15,7 @@ import LoadingSpinner from "../components/common/LoadingSpinner";
 import LookupResult from "../components/vocabulary/LookupResult";
 import MeaningSelector from "../components/vocabulary/MeaningSelector";
 import DuplicateWarning from "../components/vocabulary/DuplicateWarning";
+import WordForm from "../components/vocabulary/WordForm";
 
 export default function AddWordPage() {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export default function AddWordPage() {
   const addToast = useUIStore((s) => s.addToast);
   const { isOnline } = useOnlineStatus();
 
+  const [mode, setMode] = useState("auto"); // "auto" | "manual"
   const [word, setWord] = useState("");
   const [lookupResult, setLookupResult] = useState(null);
   const [selectedMeanings, setSelectedMeanings] = useState({});
@@ -42,6 +44,31 @@ export default function AddWordPage() {
     cefr_level: "",
     usage_register: "",
   });
+
+  const handleManualSave = async ({
+    vocabulary,
+    definitions,
+    collectionIds,
+  }) => {
+    if (!user) return;
+    setIsSaving(true);
+    try {
+      await vocabularyService.create(
+        {
+          ...vocabulary,
+          user_id: user.id,
+        },
+        definitions,
+        collectionIds,
+      );
+      addToast("Thêm từ vựng thành công!", "success");
+      navigate(defaultColId ? `/collections/${defaultColId}` : "/vocabulary");
+    } catch (err) {
+      addToast(err.message || "Lỗi lưu từ vựng", "error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const debouncedWord = useDebouncedSearch(word, 300);
 
@@ -156,35 +183,105 @@ export default function AddWordPage() {
     if (e.key === "Enter") handleLookup();
   };
 
+  const manualInitialData = {
+    vocabulary: {
+      word: word.trim(),
+      phonetic: editFields.phonetic || lookupResult?.phonetic || "",
+      part_of_speech: lookupResult?.meanings?.[0]?.part_of_speech || "",
+      cefr_level:
+        editFields.cefr_level || lookupResult?.meanings?.[0]?.cefr_level || "",
+      usage_register:
+        editFields.usage_register ||
+        lookupResult?.meanings?.[0]?.usage_register ||
+        "",
+    },
+    definitions: lookupResult?.meanings?.[0]?.definitions?.length
+      ? lookupResult.meanings[0].definitions
+      : [{ definition_en: "", definition_vi: "", example: "" }],
+  };
+
   return (
     <>
       <Header title="Thêm từ mới" />
       <div className="p-6 max-w-2xl mx-auto">
-        {/* Word input */}
-        <div className="flex gap-3 mb-4">
-          <Input
-            id="word-input"
-            placeholder="Nhập từ tiếng Anh..."
-            value={word}
-            onChange={(e) => setWord(e.target.value)}
-            onKeyDown={handleKeyDown}
-            error={wordError}
-            className="flex-1"
-          />
-          <Button onClick={handleLookup} disabled={isLooking || !isOnline}>
-            {isLooking ? <LoadingSpinner size="sm" /> : "Lookup"}
-          </Button>
+        {/* Mode Switcher */}
+        <div className="flex bg-warm-taupe p-1 rounded-xl border border-stone mb-6">
+          <button
+            type="button"
+            onClick={() => setMode("auto")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-body-sm font-medium transition-all ${
+              mode === "auto"
+                ? "bg-eggshell text-ink shadow-subtle"
+                : "text-smoke hover:text-ink"
+            }`}
+          >
+            <span>⚡</span>
+            <span>Tra cứu tự động (AI & Từ điển)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("manual")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-body-sm font-medium transition-all ${
+              mode === "manual"
+                ? "bg-eggshell text-ink shadow-subtle"
+                : "text-smoke hover:text-ink"
+            }`}
+          >
+            <span>✍️</span>
+            <span>Tự nhập thủ công</span>
+          </button>
         </div>
 
-        {/* Duplicate warning */}
-        <DuplicateWarning count={duplicateCount} />
+        {mode === "manual" ? (
+          <WordForm
+            key={`manual-${word}`}
+            initialData={manualInitialData}
+            collections={collections}
+            assignedCollectionIds={selectedColIds}
+            onSubmit={handleManualSave}
+            onCancel={() => navigate(defaultColId ? `/collections/${defaultColId}` : "/vocabulary")}
+            isSubmitting={isSaving}
+            submitLabel="Tạo từ vựng"
+          />
+        ) : (
+          <>
+            {/* Word input */}
+            <div className="flex gap-3 mb-4">
+              <Input
+                id="word-input"
+                placeholder="Nhập từ tiếng Anh..."
+                value={word}
+                onChange={(e) => setWord(e.target.value)}
+                onKeyDown={handleKeyDown}
+                error={wordError}
+                className="flex-1"
+              />
+              <Button onClick={handleLookup} disabled={isLooking || !isOnline}>
+                {isLooking ? <LoadingSpinner size="sm" /> : "Lookup"}
+              </Button>
+            </div>
 
-        {/* Offline notice */}
-        {!isOnline && (
-          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-card text-body-sm text-amber-800">
-            📡 Bạn đang offline. Bạn có thể tự điền tay tất cả các field.
-          </div>
-        )}
+            {/* Duplicate warning */}
+            <DuplicateWarning count={duplicateCount} />
+
+            {/* Offline notice */}
+            {!isOnline && (
+              <div className="mt-4 p-4 bg-amber-50 border border-amber-200 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800 rounded-card text-body-sm text-amber-800 flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-medium">📡 Bạn đang ngoại tuyến (Offline)</p>
+                  <p className="text-caption mt-0.5 opacity-90">
+                    Tính năng tra cứu từ điển & AI cần mạng. Bạn có thể chuyển sang tự nhập thủ công để lưu từ offline.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setMode("manual")}
+                >
+                  Tự nhập tay
+                </Button>
+              </div>
+            )}
 
         {/* Loading */}
         {isLooking && (
@@ -328,6 +425,8 @@ export default function AddWordPage() {
               </Button>
             </div>
           </div>
+        )}
+          </>
         )}
       </div>
     </>

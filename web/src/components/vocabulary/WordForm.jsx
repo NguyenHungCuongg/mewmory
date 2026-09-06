@@ -14,17 +14,18 @@ export default function WordForm({
   onSubmit,
   onCancel,
   isSubmitting = false,
+  submitLabel = "Lưu thay đổi",
 }) {
   const [formData, setFormData] = useState({
-    word: initialData.vocabulary.word || "",
-    phonetic: initialData.vocabulary.phonetic || "",
-    part_of_speech: initialData.vocabulary.part_of_speech || "",
-    cefr_level: initialData.vocabulary.cefr_level || "",
-    usage_register: initialData.vocabulary.usage_register || "",
+    word: initialData?.vocabulary?.word || "",
+    phonetic: initialData?.vocabulary?.phonetic || "",
+    part_of_speech: initialData?.vocabulary?.part_of_speech || "",
+    cefr_level: initialData?.vocabulary?.cefr_level || "",
+    usage_register: initialData?.vocabulary?.usage_register || "",
   });
 
   const [definitions, setDefinitions] = useState(
-    initialData.definitions && initialData.definitions.length > 0
+    initialData?.definitions && initialData.definitions.length > 0
       ? initialData.definitions.map((d) => ({ ...d }))
       : [{ definition_en: "", definition_vi: "", example: "" }],
   );
@@ -298,7 +299,7 @@ export default function WordForm({
           Hủy
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
+          {isSubmitting ? "Đang lưu..." : submitLabel}
         </Button>
       </div>
     </form>

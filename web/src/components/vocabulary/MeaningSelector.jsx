@@ -8,6 +8,8 @@ export default function MeaningSelector({
   onSelectionChange,
   onMeaningsChange,
   onTranslateDefinition,
+  provider,
+  model,
 }) {
   const [translatingKeys, setTranslatingKeys] = useState({});
   const [translateErrors, setTranslateErrors] = useState({});
@@ -49,18 +51,18 @@ export default function MeaningSelector({
 
     try {
       let translation = "";
+      const payload = {
+        text: textToTranslate,
+        partOfSpeech: meaning.part_of_speech || "",
+        word,
+      };
+      if (provider) payload.provider = provider;
+      if (model) payload.model = model;
+
       if (onTranslateDefinition) {
-        translation = await onTranslateDefinition({
-          text: textToTranslate,
-          partOfSpeech: meaning.part_of_speech || "",
-          word,
-        });
+        translation = await onTranslateDefinition(payload);
       } else {
-        translation = await lookupService.translateDefinition({
-          text: textToTranslate,
-          partOfSpeech: meaning.part_of_speech || "",
-          word,
-        });
+        translation = await lookupService.translateDefinition(payload);
       }
 
       if (translation) {

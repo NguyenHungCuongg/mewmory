@@ -164,25 +164,92 @@ export default function SettingsPage() {
                       ai_model:
                         e.target.value === "gemini"
                           ? "gemini-3.6-flash"
-                          : "meta-llama/llama-3.1-8b-instruct:free",
+                          : "nvidia/nemotron-3-ultra-550b-a55b:free",
                     })
                   }
                   className="w-full px-3 py-2 rounded-lg border border-stone bg-eggshell text-body text-graphite focus:outline-none focus:border-ink"
                 >
-                  <option value="gemini">Google Gemini (Khuyên dùng)</option>
-                  <option value="openrouter">OpenRouter AI</option>
+                  <option value="gemini">Google Gemini</option>
+                  <option value="openrouter">OpenRouter AI (Miễn phí & Đa dạng)</option>
                 </select>
               </div>
 
-              <Input
-                id="ai-model"
-                label="Model Name"
-                value={formData.ai_model}
-                onChange={(e) =>
-                  setFormData({ ...formData, ai_model: e.target.value })
-                }
-              />
+              <div className="flex flex-col gap-1.5">
+                <Input
+                  id="ai-model"
+                  label="Model Name"
+                  value={formData.ai_model}
+                  onChange={(e) =>
+                    setFormData({ ...formData, ai_model: e.target.value })
+                  }
+                />
+              </div>
             </div>
+
+            {formData.ai_provider === "openrouter" && (
+              <div className="p-3 bg-warm-taupe/40 rounded-lg border border-stone flex flex-col gap-2">
+                <div className="flex items-center justify-between flex-wrap gap-1">
+                  <span className="text-caption font-medium text-graphite">
+                    ⚡ Gợi ý Model OpenRouter miễn phí:
+                  </span>
+                  <span className="text-caption text-ash">
+                    API key: Supabase Secret (OPENROUTER_API_KEY)
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        ai_model: "nvidia/nemotron-3-ultra-550b-a55b:free",
+                      })
+                    }
+                    className={`text-caption px-2.5 py-1 rounded-pill border transition-colors cursor-pointer ${
+                      formData.ai_model ===
+                      "nvidia/nemotron-3-ultra-550b-a55b:free"
+                        ? "bg-ink text-eggshell border-ink font-medium"
+                        : "bg-eggshell text-smoke border-stone hover:text-ink hover:border-graphite"
+                    }`}
+                  >
+                    ✨ NVIDIA Nemotron 3 Ultra (Khuyên dùng)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        ai_model: "google/gemini-2.0-flash-exp:free",
+                      })
+                    }
+                    className={`text-caption px-2.5 py-1 rounded-pill border transition-colors cursor-pointer ${
+                      formData.ai_model === "google/gemini-2.0-flash-exp:free"
+                        ? "bg-ink text-eggshell border-ink font-medium"
+                        : "bg-eggshell text-smoke border-stone hover:text-ink hover:border-graphite"
+                    }`}
+                  >
+                    Gemini 2.0 Flash (free)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        ai_model: "meta-llama/llama-3.3-70b-instruct:free",
+                      })
+                    }
+                    className={`text-caption px-2.5 py-1 rounded-pill border transition-colors cursor-pointer ${
+                      formData.ai_model ===
+                      "meta-llama/llama-3.3-70b-instruct:free"
+                        ? "bg-ink text-eggshell border-ink font-medium"
+                        : "bg-eggshell text-smoke border-stone hover:text-ink hover:border-graphite"
+                    }`}
+                  >
+                    Llama 3.3 70B (free)
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Daily Review & Notifications */}

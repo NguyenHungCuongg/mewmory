@@ -117,18 +117,86 @@ async function callGemini(prompt: string, model?: string): Promise<string> {
   if (!rawText) return "";
 
   try {
-    const parsed = JSON.parse(rawText);
-    return parsed.translation || "";
+    return extractTranslation(rawText);
   } catch {
     return rawText.trim();
   }
+}
+
+function extractTranslation(raw: string): string {
+  if (!raw) return "";
+  let cleaned = raw.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  const markdownMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  const textToParse = markdownMatch ? markdownMatch[1].trim() : cleaned;
+
+  try {
+    const parsed = JSON.parse(textToParse);
+    if (parsed && typeof parsed.translation === "string") {
+      return parsed.translation.trim();
+    }
+  } catch {
+    const firstBrace = cleaned.indexOf("{");
+    const lastBrace = cleaned.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      try {
+        const sliced = cleaned.substring(firstBrace, lastBrace + 1);
+        const parsed = JSON.parse(sliced);
+        if (parsed && typeof parsed.translation === "string") {
+          return parsed.translation.trim();
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  return cleaned.replace(/^["']|["']$/g, "").trim();
 }
 
 async function callOpenRouter(prompt: string, model?: string): Promise<string> {
   const apiKey = Deno.env.get("OPENROUTER_API_KEY");
   if (!apiKey) throw new Error("OPENROUTER_API_KEY not set");
 
-  const modelName = model || "meta-llama/llama-3.1-8b-instruct:free";
+  const primaryModel = model || "nvidia/nemotron-3-ultra-550b-a55b:free";
+
+  try {
+    return await executeOpenRouterRequest(apiKey, prompt, primaryModel);
+  } catch (err: any) {
+    if (
+      primaryModel === "nvidia/nemotron-3-ultra-550b-a55b:free" &&
+      (err.message.includes("502") ||
+        err.message.includes("503") ||
+        err.message.includes("Upstream error"))
+    ) {
+      console.warn(
+        "Nemotron 3 Ultra upstream error, falling back to nvidia/nemotron-3.5-lightning:free:",
+        err.message,
+      );
+      return await executeOpenRouterRequest(
+        apiKey,
+        prompt,
+        "nvidia/nemotron-3.5-lightning:free",
+      );
+    }
+    throw err;
+  }
+}
+
+async function executeOpenRouterRequest(
+  apiKey: string,
+  prompt: string,
+  modelName: string,
+): Promise<string> {
+  const requestBody: any = {
+    model: modelName,
+    messages: [{ role: "user", content: prompt }],
+  };
+
+  if (modelName.includes("nemotron")) {
+    requestBody.reasoning = { max_tokens: 300 };
+    requestBody.max_tokens = 2500;
+  }
+
   const response = await fetch(
     "https://openrouter.ai/api/v1/chat/completions",
     {
@@ -136,27 +204,30 @@ async function callOpenRouter(prompt: string, model?: string): Promise<string> {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
+        "HTTP-Referer": "https://mewmory.app",
+        "X-Title": "Mewmory",
       },
-      body: JSON.stringify({
-        model: modelName,
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-      }),
+      body: JSON.stringify(requestBody),
+      signal: AbortSignal.timeout(90000),
     },
   );
 
   if (!response.ok) {
-    throw new Error(`OpenRouter API error: ${response.status}`);
+    const errText = await response.text();
+    console.error(`OpenRouter error ${response.status}:`, errText);
+    throw new Error(`OpenRouter API error: ${response.status} - ${errText}`);
   }
 
   const data = await response.json();
-  const rawContent = data.choices?.[0]?.message?.content;
-  if (!rawContent) return "";
-
-  try {
-    const parsed = JSON.parse(rawContent);
-    return parsed.translation || "";
-  } catch {
-    return rawContent.trim();
+  if (data.error) {
+    console.error("OpenRouter payload error:", data.error);
+    throw new Error(
+      `OpenRouter error: ${data.error.message || JSON.stringify(data.error)}`,
+    );
   }
+
+  const choice = data.choices?.[0];
+  const rawContent =
+    choice?.message?.content || choice?.message?.reasoning || "";
+  return extractTranslation(rawContent);
 }

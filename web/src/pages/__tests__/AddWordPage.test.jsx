@@ -1,9 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import "fake-indexeddb/auto";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import AddWordPage from "../AddWordPage";
 import { useAuthStore } from "../../stores/auth.store";
 import { useCollectionStore } from "../../stores/collection.store";
+import { useSettingsStore } from "../../stores/settings.store";
 import { useUIStore } from "../../stores/ui.store";
 import { vocabularyService } from "../../services/vocabulary.service";
 import { lookupService } from "../../services/lookup.service";
@@ -49,6 +51,14 @@ describe("AddWordPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useAuthStore.setState({ user: { id: "user-123" } });
+    useSettingsStore.setState({
+      settings: {
+        ai_provider: "gemini",
+        ai_model: "gemini-3.6-flash",
+      },
+      isLoading: false,
+      fetchSettings: vi.fn(),
+    });
     useCollectionStore.setState({
       items: [{ id: "col-1", name: "Daily English" }],
       fetchCollections: vi.fn(),
@@ -291,11 +301,13 @@ describe("AddWordPage", () => {
     fireEvent.click(translateBtn);
 
     await waitFor(() => {
-      expect(lookupService.translateDefinition).toHaveBeenCalledWith({
-        text: "A large self-service shop selling food and household goods.",
-        partOfSpeech: "noun",
-        word: "supermarket",
-      });
+      expect(lookupService.translateDefinition).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: "A large self-service shop selling food and household goods.",
+          partOfSpeech: "noun",
+          word: "supermarket",
+        }),
+      );
       expect(
         screen.getByDisplayValue("Siêu thị (cửa hàng tự phục vụ lớn)"),
       ).toBeInTheDocument();

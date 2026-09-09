@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../stores/auth.store";
 import { useCollectionStore } from "../stores/collection.store";
+import { useSettingsStore } from "../stores/settings.store";
 import { useUIStore } from "../stores/ui.store";
 import { vocabularyService } from "../services/vocabulary.service";
 import { lookupService } from "../services/lookup.service";
@@ -22,10 +23,17 @@ export default function AddWordPage() {
   const [searchParams] = useSearchParams();
   const defaultColId = searchParams.get("collectionId");
   const { user } = useAuthStore();
+  const { settings, fetchSettings } = useSettingsStore();
   const { items: collections, fetchCollections, addCollection } =
     useCollectionStore();
   const addToast = useUIStore((s) => s.addToast);
   const { isOnline } = useOnlineStatus();
+
+  useEffect(() => {
+    if (user?.id && !settings) {
+      fetchSettings(user.id);
+    }
+  }, [user, settings, fetchSettings]);
 
   const [mode, setMode] = useState("auto"); // "auto" | "manual"
   const [word, setWord] = useState("");
@@ -153,7 +161,9 @@ export default function AddWordPage() {
 
     setIsLooking(true);
     try {
-      const result = await lookupService.lookupWord(word);
+      const provider = settings?.ai_provider || "gemini";
+      const model = settings?.ai_model || undefined;
+      const result = await lookupService.lookupWord(word, provider, model);
       setLookupResult(result);
       setEditFields({
         phonetic: result.phonetic || "",
@@ -437,6 +447,8 @@ export default function AddWordPage() {
                         meanings: newMeanings,
                       }))
                     }
+                    provider={settings?.ai_provider}
+                    model={settings?.ai_model}
                   />
                 </div>
 

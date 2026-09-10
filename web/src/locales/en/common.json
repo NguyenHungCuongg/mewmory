@@ -1,0 +1,15 @@
+{
+  "language": "Language",
+  "languages": {
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "offline": "Offline",
+  "loading": "Loading...",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "close": "Close",
+  "confirm": "Confirm"
+}

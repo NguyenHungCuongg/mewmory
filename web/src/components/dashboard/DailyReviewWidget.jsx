@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Button from "../common/Button";
 import { CEFR_COLORS } from "../../utils/constants";
 
 export default function DailyReviewWidget({ randomWord, onNextWord, isLoading }) {
+  const { t } = useTranslation("dashboard");
   const [mode, setMode] = useState("gentle"); // "gentle" | "quiz"
   const [isRevealed, setIsRevealed] = useState(false);
 
@@ -31,13 +33,13 @@ export default function DailyReviewWidget({ randomWord, onNextWord, isLoading })
     return (
       <div className="card-taupe p-8 rounded-card-lg text-center">
         <h3 className="text-heading-sm font-display font-light text-ink">
-          Ôn tập hàng ngày (Daily Review)
+          {t("dailyReview.title")}
         </h3>
         <p className="text-body-sm text-smoke mt-2 max-w-md mx-auto">
-          Chưa có từ vựng nào để ôn tập. Thêm từ mới vào sổ tay để kích hoạt Daily Review nhé!
+          {t("dailyReview.emptyDescription")}
         </p>
         <Link to="/vocabulary/add" className="inline-block mt-4">
-          <Button size="sm">+ Thêm từ ngay</Button>
+          <Button size="sm">{t("dailyReview.addWordNow")}</Button>
         </Link>
       </div>
     );
@@ -51,7 +53,7 @@ export default function DailyReviewWidget({ randomWord, onNextWord, isLoading })
       <div className="flex items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-2">
           <span className="text-subheading font-display font-light text-ink">
-            ✨ Ôn tập ngẫu nhiên
+            {t("dailyReview.randomReview")}
           </span>
         </div>
 
@@ -60,28 +62,28 @@ export default function DailyReviewWidget({ randomWord, onNextWord, isLoading })
           <div className="flex bg-eggshell p-1 rounded-pill border border-stone text-caption font-medium">
             <button
               onClick={() => setMode("gentle")}
-              className={`px-3 py-1 rounded-pill transition-all ${
+              className={`px-3 py-1 rounded-pill transition-all cursor-pointer ${
                 mode === "gentle"
                   ? "bg-ink text-eggshell"
                   : "text-smoke hover:text-ink"
               }`}
             >
-              Xem nhanh
+              {t("dailyReview.modes.gentle")}
             </button>
             <button
               onClick={() => setMode("quiz")}
-              className={`px-3 py-1 rounded-pill transition-all ${
+              className={`px-3 py-1 rounded-pill transition-all cursor-pointer ${
                 mode === "quiz"
                   ? "bg-ink text-eggshell"
                   : "text-smoke hover:text-ink"
               }`}
             >
-              Quiz (Ẩn nghĩa)
+              {t("dailyReview.modes.quiz")}
             </button>
           </div>
 
-          <Button variant="ghost" size="sm" onClick={onNextWord} title="Đổi từ khác">
-            🎲 Đổi từ
+          <Button variant="ghost" size="sm" onClick={onNextWord} title={t("dailyReview.nextWordTitle")}>
+            {t("dailyReview.nextWord")}
           </Button>
         </div>
       </div>
@@ -98,8 +100,8 @@ export default function DailyReviewWidget({ randomWord, onNextWord, isLoading })
           {randomWord.audio_url && (
             <button
               onClick={(e) => handlePlayAudio(e, randomWord.audio_url)}
-              className="w-9 h-9 rounded-full bg-eggshell border border-stone flex items-center justify-center hover:bg-stone/50 transition-colors"
-              title="Phát âm"
+              className="w-9 h-9 rounded-full bg-eggshell border border-stone flex items-center justify-center hover:bg-stone/50 transition-colors cursor-pointer"
+              title={t("dailyReview.pronounce")}
             >
               🔊
             </button>
@@ -154,16 +156,16 @@ export default function DailyReviewWidget({ randomWord, onNextWord, isLoading })
                 </div>
               ))
             ) : (
-              <p className="text-smoke text-body-sm">Chưa có định nghĩa</p>
+              <p className="text-smoke text-body-sm">{t("dailyReview.noDefinition")}</p>
             )}
           </div>
         ) : (
           <div className="w-full mt-2 pt-4 border-t border-stone">
             <button
               onClick={() => setIsRevealed(true)}
-              className="w-full py-4 rounded-card bg-eggshell border border-dashed border-stone hover:border-graphite/40 text-body-sm text-smoke hover:text-ink transition-all"
+              className="w-full py-4 rounded-card bg-eggshell border border-dashed border-stone hover:border-graphite/40 text-body-sm text-smoke hover:text-ink transition-all cursor-pointer"
             >
-              👁️ Nhấn vào đây để xem nghĩa của từ
+              {t("dailyReview.reveal")}
             </button>
           </div>
         )}
@@ -171,3 +173,4 @@ export default function DailyReviewWidget({ randomWord, onNextWord, isLoading })
     </div>
   );
 }
+

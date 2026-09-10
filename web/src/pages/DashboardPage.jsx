@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../stores/auth.store";
 import { statisticsService } from "../services/statistics.service";
 import { collectionService } from "../services/collection.service";
@@ -13,6 +14,7 @@ import LevelDistribution from "../components/dashboard/LevelDistribution";
 import CollectionDistribution from "../components/dashboard/CollectionDistribution";
 
 export default function DashboardPage() {
+  const { t } = useTranslation("dashboard");
   const { user } = useAuthStore();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -81,10 +83,10 @@ export default function DashboardPage() {
   return (
     <>
       <Header
-        title="Tổng quan (Dashboard)"
+        title={t("title")}
         actions={
           <Link to="/vocabulary/add">
-            <Button>+ Thêm từ mới</Button>
+            <Button>{t("addNewWord")}</Button>
           </Link>
         }
       />

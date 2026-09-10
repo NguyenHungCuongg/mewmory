@@ -6,9 +6,11 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 import { useChartColors } from "../../hooks/useChartColors";
 
 export default function StreakChart({ data = [] }) {
+  const { t } = useTranslation("dashboard");
   const { axisStroke, axisLine, tooltipBg, tooltipBorder, tooltipText, tooltipShadow, barFillPrimary } =
     useChartColors();
 
@@ -18,7 +20,7 @@ export default function StreakChart({ data = [] }) {
     <div className="card-taupe p-6 rounded-card flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h3 className="text-subheading font-display font-light text-ink">
-          📈 Tiến độ thêm từ (14 ngày gần nhất)
+          {t("charts.wordsAddedProgress")}
         </h3>
       </div>
 
@@ -50,8 +52,8 @@ export default function StreakChart({ data = [] }) {
               }}
               itemStyle={{ color: tooltipText }}
               labelStyle={{ color: tooltipText, fontWeight: 500 }}
-              formatter={(val) => [`${val} từ`, "Đã thêm"]}
-              labelFormatter={(label) => `Ngày ${label}`}
+              formatter={(val) => [t("charts.wordsCount", { count: val }), t("charts.added")]}
+              labelFormatter={(label) => t("charts.dateLabel", { label })}
             />
             <Bar
               dataKey="count"
@@ -65,3 +67,4 @@ export default function StreakChart({ data = [] }) {
     </div>
   );
 }
+

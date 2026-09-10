@@ -1,0 +1,28 @@
+{
+  "word": "Từ (Word)",
+  "phonetic": "Phiên âm (IPA)",
+  "partOfSpeech": "Loại từ (Part of Speech)",
+  "cefrLevel": "CEFR Level",
+  "usageRegister": "Ngữ cảnh (Usage)",
+  "selectPlaceholder": "— Chọn —",
+  "basicInfo": "Thông tin từ",
+  "definitionsTitle": "Định nghĩa & Ví dụ",
+  "addDefinition": "+ Thêm định nghĩa",
+  "definitionNumber": "Định nghĩa #{{num}}",
+  "delete": "Xóa",
+  "definitionVi": "Nghĩa tiếng Việt",
+  "definitionViPlaceholder": "Ví dụ: kiên cường, hồi phục nhanh",
+  "definitionEn": "Định nghĩa tiếng Anh (tùy chọn)",
+  "definitionEnPlaceholder": "English definition...",
+  "example": "Câu ví dụ (tùy chọn)",
+  "examplePlaceholder": "Ví dụ: She remained resilient in face of adversity.",
+  "collections": "Bộ sưu tập",
+  "cancel": "Hủy",
+  "submitDefault": "Lưu thay đổi",
+  "createDefault": "Tạo từ vựng",
+  "saving": "Đang lưu...",
+  "errors": {
+    "wordRequired": "Từ vựng không được để trống",
+    "definitionRequired": "Cần có ít nhất một định nghĩa tiếng Anh hoặc tiếng Việt"
+  }
+}

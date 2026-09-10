@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../stores/auth.store";
 import { collectionService } from "../services/collection.service";
 import { vocabularyService } from "../services/vocabulary.service";
@@ -14,6 +15,7 @@ import ConfirmDialog from "../components/common/ConfirmDialog";
 export default function CollectionDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation("collection");
   const { user } = useAuthStore();
   const addToast = useUIStore((s) => s.addToast);
 
@@ -33,14 +35,14 @@ export default function CollectionDetailPage() {
     try {
       const data = await collectionService.getById(id);
       if (!data) {
-        addToast("Không tìm thấy bộ sưu tập", "error");
+        addToast(t("toasts.notFound"), "error");
         navigate("/collections");
         return;
       }
       setCollection(data.collection);
       setVocabularies(data.vocabularies);
     } catch (err) {
-      addToast(err.message || "Lỗi tải bộ sưu tập", "error");
+      addToast(err.message || t("toasts.loadError"), "error");
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +61,7 @@ export default function CollectionDetailPage() {
       const res = await vocabularyService.getAll(user.id, { limit: 100 });
       setAllUserVocabs(res.items || []);
     } catch (err) {
-      addToast("Lỗi tải danh sách từ vựng", "error");
+      addToast(t("toasts.loadVocabsError"), "error");
     } finally {
       setIsLoadingVocabs(false);
     }
@@ -68,10 +70,10 @@ export default function CollectionDetailPage() {
   const handleAddExistingWord = async (vocabId) => {
     try {
       await collectionService.assignWord(vocabId, id);
-      addToast("Đã thêm từ vào bộ sưu tập!", "success");
+      addToast(t("toasts.addWordSuccess"), "success");
       await loadData();
     } catch (err) {
-      addToast(err.message || "Lỗi thêm từ", "error");
+      addToast(err.message || t("toasts.addWordError"), "error");
     }
   };
 
@@ -80,13 +82,14 @@ export default function CollectionDetailPage() {
     try {
       await collectionService.removeWord(removingWordId, id);
       setVocabularies((prev) => prev.filter((v) => v.id !== removingWordId));
-      addToast("Đã bỏ từ ra khỏi bộ sưu tập", "success");
+      addToast(t("toasts.removeWordSuccess"), "success");
     } catch (err) {
-      addToast(err.message || "Lỗi bỏ từ", "error");
+      addToast(err.message || t("toasts.removeWordError"), "error");
     } finally {
       setRemovingWordId(null);
     }
   };
+
 
   if (isLoading) {
     return (
@@ -108,16 +111,16 @@ export default function CollectionDetailPage() {
               variant="secondary"
               onClick={() => navigate("/collections")}
             >
-              ← Quay lại
+              {t("detail.back")}
             </Button>
             <Button
               variant="secondary"
               onClick={handleOpenAddExisting}
             >
-              + Chọn từ có sẵn
+              {t("detail.selectExisting")}
             </Button>
             <Link to={`/vocabulary/add?collectionId=${id}`}>
-              <Button>+ Thêm từ mới</Button>
+              <Button>{t("detail.addNew")}</Button>
             </Link>
           </div>
         }
@@ -132,21 +135,21 @@ export default function CollectionDetailPage() {
 
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-heading-sm font-display font-light">
-            Từ vựng ({vocabularies.length})
+            {t("detail.wordsTitle", { count: vocabularies.length })}
           </h2>
           <Button
             variant="secondary"
             size="sm"
             onClick={handleOpenAddExisting}
           >
-            + Chọn từ có sẵn
+            {t("detail.selectExisting")}
           </Button>
         </div>
 
         {vocabularies.length === 0 ? (
           <div className="text-center py-12 card-taupe rounded-card flex flex-col items-center gap-3">
             <p className="text-smoke text-body-sm">
-              Chưa có từ vựng nào trong bộ sưu tập này.
+              {t("detail.emptyWords")}
             </p>
             <div className="flex items-center gap-3 mt-2">
               <Button
@@ -154,10 +157,10 @@ export default function CollectionDetailPage() {
                 variant="secondary"
                 onClick={handleOpenAddExisting}
               >
-                + Chọn từ có sẵn
+                {t("detail.selectExisting")}
               </Button>
               <Link to={`/vocabulary/add?collectionId=${id}`}>
-                <Button size="sm">+ Thêm từ mới</Button>
+                <Button size="sm">{t("detail.addNew")}</Button>
               </Link>
             </div>
           </div>
@@ -196,10 +199,10 @@ export default function CollectionDetailPage() {
 
                 <button
                   onClick={() => setRemovingWordId(vocab.id)}
-                  className="text-caption text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
-                  title="Bỏ khỏi bộ sưu tập"
+                  className="text-caption text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors cursor-pointer"
+                  title={t("detail.removeTitle")}
                 >
-                  Bỏ ra
+                  {t("detail.removeFromCollection")}
                 </button>
               </div>
             ))}
@@ -211,12 +214,12 @@ export default function CollectionDetailPage() {
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        title="Thêm từ vựng vào bộ sưu tập"
+        title={t("detail.modalTitle")}
       >
         <div className="flex flex-col gap-4 max-h-[70vh]">
           <Input
             id="search-vocab-modal"
-            placeholder="Tìm từ vựng trong kho của bạn..."
+            placeholder={t("detail.modalSearchPlaceholder")}
             value={searchWord}
             onChange={(e) => setSearchWord(e.target.value)}
             autoFocus
@@ -248,8 +251,8 @@ export default function CollectionDetailPage() {
                   return (
                     <p className="text-body-sm text-smoke text-center py-6">
                       {searchWord
-                        ? "Không tìm thấy từ vựng phù hợp."
-                        : "Kho từ vựng của bạn chưa có từ nào."}
+                        ? t("detail.modalNotFound")
+                        : t("detail.modalEmpty")}
                     </p>
                   );
                 }
@@ -283,7 +286,7 @@ export default function CollectionDetailPage() {
 
                       {isAlreadyIn ? (
                         <span className="text-caption text-emerald-700 dark:text-emerald-300 font-medium px-2 py-1 bg-emerald-50 dark:bg-emerald-950/70 rounded border border-emerald-200 dark:border-emerald-800">
-                          ✓ Đã thêm
+                          {t("detail.modalAlreadyIn")}
                         </span>
                       ) : (
                         <Button
@@ -291,7 +294,7 @@ export default function CollectionDetailPage() {
                           variant="secondary"
                           onClick={() => handleAddExistingWord(v.id)}
                         >
-                          + Thêm
+                          {t("detail.modalAddButton")}
                         </Button>
                       )}
                     </div>
@@ -307,13 +310,13 @@ export default function CollectionDetailPage() {
               onClick={() => setIsAddModalOpen(false)}
               className="text-body-sm text-ink underline font-medium hover:text-smoke"
             >
-              + Hoặc tạo từ mới hoàn toàn
+              {t("detail.modalCreateNew")}
             </Link>
             <Button
               variant="secondary"
               onClick={() => setIsAddModalOpen(false)}
             >
-              Đóng
+              {t("detail.modalClose")}
             </Button>
           </div>
         </div>
@@ -321,9 +324,9 @@ export default function CollectionDetailPage() {
 
       <ConfirmDialog
         isOpen={!!removingWordId}
-        title="Bỏ từ khỏi bộ sưu tập"
-        message="Từ vựng vẫn sẽ được lưu trong sổ từ của bạn, chỉ bị gỡ khỏi bộ sưu tập này."
-        confirmText="Bỏ ra"
+        title={t("detail.removeConfirmTitle")}
+        message={t("detail.removeConfirmMessage")}
+        confirmText={t("detail.removeConfirmButton")}
         variant="danger"
         onConfirm={handleRemoveWord}
         onCancel={() => setRemovingWordId(null)}
@@ -331,3 +334,4 @@ export default function CollectionDetailPage() {
     </>
   );
 }
+

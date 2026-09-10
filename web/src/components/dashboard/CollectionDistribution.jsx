@@ -6,9 +6,11 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 import { useChartColors } from "../../hooks/useChartColors";
 
 export default function CollectionDistribution({ data = [] }) {
+  const { t } = useTranslation("dashboard");
   const { axisStroke, tooltipBg, tooltipBorder, tooltipShadow, tooltipText, barFillSecondary } =
     useChartColors();
 
@@ -16,9 +18,9 @@ export default function CollectionDistribution({ data = [] }) {
     return (
       <div className="card-taupe p-6 rounded-card flex flex-col items-center justify-center min-h-[260px] text-center">
         <h3 className="text-subheading font-display font-light text-ink mb-2">
-          Từ vựng theo bộ sưu tập
+          {t("charts.collectionDistribution")}
         </h3>
-        <p className="text-body-sm text-smoke">Chưa có bộ sưu tập nào</p>
+        <p className="text-body-sm text-smoke">{t("charts.noCollectionData")}</p>
       </div>
     );
   }
@@ -28,7 +30,7 @@ export default function CollectionDistribution({ data = [] }) {
   return (
     <div className="card-taupe p-6 rounded-card flex flex-col gap-4">
       <h3 className="text-subheading font-display font-light text-ink">
-        📁 Từ vựng theo bộ sưu tập
+        {t("charts.collectionDistribution")}
       </h3>
 
       <div className="h-60 w-full pt-2">
@@ -58,7 +60,10 @@ export default function CollectionDistribution({ data = [] }) {
               }}
               itemStyle={{ color: tooltipText }}
               labelStyle={{ color: tooltipText, fontWeight: 500 }}
-              formatter={(val) => [`${val} từ`, "Số lượng"]}
+              formatter={(val) => [
+                t("charts.wordsCount", { count: val }),
+                t("charts.quantity"),
+              ]}
             />
             <Bar dataKey="count" fill={barFillSecondary} radius={[0, 4, 4, 0]} maxBarSize={20} />
           </BarChart>
@@ -67,3 +72,4 @@ export default function CollectionDistribution({ data = [] }) {
     </div>
   );
 }
+

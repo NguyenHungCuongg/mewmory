@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Button from "../common/Button";
 import Input from "../common/Input";
 import {
@@ -14,8 +15,11 @@ export default function WordForm({
   onSubmit,
   onCancel,
   isSubmitting = false,
-  submitLabel = "Lưu thay đổi",
+  submitLabel,
 }) {
+  const { t } = useTranslation("wordForm");
+  const actualSubmitLabel = submitLabel || t("submitDefault");
+
   const [formData, setFormData] = useState({
     word: initialData?.vocabulary?.word || "",
     phonetic: initialData?.vocabulary?.phonetic || "",
@@ -62,7 +66,7 @@ export default function WordForm({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.word.trim()) {
-      setError("Từ vựng không được để trống");
+      setError(t("errors.wordRequired"));
       return;
     }
 
@@ -71,7 +75,7 @@ export default function WordForm({
     );
 
     if (validDefs.length === 0) {
-      setError("Cần có ít nhất một định nghĩa tiếng Anh hoặc tiếng Việt");
+      setError(t("errors.definitionRequired"));
       return;
     }
 
@@ -100,13 +104,13 @@ export default function WordForm({
       {/* Vocabulary basic details */}
       <div className="card-taupe flex flex-col gap-4">
         <h3 className="text-subheading font-display font-light text-ink">
-          Thông tin từ
+          {t("basicInfo")}
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             id="word"
-            label="Từ (Word)"
+            label={t("word")}
             value={formData.word}
             onChange={(e) => {
               setFormData({ ...formData, word: e.target.value });
@@ -116,7 +120,7 @@ export default function WordForm({
 
           <Input
             id="phonetic"
-            label="Phiên âm (IPA)"
+            label={t("phonetic")}
             placeholder="/fəˈnet.ɪk/"
             value={formData.phonetic}
             onChange={(e) =>
@@ -128,7 +132,7 @@ export default function WordForm({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-body-sm text-graphite font-medium">
-              Loại từ (Part of Speech)
+              {t("partOfSpeech")}
             </label>
             <select
               value={formData.part_of_speech}
@@ -137,7 +141,7 @@ export default function WordForm({
               }
               className="w-full px-3 py-2 rounded-lg border border-stone bg-eggshell text-body text-graphite focus:outline-none focus:border-ink"
             >
-              <option value="">— Chọn —</option>
+              <option value="">{t("selectPlaceholder")}</option>
               {PARTS_OF_SPEECH.map((pos) => (
                 <option key={pos} value={pos}>
                   {pos}
@@ -148,7 +152,7 @@ export default function WordForm({
 
           <div className="flex flex-col gap-1.5">
             <label className="text-body-sm text-graphite font-medium">
-              CEFR Level
+              {t("cefrLevel")}
             </label>
             <select
               value={formData.cefr_level}
@@ -157,7 +161,7 @@ export default function WordForm({
               }
               className="w-full px-3 py-2 rounded-lg border border-stone bg-eggshell text-body text-graphite focus:outline-none focus:border-ink"
             >
-              <option value="">— Chọn —</option>
+              <option value="">{t("selectPlaceholder")}</option>
               {CEFR_LEVELS.map((lvl) => (
                 <option key={lvl} value={lvl}>
                   {lvl}
@@ -168,7 +172,7 @@ export default function WordForm({
 
           <div className="flex flex-col gap-1.5">
             <label className="text-body-sm text-graphite font-medium">
-              Ngữ cảnh (Usage)
+              {t("usageRegister")}
             </label>
             <select
               value={formData.usage_register}
@@ -177,7 +181,7 @@ export default function WordForm({
               }
               className="w-full px-3 py-2 rounded-lg border border-stone bg-eggshell text-body text-graphite focus:outline-none focus:border-ink"
             >
-              <option value="">— Chọn —</option>
+              <option value="">{t("selectPlaceholder")}</option>
               {USAGE_REGISTERS.map((u) => (
                 <option key={u} value={u}>
                   {u}
@@ -192,7 +196,7 @@ export default function WordForm({
       <div className="card-taupe flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 className="text-subheading font-display font-light text-ink">
-            Định nghĩa & Ví dụ
+            {t("definitionsTitle")}
           </h3>
           <Button
             type="button"
@@ -200,7 +204,7 @@ export default function WordForm({
             size="sm"
             onClick={handleAddDefinition}
           >
-            + Thêm định nghĩa
+            {t("addDefinition")}
           </Button>
         </div>
 
@@ -212,7 +216,7 @@ export default function WordForm({
             >
               <div className="flex items-center justify-between">
                 <span className="text-caption text-smoke font-medium">
-                  Định nghĩa #{idx + 1}
+                  {t("definitionNumber", { num: idx + 1 })}
                 </span>
                 {definitions.length > 1 && (
                   <button
@@ -220,15 +224,15 @@ export default function WordForm({
                     onClick={() => handleRemoveDefinition(idx)}
                     className="text-caption text-red-600 hover:text-red-800"
                   >
-                    Xóa
+                    {t("delete")}
                   </button>
                 )}
               </div>
 
               <Input
                 id={`def-vi-${idx}`}
-                label="Nghĩa tiếng Việt"
-                placeholder="Ví dụ: kiên cường, hồi phục nhanh"
+                label={t("definitionVi")}
+                placeholder={t("definitionViPlaceholder")}
                 value={def.definition_vi || ""}
                 onChange={(e) =>
                   handleDefChange(idx, "definition_vi", e.target.value)
@@ -237,8 +241,8 @@ export default function WordForm({
 
               <Input
                 id={`def-en-${idx}`}
-                label="Định nghĩa tiếng Anh (tùy chọn)"
-                placeholder="English definition..."
+                label={t("definitionEn")}
+                placeholder={t("definitionEnPlaceholder")}
                 value={def.definition_en || ""}
                 onChange={(e) =>
                   handleDefChange(idx, "definition_en", e.target.value)
@@ -247,11 +251,11 @@ export default function WordForm({
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-body-sm text-graphite font-medium">
-                  Câu ví dụ (tùy chọn)
+                  {t("example")}
                 </label>
                 <input
                   type="text"
-                  placeholder="Ví dụ: She remained resilient in face of adversity."
+                  placeholder={t("examplePlaceholder")}
                   value={def.example || ""}
                   onChange={(e) =>
                     handleDefChange(idx, "example", e.target.value)
@@ -268,7 +272,7 @@ export default function WordForm({
       {collections.length > 0 && (
         <div className="card-taupe flex flex-col gap-3">
           <h3 className="text-subheading font-display font-light text-ink">
-            Bộ sưu tập
+            {t("collections")}
           </h3>
           <div className="flex flex-wrap gap-2">
             {collections.map((col) => {
@@ -296,10 +300,10 @@ export default function WordForm({
       {/* Buttons */}
       <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone">
         <Button type="button" variant="secondary" onClick={onCancel}>
-          Hủy
+          {t("cancel")}
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Đang lưu..." : submitLabel}
+          {isSubmitting ? t("saving") : actualSubmitLabel}
         </Button>
       </div>
     </form>

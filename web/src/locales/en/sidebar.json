@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "vocabulary": "Vocabulary",
+    "collections": "Collections",
+    "settings": "Settings"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "Auto",
+    "title": "Theme: {{theme}} (Click to change)",
+    "ariaLabel": "Switch theme, currently {{theme}}"
+  },
+  "user": {
+    "defaultName": "User",
+    "signOut": "Sign out",
+    "signOutError": "Sign out error"
+  }
+}

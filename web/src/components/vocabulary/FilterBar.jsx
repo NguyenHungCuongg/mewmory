@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   CEFR_LEVELS,
   PARTS_OF_SPEECH,
@@ -5,6 +6,8 @@ import {
 } from "../../utils/constants";
 
 export default function FilterBar({ filters, onFilterChange, collections = [] }) {
+  const { t } = useTranslation("vocabulary");
+
   const handleChange = (key, value) => {
     onFilterChange({
       ...filters,
@@ -17,9 +20,9 @@ export default function FilterBar({ filters, onFilterChange, collections = [] })
       <select
         value={filters.cefr_level || ""}
         onChange={(e) => handleChange("cefr_level", e.target.value)}
-        className="px-3 py-1.5 rounded-pill border border-stone bg-eggshell text-body-sm text-graphite focus:outline-none focus:border-ink"
+        className="px-3 py-1.5 rounded-pill border border-stone bg-eggshell text-body-sm text-graphite focus:outline-none focus:border-ink cursor-pointer"
       >
-        <option value="">Tất cả CEFR Level</option>
+        <option value="">{t("filter.allCefr")}</option>
         {CEFR_LEVELS.map((l) => (
           <option key={l} value={l}>
             {l}
@@ -30,9 +33,9 @@ export default function FilterBar({ filters, onFilterChange, collections = [] })
       <select
         value={filters.part_of_speech || ""}
         onChange={(e) => handleChange("part_of_speech", e.target.value)}
-        className="px-3 py-1.5 rounded-pill border border-stone bg-eggshell text-body-sm text-graphite focus:outline-none focus:border-ink"
+        className="px-3 py-1.5 rounded-pill border border-stone bg-eggshell text-body-sm text-graphite focus:outline-none focus:border-ink cursor-pointer"
       >
-        <option value="">Tất cả loại từ</option>
+        <option value="">{t("filter.allPartsOfSpeech")}</option>
         {PARTS_OF_SPEECH.map((p) => (
           <option key={p} value={p}>
             {p}
@@ -43,9 +46,9 @@ export default function FilterBar({ filters, onFilterChange, collections = [] })
       <select
         value={filters.usage_register || ""}
         onChange={(e) => handleChange("usage_register", e.target.value)}
-        className="px-3 py-1.5 rounded-pill border border-stone bg-eggshell text-body-sm text-graphite focus:outline-none focus:border-ink"
+        className="px-3 py-1.5 rounded-pill border border-stone bg-eggshell text-body-sm text-graphite focus:outline-none focus:border-ink cursor-pointer"
       >
-        <option value="">Tất cả ngữ cảnh</option>
+        <option value="">{t("filter.allUsageRegisters")}</option>
         {USAGE_REGISTERS.map((u) => (
           <option key={u} value={u}>
             {u}
@@ -57,9 +60,9 @@ export default function FilterBar({ filters, onFilterChange, collections = [] })
         <select
           value={filters.collection_id || ""}
           onChange={(e) => handleChange("collection_id", e.target.value)}
-          className="px-3 py-1.5 rounded-pill border border-stone bg-eggshell text-body-sm text-graphite focus:outline-none focus:border-ink"
+          className="px-3 py-1.5 rounded-pill border border-stone bg-eggshell text-body-sm text-graphite focus:outline-none focus:border-ink cursor-pointer"
         >
-          <option value="">Tất cả bộ sưu tập</option>
+          <option value="">{t("filter.allCollections")}</option>
           {collections.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -71,11 +74,12 @@ export default function FilterBar({ filters, onFilterChange, collections = [] })
       {Object.values(filters).some(Boolean) && (
         <button
           onClick={() => onFilterChange({})}
-          className="text-caption text-smoke hover:text-ink font-medium px-2 py-1 underline"
+          className="text-caption text-smoke hover:text-ink font-medium px-2 py-1 underline cursor-pointer"
         >
-          Xóa bộ lọc
+          {t("filter.clear")}
         </button>
       )}
     </div>
   );
 }
+

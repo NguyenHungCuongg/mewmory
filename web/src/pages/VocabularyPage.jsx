@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../stores/auth.store";
 import { useVocabularyStore } from "../stores/vocabulary.store";
 import { useCollectionStore } from "../stores/collection.store";
@@ -15,6 +16,7 @@ import EmptyState from "../components/common/EmptyState";
 const PAGE_SIZE = 12;
 
 export default function VocabularyPage() {
+  const { t } = useTranslation("vocabulary");
   const { user } = useAuthStore();
   const {
     items,
@@ -86,10 +88,10 @@ export default function VocabularyPage() {
   return (
     <>
       <Header
-        title="Từ vựng của tôi"
+        title={t("title")}
         actions={
           <Link to="/vocabulary/add">
-            <Button>+ Thêm từ mới</Button>
+            <Button>{t("addNewWord")}</Button>
           </Link>
         }
       />
@@ -100,7 +102,7 @@ export default function VocabularyPage() {
           <div className="w-full sm:max-w-md">
             <Input
               id="search-vocab"
-              placeholder="Tìm kiếm từ vựng, định nghĩa..."
+              placeholder={t("searchPlaceholder")}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
@@ -108,17 +110,17 @@ export default function VocabularyPage() {
 
           <div className="flex items-center gap-3 self-end sm:self-auto">
             <span className="text-body-sm text-smoke whitespace-nowrap">
-              Sắp xếp:
+              {t("sort.label")}
             </span>
             <select
               value={currentSortValue}
               onChange={handleSortChange}
-              className="px-3 py-2 rounded-pill border border-stone bg-eggshell text-body-sm text-graphite focus:outline-none focus:border-ink"
+              className="px-3 py-2 rounded-pill border border-stone bg-eggshell text-body-sm text-graphite focus:outline-none focus:border-ink cursor-pointer"
             >
-              <option value="newest">Mới thêm gần đây</option>
-              <option value="oldest">Cũ nhất</option>
-              <option value="az">Theo chữ cái (A → Z)</option>
-              <option value="za">Theo chữ cái (Z → A)</option>
+              <option value="newest">{t("sort.newest")}</option>
+              <option value="oldest">{t("sort.oldest")}</option>
+              <option value="az">{t("sort.az")}</option>
+              <option value="za">{t("sort.za")}</option>
             </select>
           </div>
         </div>
@@ -133,7 +135,7 @@ export default function VocabularyPage() {
         {/* Results Info */}
         <div className="flex items-center justify-between text-body-sm text-smoke">
           <span>
-            Hiển thị <strong>{items.length}</strong> / <strong>{total}</strong> từ
+            {t("resultsInfo", { count: items.length, total })}
           </span>
         </div>
 
@@ -145,16 +147,16 @@ export default function VocabularyPage() {
         ) : items.length === 0 ? (
           <EmptyState
             icon="🔍"
-            title="Không tìm thấy từ vựng nào"
+            title={t("empty.title")}
             description={
               searchInput || Object.keys(filters).length > 0
-                ? "Thử thay đổi từ khóa tìm kiếm hoặc bỏ bớt các bộ lọc của bạn."
-                : "Bắt đầu học bằng cách thêm từ vựng đầu tiên vào sổ tay của bạn."
+                ? t("empty.filtered")
+                : t("empty.noWords")
             }
             action={
               !searchInput && Object.keys(filters).length === 0 ? (
                 <Link to="/vocabulary/add">
-                  <Button>+ Thêm từ mới ngay</Button>
+                  <Button>{t("addNewWordNow")}</Button>
                 </Link>
               ) : null
             }
@@ -176,10 +178,10 @@ export default function VocabularyPage() {
               onClick={handlePrevPage}
               disabled={offset === 0 || isLoading}
             >
-              ← Trang trước
+              {t("pagination.prev")}
             </Button>
             <span className="text-body-sm text-smoke">
-              Trang {currentPage} / {totalPages}
+              {t("pagination.pageInfo", { current: currentPage, total: totalPages })}
             </span>
             <Button
               variant="secondary"
@@ -187,7 +189,7 @@ export default function VocabularyPage() {
               onClick={handleNextPage}
               disabled={offset + PAGE_SIZE >= total || isLoading}
             >
-              Trang sau →
+              {t("pagination.next")}
             </Button>
           </div>
         )}
@@ -195,3 +197,4 @@ export default function VocabularyPage() {
     </>
   );
 }
+

@@ -1,0 +1,28 @@
+{
+  "word": "Word",
+  "phonetic": "Phonetic (IPA)",
+  "partOfSpeech": "Part of Speech",
+  "cefrLevel": "CEFR Level",
+  "usageRegister": "Usage Register",
+  "selectPlaceholder": "— Select —",
+  "basicInfo": "Word Information",
+  "definitionsTitle": "Definitions & Examples",
+  "addDefinition": "+ Add definition",
+  "definitionNumber": "Definition #{{num}}",
+  "delete": "Delete",
+  "definitionVi": "Vietnamese Definition",
+  "definitionViPlaceholder": "E.g., kiên cường, hồi phục nhanh",
+  "definitionEn": "English Definition (optional)",
+  "definitionEnPlaceholder": "English definition...",
+  "example": "Example Sentence (optional)",
+  "examplePlaceholder": "E.g., She remained resilient in face of adversity.",
+  "collections": "Collections",
+  "cancel": "Cancel",
+  "submitDefault": "Save changes",
+  "createDefault": "Create word",
+  "saving": "Saving...",
+  "errors": {
+    "wordRequired": "Word cannot be empty",
+    "definitionRequired": "At least one English or Vietnamese definition is required"
+  }
+}

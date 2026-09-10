@@ -1,0 +1,61 @@
+{
+  "title": "My Vocabulary",
+  "addNewWord": "+ Add new word",
+  "addNewWordNow": "+ Add new word now",
+  "searchPlaceholder": "Search vocabulary, definitions...",
+  "sort": {
+    "label": "Sort by:",
+    "newest": "Recently added",
+    "oldest": "Oldest",
+    "az": "Alphabetical (A → Z)",
+    "za": "Alphabetical (Z → A)"
+  },
+  "filter": {
+    "allCefr": "All CEFR Levels",
+    "allPartsOfSpeech": "All parts of speech",
+    "allUsageRegisters": "All contexts",
+    "allCollections": "All collections",
+    "clear": "Clear filters"
+  },
+  "resultsInfo": "Showing {{count}} / {{total}} words",
+  "card": {
+    "noDefinition": "No definition yet",
+    "extraDefs": "+{{count}} more meanings",
+    "details": "Details",
+    "viewWord": "View word →"
+  },
+  "empty": {
+    "title": "No vocabulary found",
+    "filtered": "Try adjusting your search terms or clearing some filters.",
+    "noWords": "Start learning by adding your first word to your notebook."
+  },
+  "pagination": {
+    "prev": "← Previous page",
+    "next": "Next page →",
+    "pageInfo": "Page {{current}} / {{total}}"
+  },
+  "detail": {
+    "backToList": "← Back to list",
+    "edit": "Edit",
+    "delete": "Delete",
+    "pronounce": "Pronounce",
+    "definitionsTitle": "Definitions ({{count}})",
+    "noDefinitions": "No definitions available for this word.",
+    "collectionsTitle": "Collections",
+    "assignCollection": "+ Assign to collection",
+    "editCollection": "✏️ Edit",
+    "noCollectionsAssigned": "This word has not been assigned to any collection. Click \"+ Assign to collection\" to organize.",
+    "addedOn": "Added on: {{date}}",
+    "updatedOn": "Last updated: {{date}}",
+    "deleteConfirmTitle": "Confirm Delete Word",
+    "deleteConfirmMessage": "Are you sure you want to delete \"{{word}}\" from your notebook?",
+    "deleteConfirmButton": "Delete permanently",
+    "toastNotFound": "Word not found",
+    "toastLoadError": "Error loading word",
+    "toastAudioError": "Cannot play audio",
+    "toastUpdateSuccess": "Word updated successfully!",
+    "toastUpdateError": "Error updating word",
+    "toastDeleteSuccess": "Word deleted",
+    "toastDeleteError": "Error deleting word"
+  }
+}

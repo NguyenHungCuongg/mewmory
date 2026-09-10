@@ -1,4 +1,5 @@
 import OfflineBadge from "../common/OfflineBadge";
+import LanguageSwitcher from "../common/LanguageSwitcher";
 
 export default function Header({ title, actions }) {
   return (
@@ -6,6 +7,7 @@ export default function Header({ title, actions }) {
       <h2 className="text-subheading font-display font-light">{title}</h2>
       <div className="flex items-center gap-4">
         {actions}
+        <LanguageSwitcher />
         <OfflineBadge />
       </div>
     </header>

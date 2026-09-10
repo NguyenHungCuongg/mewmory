@@ -1,0 +1,48 @@
+{
+  "title": "Cài đặt hệ thống",
+  "appearance": {
+    "title": "🎨 Giao diện",
+    "description": "Tùy chỉnh chế độ hiển thị sáng, tối hoặc tự động theo thiết bị.",
+    "light": "Sáng",
+    "lightDesc": "Màu ấm sáng sủa",
+    "dark": "Tối",
+    "darkDesc": "Dịu mắt ban đêm",
+    "system": "Tự động",
+    "systemDesc": "Theo hệ thống"
+  },
+  "ai": {
+    "title": "🤖 Cấu hình AI & Tra cứu",
+    "description": "Tùy chỉnh nhà cung cấp mô hình trí tuệ nhân tạo dùng để bóc tách từ và phân loại.",
+    "provider": "AI Provider",
+    "modelName": "Model Name",
+    "openrouterTip": "⚡ Gợi ý Model OpenRouter miễn phí:",
+    "apiKeyNote": "API key: Supabase Secret (OPENROUTER_API_KEY)",
+    "gemmaRecommend": "✨ Google Gemma 4 31B (Khuyên dùng)"
+  },
+  "notifications": {
+    "title": "🔔 Nhắc nhở & Ôn tập hàng ngày",
+    "description": "Thiết lập chế độ hiển thị thẻ flashcard và lịch ôn tập từ vựng.",
+    "enable": "Kích hoạt nhắc nhở định kỳ",
+    "enableDesc": "Hiển thị thông báo ôn từ vựng theo giờ đã chọn",
+    "defaultMode": "Chế độ ôn tập mặc định",
+    "gentleMode": "Xem nhanh (Gentle mode)",
+    "quizMode": "Quiz kiểm tra (Ẩn nghĩa)",
+    "time": "Thời gian nhắc nhở",
+    "collectionPriority": "Ưu tiên ôn tập từ các bộ sưu tập:"
+  },
+  "account": {
+    "title": "👤 Tài khoản & Bảo mật",
+    "email": "Email đăng nhập:",
+    "userId": "User ID:",
+    "signOut": "Đăng xuất tài khoản",
+    "signOutConfirmTitle": "Xác nhận đăng xuất",
+    "signOutConfirmMessage": "Bạn có chắc chắn muốn đăng xuất khỏi tài khoản Mewmory trên thiết bị này không?",
+    "signOutButton": "Đăng xuất"
+  },
+  "saveAll": "Lưu tất cả thay đổi",
+  "saving": "Đang lưu cài đặt...",
+  "saveSuccess": "Đã lưu cài đặt thành công!",
+  "saveError": "Lỗi lưu cài đặt",
+  "signOutSuccess": "Đã đăng xuất",
+  "signOutError": "Lỗi đăng xuất"
+}

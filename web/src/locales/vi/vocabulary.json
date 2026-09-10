@@ -1,0 +1,61 @@
+{
+  "title": "Từ vựng của tôi",
+  "addNewWord": "+ Thêm từ mới",
+  "addNewWordNow": "+ Thêm từ mới ngay",
+  "searchPlaceholder": "Tìm kiếm từ vựng, định nghĩa...",
+  "sort": {
+    "label": "Sắp xếp:",
+    "newest": "Mới thêm gần đây",
+    "oldest": "Cũ nhất",
+    "az": "Theo chữ cái (A → Z)",
+    "za": "Theo chữ cái (Z → A)"
+  },
+  "filter": {
+    "allCefr": "Tất cả CEFR Level",
+    "allPartsOfSpeech": "Tất cả loại từ",
+    "allUsageRegisters": "Tất cả ngữ cảnh",
+    "allCollections": "Tất cả bộ sưu tập",
+    "clear": "Xóa bộ lọc"
+  },
+  "resultsInfo": "Hiển thị {{count}} / {{total}} từ",
+  "card": {
+    "noDefinition": "Chưa có định nghĩa",
+    "extraDefs": "+{{count}} nghĩa khác",
+    "details": "Chi tiết",
+    "viewWord": "Xem từ →"
+  },
+  "empty": {
+    "title": "Không tìm thấy từ vựng nào",
+    "filtered": "Thử thay đổi từ khóa tìm kiếm hoặc bỏ bớt các bộ lọc của bạn.",
+    "noWords": "Bắt đầu học bằng cách thêm từ vựng đầu tiên vào sổ tay của bạn."
+  },
+  "pagination": {
+    "prev": "← Trang trước",
+    "next": "Trang sau →",
+    "pageInfo": "Trang {{current}} / {{total}}"
+  },
+  "detail": {
+    "backToList": "← Quay lại danh sách",
+    "edit": "Chỉnh sửa",
+    "delete": "Xóa",
+    "pronounce": "Phát âm",
+    "definitionsTitle": "Định nghĩa ({{count}})",
+    "noDefinitions": "Chưa có định nghĩa nào cho từ này.",
+    "collectionsTitle": "Bộ sưu tập",
+    "assignCollection": "+ Gán vào bộ sưu tập",
+    "editCollection": "✏️ Chỉnh sửa",
+    "noCollectionsAssigned": "Từ này chưa được gán vào bộ sưu tập nào. Nhấn \"+ Gán vào bộ sưu tập\" để phân loại.",
+    "addedOn": "Thêm vào ngày: {{date}}",
+    "updatedOn": "Cập nhật lần cuối: {{date}}",
+    "deleteConfirmTitle": "Xác nhận xóa từ vựng",
+    "deleteConfirmMessage": "Bạn có chắc chắn muốn xóa từ \"{{word}}\" khỏi sổ tay không?",
+    "deleteConfirmButton": "Xóa vĩnh viễn",
+    "toastNotFound": "Không tìm thấy từ vựng",
+    "toastLoadError": "Lỗi tải từ vựng",
+    "toastAudioError": "Không thể phát audio",
+    "toastUpdateSuccess": "Cập nhật từ vựng thành công!",
+    "toastUpdateError": "Lỗi cập nhật",
+    "toastDeleteSuccess": "Đã xóa từ vựng",
+    "toastDeleteError": "Lỗi xóa từ vựng"
+  }
+}

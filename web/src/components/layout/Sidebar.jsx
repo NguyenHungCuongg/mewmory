@@ -1,34 +1,38 @@
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../../stores/auth.store";
 import { authService } from "../../services/auth.service";
 import { useUIStore } from "../../stores/ui.store";
 import { useThemeStore } from "../../stores/theme.store";
 
-const navItems = [
-  { to: "/", label: "Dashboard", icon: "📊" },
-  { to: "/vocabulary", label: "Từ vựng", icon: "📖" },
-  { to: "/collections", label: "Collections", icon: "📚" },
-  { to: "/settings", label: "Cài đặt", icon: "⚙️" },
-];
-
-const themeConfig = {
-  light: { icon: "☀️", label: "Sáng" },
-  dark: { icon: "🌙", label: "Tối" },
-  system: { icon: "💻", label: "Tự động" },
+const themeIcons = {
+  light: "☀️",
+  dark: "🌙",
+  system: "💻",
 };
 
 export default function Sidebar() {
+  const { t } = useTranslation("sidebar");
   const { user, signOut: clearAuth } = useAuthStore();
   const addToast = useUIStore((s) => s.addToast);
   const { theme, toggleTheme } = useThemeStore();
-  const currentTheme = themeConfig[theme] || themeConfig.system;
+
+  const navItems = [
+    { to: "/", label: t("nav.dashboard"), icon: "📊" },
+    { to: "/vocabulary", label: t("nav.vocabulary"), icon: "📖" },
+    { to: "/collections", label: t("nav.collections"), icon: "📚" },
+    { to: "/settings", label: t("nav.settings"), icon: "⚙️" },
+  ];
+
+  const themeLabel = t(`theme.${theme}`, { defaultValue: t("theme.system") });
+  const themeIcon = themeIcons[theme] || themeIcons.system;
 
   const handleSignOut = async () => {
     try {
       await authService.signOut();
       clearAuth();
     } catch (err) {
-      addToast("Lỗi đăng xuất", "error");
+      addToast(t("user.signOutError"), "error");
     }
   };
 
@@ -68,16 +72,16 @@ export default function Sidebar() {
       <div className="px-4 py-2">
         <button
           onClick={toggleTheme}
-          title={`Giao diện: ${currentTheme.label} (Nhấn để đổi)`}
-          aria-label={`Chuyển chế độ giao diện, hiện tại là ${currentTheme.label}`}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-body-sm text-smoke hover:text-ink hover:bg-eggshell/60 transition-colors"
+          title={t("theme.title", { theme: themeLabel })}
+          aria-label={t("theme.ariaLabel", { theme: themeLabel })}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-body-sm text-smoke hover:text-ink hover:bg-eggshell/60 transition-colors cursor-pointer"
         >
           <span className="flex items-center gap-2.5">
-            <span>{currentTheme.icon}</span>
-            <span>Giao diện</span>
+            <span>{themeIcon}</span>
+            <span>{t("theme.label")}</span>
           </span>
           <span className="text-caption text-smoke font-medium capitalize bg-stone/50 px-2 py-0.5 rounded-full">
-            {currentTheme.label}
+            {themeLabel}
           </span>
         </button>
       </div>
@@ -90,17 +94,18 @@ export default function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-body-sm text-ink truncate">
-              {user?.email || "User"}
+              {user?.email || t("user.defaultName")}
             </p>
           </div>
         </div>
         <button
           onClick={handleSignOut}
-          className="w-full text-left px-3 py-2 text-body-sm text-smoke hover:text-ink transition-colors rounded-lg hover:bg-eggshell/60"
+          className="w-full text-left px-3 py-2 text-body-sm text-smoke hover:text-ink transition-colors rounded-lg hover:bg-eggshell/60 cursor-pointer"
         >
-          Đăng xuất
+          {t("user.signOut")}
         </button>
       </div>
     </aside>
   );
 }
+

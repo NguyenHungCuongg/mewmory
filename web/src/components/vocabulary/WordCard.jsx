@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { CEFR_COLORS } from "../../utils/constants";
 
 export default function WordCard({ vocabulary }) {
+  const { t } = useTranslation("vocabulary");
   const cefrStyle = CEFR_COLORS[vocabulary.cefr_level] || {};
   const firstDef = vocabulary.definitions?.[0];
   const extraDefsCount = (vocabulary.definitions?.length || 1) - 1;
@@ -63,7 +65,7 @@ export default function WordCard({ vocabulary }) {
             </p>
           ) : (
             <p className="text-caption text-ash italic">
-              Chưa có định nghĩa
+              {t("card.noDefinition")}
             </p>
           )}
 
@@ -78,12 +80,15 @@ export default function WordCard({ vocabulary }) {
       {/* Card Footer: Metadata & hover prompt */}
       <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-stone/50 text-caption text-smoke">
         <span>
-          {extraDefsCount > 0 ? `+${extraDefsCount} nghĩa khác` : "Chi tiết"}
+          {extraDefsCount > 0
+            ? t("card.extraDefs", { count: extraDefsCount })
+            : t("card.details")}
         </span>
         <span className="text-smoke group-hover:text-ink group-hover:translate-x-0.5 transition-all font-medium">
-          Xem từ →
+          {t("card.viewWord")}
         </span>
       </div>
     </Link>
   );
 }
+

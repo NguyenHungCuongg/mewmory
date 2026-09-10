@@ -1,0 +1,15 @@
+{
+  "language": "Ngôn ngữ",
+  "languages": {
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "offline": "Đang ngoại tuyến",
+  "loading": "Đang tải...",
+  "save": "Lưu",
+  "cancel": "Hủy",
+  "delete": "Xóa",
+  "edit": "Chỉnh sửa",
+  "close": "Đóng",
+  "confirm": "Xác nhận"
+}

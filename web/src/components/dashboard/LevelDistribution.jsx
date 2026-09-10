@@ -6,6 +6,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 import { useChartColors } from "../../hooks/useChartColors";
 
 const LEVEL_COLORS = {
@@ -19,6 +20,7 @@ const LEVEL_COLORS = {
 };
 
 export default function LevelDistribution({ data = [] }) {
+  const { t } = useTranslation("dashboard");
   const { tooltipBg, tooltipBorder, tooltipShadow, tooltipText, legendText } =
     useChartColors();
 
@@ -26,9 +28,9 @@ export default function LevelDistribution({ data = [] }) {
     return (
       <div className="card-taupe p-6 rounded-card flex flex-col items-center justify-center min-h-[260px] text-center">
         <h3 className="text-subheading font-display font-light text-ink mb-2">
-          Phân bố trình độ (CEFR)
+          {t("charts.levelDistribution")}
         </h3>
-        <p className="text-body-sm text-smoke">Chưa có dữ liệu phân loại</p>
+        <p className="text-body-sm text-smoke">{t("charts.noLevelData")}</p>
       </div>
     );
   }
@@ -36,7 +38,7 @@ export default function LevelDistribution({ data = [] }) {
   return (
     <div className="card-taupe p-6 rounded-card flex flex-col gap-4">
       <h3 className="text-subheading font-display font-light text-ink">
-        🎯 Phân bố theo trình độ (CEFR)
+        {t("charts.levelDistribution")}
       </h3>
 
       <div className="h-60 w-full">
@@ -70,7 +72,10 @@ export default function LevelDistribution({ data = [] }) {
               }}
               itemStyle={{ color: tooltipText }}
               labelStyle={{ color: tooltipText, fontWeight: 500 }}
-              formatter={(val, name) => [`${val} từ`, `Level ${name}`]}
+              formatter={(val, name) => [
+                t("charts.wordsCount", { count: val }),
+                t("charts.level", { level: name }),
+              ]}
             />
             <Legend
               verticalAlign="bottom"
@@ -88,3 +93,4 @@ export default function LevelDistribution({ data = [] }) {
     </div>
   );
 }
+

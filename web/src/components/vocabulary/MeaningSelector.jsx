@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { lookupService } from "../../services/lookup.service";
 
 export default function MeaningSelector({
@@ -11,6 +12,7 @@ export default function MeaningSelector({
   provider,
   model,
 }) {
+  const { t } = useTranslation("addWord");
   const [translatingKeys, setTranslatingKeys] = useState({});
   const [translateErrors, setTranslateErrors] = useState({});
 
@@ -72,7 +74,7 @@ export default function MeaningSelector({
       console.error("Translation error:", err);
       setTranslateErrors((prev) => ({
         ...prev,
-        [key]: "Dịch thất bại, vui lòng thử lại",
+        [key]: t("meaningSelector.translateFailed"),
       }));
     } finally {
       setTranslatingKeys((prev) => ({ ...prev, [key]: false }));
@@ -151,7 +153,7 @@ export default function MeaningSelector({
   };
 
   if (!meanings || meanings.length === 0) {
-    return <p className="text-smoke text-body-sm">Không tìm thấy nghĩa nào.</p>;
+    return <p className="text-smoke text-body-sm">{t("meaningSelector.noMeanings")}</p>;
   }
 
   return (
@@ -159,16 +161,16 @@ export default function MeaningSelector({
       {/* Bulk action toolbar */}
       <div className="flex items-center justify-between px-1">
         <span className="text-caption text-smoke">
-          Đã chọn:{" "}
+          {t("meaningSelector.selected")}{" "}
           <strong className="text-ink font-semibold">{selectedCount}</strong> /{" "}
-          {totalDefsCount} định nghĩa
+          {totalDefsCount} {t("meaningSelector.definitions")}
         </span>
         <button
           type="button"
           onClick={handleToggleSelectAll}
           className="text-caption text-ink font-medium hover:underline px-3 py-1 rounded-pill border border-stone hover:border-graphite/40 transition-colors bg-eggshell shadow-xs cursor-pointer"
         >
-          {isAllSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+          {isAllSelected ? t("meaningSelector.deselectAll") : t("meaningSelector.selectAll")}
         </button>
       </div>
 
@@ -195,14 +197,14 @@ export default function MeaningSelector({
               onClick={() => handleAddDef(mIdx)}
               className="text-caption text-ink font-medium px-2.5 py-1 rounded-pill border border-stone bg-eggshell hover:bg-warm-taupe transition-colors flex items-center gap-1 cursor-pointer shrink-0"
             >
-              <span>+ Thêm nghĩa</span>
+              <span>{t("meaningSelector.addMeaning")}</span>
             </button>
           </div>
 
           <div className="flex flex-col gap-2.5">
             {(!meaning.definitions || meaning.definitions.length === 0) && (
               <p className="text-caption text-ash italic py-2 text-center">
-                Chưa có định nghĩa nào cho từ loại này. Bấm "+ Thêm nghĩa" để tạo mới.
+                {t("meaningSelector.noDefsForPos")}
               </p>
             )}
 
@@ -226,7 +228,7 @@ export default function MeaningSelector({
                     checked={isSelected}
                     onChange={() => handleToggleMeaning(mIdx, dIdx)}
                     className="mt-1 accent-ink w-4 h-4 cursor-pointer shrink-0"
-                    aria-label={`Chọn định nghĩa ${dIdx + 1}`}
+                    aria-label={t("meaningSelector.selectDefAria", { num: dIdx + 1 })}
                   />
                   <div className="flex-1 flex flex-col gap-1.5 min-w-0">
                     <div className="flex items-start justify-between gap-2">
@@ -234,7 +236,7 @@ export default function MeaningSelector({
                         <input
                           type="text"
                           value={def.definition_en || ""}
-                          placeholder="Định nghĩa tiếng Anh (tùy chọn)..."
+                          placeholder={t("meaningSelector.defEnPlaceholder")}
                           onChange={(e) =>
                             handleUpdateDef(
                               mIdx,
@@ -247,14 +249,14 @@ export default function MeaningSelector({
                         />
                       ) : (
                         <p className="text-body-sm text-ink font-medium leading-snug">
-                          {def.definition_en || "(Không có định nghĩa tiếng Anh)"}
+                          {def.definition_en || t("meaningSelector.noEnDef")}
                         </p>
                       )}
                       <button
                         type="button"
                         onClick={() => handleDeleteDef(mIdx, dIdx)}
-                        title="Xóa định nghĩa này"
-                        aria-label="Xóa định nghĩa"
+                        title={t("meaningSelector.deleteDefTitle")}
+                        aria-label={t("meaningSelector.deleteDef")}
                         className="text-ash hover:text-red-500 p-0.5 rounded transition-colors text-body-sm cursor-pointer shrink-0"
                       >
                         ✕
@@ -269,7 +271,7 @@ export default function MeaningSelector({
                       <input
                         type="text"
                         value={def.definition_vi || ""}
-                        placeholder="Nhập nghĩa tiếng Việt..."
+                        placeholder={t("meaningSelector.defViPlaceholder")}
                         onChange={(e) =>
                           handleUpdateDef(
                             mIdx,
@@ -290,8 +292,8 @@ export default function MeaningSelector({
                         disabled={isTranslating}
                         title={
                           def.definition_vi
-                            ? "Dịch lại nghĩa này bằng AI"
-                            : "Dịch định nghĩa tiếng Anh sang tiếng Việt bằng AI"
+                            ? t("meaningSelector.retranslateTooltip")
+                            : t("meaningSelector.translateTooltip")
                         }
                         className={`text-caption px-2.5 py-1 rounded border transition-colors flex items-center gap-1 shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                           def.definition_vi
@@ -302,12 +304,12 @@ export default function MeaningSelector({
                         {isTranslating ? (
                           <>
                             <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                            <span>Đang dịch...</span>
+                            <span>{t("meaningSelector.translating")}</span>
                           </>
                         ) : (
                           <>
                             <span>🔄</span>
-                            <span>{def.definition_vi ? "Dịch lại" : "Dịch"}</span>
+                            <span>{def.definition_vi ? t("meaningSelector.retranslate") : t("meaningSelector.translate")}</span>
                           </>
                         )}
                       </button>
@@ -326,7 +328,7 @@ export default function MeaningSelector({
                       <input
                         type="text"
                         value={def.example || ""}
-                        placeholder="Câu ví dụ..."
+                        placeholder={t("meaningSelector.examplePlaceholder")}
                         onChange={(e) =>
                           handleUpdateDef(
                             mIdx,

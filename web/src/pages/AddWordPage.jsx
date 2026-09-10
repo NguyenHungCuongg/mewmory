@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../stores/auth.store";
 import { useCollectionStore } from "../stores/collection.store";
 import { useSettingsStore } from "../stores/settings.store";
@@ -19,6 +20,7 @@ import DuplicateWarning from "../components/vocabulary/DuplicateWarning";
 import WordForm from "../components/vocabulary/WordForm";
 
 export default function AddWordPage() {
+  const { t } = useTranslation(["addWord", "wordForm"]);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const defaultColId = searchParams.get("collectionId");
@@ -73,9 +75,12 @@ export default function AddWordPage() {
       }
       setNewColName("");
       setIsCreatingCol(false);
-      addToast(`Đã tạo bộ sưu tập "${newCol?.name || newColName}"!`, "success");
+      addToast(
+        t("toastColCreated", { name: newCol?.name || newColName }),
+        "success",
+      );
     } catch (err) {
-      addToast(err.message || "Lỗi tạo bộ sưu tập", "error");
+      addToast(err.message || t("toastColError"), "error");
     } finally {
       setIsSubmittingCol(false);
     }
@@ -93,9 +98,9 @@ export default function AddWordPage() {
       if (newCol?.id) {
         setSelectedColIds((prev) => [...prev, newCol.id]);
       }
-      addToast(`Đã tạo bộ sưu tập "${suggestedName}"!`, "success");
+      addToast(t("toastColCreated", { name: suggestedName }), "success");
     } catch (err) {
-      addToast(err.message || "Lỗi tạo bộ sưu tập", "error");
+      addToast(err.message || t("toastColError"), "error");
     } finally {
       setIsSubmittingCol(false);
     }
@@ -117,10 +122,10 @@ export default function AddWordPage() {
         definitions,
         collectionIds,
       );
-      addToast("Thêm từ vựng thành công!", "success");
+      addToast(t("toastSuccess"), "success");
       navigate(defaultColId ? `/collections/${defaultColId}` : "/vocabulary");
     } catch (err) {
-      addToast(err.message || "Lỗi lưu từ vựng", "error");
+      addToast(err.message || t("toastSaveError"), "error");
     } finally {
       setIsSaving(false);
     }
@@ -155,7 +160,7 @@ export default function AddWordPage() {
     setWordError("");
 
     if (!isOnline) {
-      addToast("Cần kết nối mạng để tra cứu", "error");
+      addToast(t("toastNetworkRequired"), "error");
       return;
     }
 
@@ -179,7 +184,7 @@ export default function AddWordPage() {
       });
       setSelectedMeanings(selection);
     } catch (err) {
-      addToast(err.message || "Lỗi tra cứu từ vựng", "error");
+      addToast(err.message || t("toastLookupError"), "error");
     } finally {
       setIsLooking(false);
     }
@@ -187,7 +192,7 @@ export default function AddWordPage() {
 
   const handleSave = async () => {
     if (!user || Object.keys(selectedMeanings).length === 0) {
-      addToast("Vui lòng chọn ít nhất 1 nghĩa", "error");
+      addToast(t("toastSelectMeaning"), "error");
       return;
     }
 
@@ -228,10 +233,10 @@ export default function AddWordPage() {
         }
       }
 
-      addToast("Đã lưu thành công!", "success");
+      addToast(t("toastSaved"), "success");
       navigate(defaultColId ? `/collections/${defaultColId}` : "/vocabulary");
     } catch (err) {
-      addToast(err.message || "Lỗi lưu từ vựng", "error");
+      addToast(err.message || t("toastSaveError"), "error");
     } finally {
       setIsSaving(false);
     }
@@ -239,7 +244,7 @@ export default function AddWordPage() {
 
   const handlePlayAudio = (url) => {
     const audio = new Audio(url);
-    audio.play().catch(() => addToast("Không thể phát audio", "error"));
+    audio.play().catch(() => addToast(t("toastAudioError"), "error"));
   };
 
   const handleKeyDown = (e) => {
@@ -265,7 +270,7 @@ export default function AddWordPage() {
 
   return (
     <>
-      <Header title="Thêm từ mới" />
+      <Header title={t("title")} />
       <div className="p-6 max-w-2xl mx-auto">
         {/* Mode Switcher */}
         <div className="flex bg-warm-taupe p-1 rounded-xl border border-stone mb-6">
@@ -279,7 +284,7 @@ export default function AddWordPage() {
             }`}
           >
             <span>⚡</span>
-            <span>Tra cứu tự động (AI & Từ điển)</span>
+            <span>{t("modes.auto")}</span>
           </button>
           <button
             type="button"
@@ -291,7 +296,7 @@ export default function AddWordPage() {
             }`}
           >
             <span>✍️</span>
-            <span>Tự nhập thủ công</span>
+            <span>{t("modes.manual")}</span>
           </button>
         </div>
 
@@ -308,7 +313,7 @@ export default function AddWordPage() {
               )
             }
             isSubmitting={isSaving}
-            submitLabel="Tạo từ vựng"
+            submitLabel={t("wordForm:createDefault")}
           />
         ) : (
           <>
@@ -316,7 +321,7 @@ export default function AddWordPage() {
             <div className="flex gap-3 mb-4">
               <Input
                 id="word-input"
-                placeholder="Nhập từ tiếng Anh..."
+                placeholder={t("searchPlaceholder")}
                 value={word}
                 onChange={(e) => setWord(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -324,7 +329,7 @@ export default function AddWordPage() {
                 className="flex-1"
               />
               <Button onClick={handleLookup} disabled={isLooking || !isOnline}>
-                {isLooking ? <LoadingSpinner size="sm" /> : "Lookup"}
+                {isLooking ? <LoadingSpinner size="sm" /> : t("lookupButton")}
               </Button>
             </div>
 
@@ -336,11 +341,10 @@ export default function AddWordPage() {
               <div className="mt-4 p-4 bg-amber-50 border border-amber-200 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800 rounded-card text-body-sm text-amber-800 flex items-center justify-between gap-4">
                 <div>
                   <p className="font-medium">
-                    📡 Bạn đang ngoại tuyến (Offline)
+                    {t("offlineTitle")}
                   </p>
                   <p className="text-caption mt-0.5 opacity-90">
-                    Tính năng tra cứu từ điển & AI cần mạng. Bạn có thể chuyển
-                    sang tự nhập thủ công để lưu từ offline.
+                    {t("offlineNotice")}
                   </p>
                 </div>
                 <Button
@@ -348,7 +352,7 @@ export default function AddWordPage() {
                   variant="secondary"
                   onClick={() => setMode("manual")}
                 >
-                  Tự nhập tay
+                  {t("manualSwitch")}
                 </Button>
               </div>
             )}
@@ -372,7 +376,7 @@ export default function AddWordPage() {
                 <div className="grid grid-cols-3 gap-4">
                   <Input
                     id="phonetic"
-                    label="Phiên âm (IPA)"
+                    label={t("wordForm:phonetic")}
                     value={editFields.phonetic}
                     onChange={(e) =>
                       setEditFields({ ...editFields, phonetic: e.target.value })
@@ -380,7 +384,7 @@ export default function AddWordPage() {
                   />
                   <div className="flex flex-col gap-1.5">
                     <label className="text-body-sm text-graphite font-medium">
-                      CEFR Level
+                      {t("wordForm:cefrLevel")}
                     </label>
                     <select
                       value={editFields.cefr_level}
@@ -402,7 +406,7 @@ export default function AddWordPage() {
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-body-sm text-graphite font-medium">
-                      Usage
+                      {t("wordForm:usageRegister")}
                     </label>
                     <select
                       value={editFields.usage_register}
@@ -434,7 +438,7 @@ export default function AddWordPage() {
                 {/* Meaning selection */}
                 <div>
                   <h3 className="text-subheading font-display font-light mb-3">
-                    Chọn nghĩa muốn lưu
+                    {t("selectMeaningsTitle")}
                   </h3>
                   <MeaningSelector
                     meanings={lookupResult.meanings}
@@ -456,7 +460,7 @@ export default function AddWordPage() {
                 <div className="card-taupe flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-subheading font-display font-light text-ink">
-                      Bộ sưu tập (tùy chọn)
+                      {t("collectionsTitle")}
                     </h3>
                     {!isCreatingCol && (
                       <button
@@ -464,12 +468,12 @@ export default function AddWordPage() {
                         onClick={() => setIsCreatingCol(true)}
                         className="text-caption text-ink font-medium px-2.5 py-1 rounded-pill border border-stone bg-eggshell hover:bg-warm-taupe transition-colors flex items-center gap-1 cursor-pointer"
                       >
-                        <span>+ Tạo mới</span>
+                        <span>{t("createCollection")}</span>
                       </button>
                     )}
                   </div>
                   <p className="text-caption text-smoke">
-                    Chọn một hoặc nhiều bộ sưu tập để gán từ này vào:
+                    {t("collectionsDesc")}
                   </p>
 
                   {/* Inline quick create collection form */}
@@ -482,7 +486,7 @@ export default function AddWordPage() {
                         type="text"
                         value={newColName}
                         onChange={(e) => setNewColName(e.target.value)}
-                        placeholder="Tên bộ sưu tập mới..."
+                        placeholder={t("newColPlaceholder")}
                         autoFocus
                         className="flex-1 px-3 py-1 text-body-sm bg-warm-taupe/40 dark:bg-stone/30 border border-stone rounded outline-none text-ink placeholder:text-ash focus:border-ink"
                       />
@@ -491,7 +495,7 @@ export default function AddWordPage() {
                         type="submit"
                         disabled={!newColName.trim() || isSubmittingCol}
                       >
-                        {isSubmittingCol ? "..." : "Tạo"}
+                        {isSubmittingCol ? "..." : t("createColButton")}
                       </Button>
                       <Button
                         size="sm"
@@ -502,7 +506,7 @@ export default function AddWordPage() {
                           setNewColName("");
                         }}
                       >
-                        Hủy
+                        {t("cancelButton")}
                       </Button>
                     </form>
                   )}
@@ -542,9 +546,9 @@ export default function AddWordPage() {
                                     ? "bg-white/20 text-white"
                                     : "bg-amber-500/15 text-amber-600 dark:text-amber-400"
                                 }`}
-                                title="Được AI gợi ý cho từ này"
+                                title={t("aiBadgeTooltip")}
                               >
-                                ✨ Gợi ý
+                                {t("aiBadge")}
                               </span>
                             )}
                           </button>
@@ -554,8 +558,7 @@ export default function AddWordPage() {
                   ) : (
                     !isCreatingCol && (
                       <p className="text-caption text-ash italic">
-                        Chưa có bộ sưu tập nào. Bấm "+ Tạo mới" để tạo bộ sưu
-                        tập đầu tiên.
+                        {t("noCollections")}
                       </p>
                     )
                   )}
@@ -570,8 +573,8 @@ export default function AddWordPage() {
                   )?.length > 0 && (
                     <div className="pt-2 border-t border-stone/60 flex flex-col gap-1.5">
                       <span className="text-caption text-smoke flex items-center gap-1">
-                        <span>✨ Gợi ý từ AI:</span>
-                        <span className="text-ash">(Bấm để tạo nhanh)</span>
+                        <span>{t("aiSuggestionsTitle")}</span>
+                        <span className="text-ash">{t("clickToCreate")}</span>
                       </span>
                       <div className="flex flex-wrap gap-1.5">
                         {lookupResult.suggested_collections
@@ -605,7 +608,7 @@ export default function AddWordPage() {
                 variant="secondary"
                 onClick={() => navigate("/vocabulary")}
               >
-                Hủy
+                {t("cancel")}
               </Button>
               <Button
                 onClick={handleSave}
@@ -614,8 +617,8 @@ export default function AddWordPage() {
                 }
               >
                 {isSaving
-                  ? "Đang lưu..."
-                  : `Lưu (${Object.keys(selectedMeanings).length} nghĩa)`}
+                  ? t("saving")
+                  : t("saveCount", { count: Object.keys(selectedMeanings).length })}
               </Button>
             </div>
           </div>

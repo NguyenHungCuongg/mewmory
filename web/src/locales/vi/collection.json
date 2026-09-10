@@ -1,0 +1,68 @@
+{
+  "title": "Bộ sưu tập",
+  "createCollection": "+ Tạo bộ sưu tập",
+  "createFirst": "+ Tạo bộ sưu tập đầu tiên",
+  "empty": {
+    "title": "Chưa có bộ sưu tập nào",
+    "description": "Nhóm từ vựng của bạn theo chủ đề, kỳ thi hoặc sở thích cá nhân để dễ dàng ôn tập."
+  },
+  "card": {
+    "default": "Mặc định",
+    "ai": "AI",
+    "wordCount": "{{count}} từ",
+    "edit": "Sửa",
+    "delete": "Xóa"
+  },
+  "form": {
+    "createTitle": "Tạo bộ sưu tập mới",
+    "editTitle": "Chỉnh sửa bộ sưu tập",
+    "nameLabel": "Tên bộ sưu tập",
+    "namePlaceholder": "Ví dụ: IELTS Vocabulary, Travel, Tech...",
+    "nameRequired": "Tên bộ sưu tập không được để trống",
+    "descriptionLabel": "Mô tả (tùy chọn)",
+    "descriptionPlaceholder": "Ghi chú ngắn về bộ sưu tập này...",
+    "cancel": "Hủy",
+    "save": "Lưu thay đổi",
+    "create": "Tạo bộ sưu tập",
+    "saving": "Đang lưu..."
+  },
+  "detail": {
+    "back": "← Quay lại",
+    "selectExisting": "+ Chọn từ có sẵn",
+    "addNew": "+ Thêm từ mới",
+    "wordsTitle": "Từ vựng ({{count}})",
+    "emptyWords": "Chưa có từ vựng nào trong bộ sưu tập này.",
+    "removeFromCollection": "Bỏ ra",
+    "removeTitle": "Bỏ khỏi bộ sưu tập",
+    "removeConfirmTitle": "Bỏ từ khỏi bộ sưu tập",
+    "removeConfirmMessage": "Từ vựng vẫn sẽ được lưu trong sổ từ của bạn, chỉ bị gỡ khỏi bộ sưu tập này.",
+    "removeConfirmButton": "Bỏ ra",
+    "modalTitle": "Thêm từ vựng vào bộ sưu tập",
+    "modalSearchPlaceholder": "Tìm từ vựng trong kho của bạn...",
+    "modalEmpty": "Kho từ vựng của bạn chưa có từ nào.",
+    "modalNotFound": "Không tìm thấy từ vựng phù hợp.",
+    "modalAlreadyIn": "✓ Đã thêm",
+    "modalAddButton": "+ Thêm",
+    "modalCreateNew": "+ Hoặc tạo từ mới hoàn toàn",
+    "modalClose": "Đóng"
+  },
+  "deleteConfirm": {
+    "title": "Xác nhận xóa bộ sưu tập",
+    "message": "Bạn có chắc muốn xóa bộ sưu tập \"{{name}}\"? Các từ vựng bên trong sẽ không bị xóa.",
+    "confirm": "Xóa"
+  },
+  "toasts": {
+    "createSuccess": "Đã tạo bộ sưu tập mới!",
+    "updateSuccess": "Đã cập nhật bộ sưu tập!",
+    "deleteSuccess": "Đã xóa bộ sưu tập",
+    "errorAction": "Lỗi xử lý bộ sưu tập",
+    "errorDelete": "Lỗi xóa bộ sưu tập",
+    "notFound": "Không tìm thấy bộ sưu tập",
+    "loadError": "Lỗi tải bộ sưu tập",
+    "loadVocabsError": "Lỗi tải danh sách từ vựng",
+    "addWordSuccess": "Đã thêm từ vào bộ sưu tập!",
+    "addWordError": "Lỗi thêm từ",
+    "removeWordSuccess": "Đã bỏ từ ra khỏi bộ sưu tập",
+    "removeWordError": "Lỗi bỏ từ"
+  }
+}

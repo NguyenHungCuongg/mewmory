@@ -1,0 +1,69 @@
+{
+  "title": "Collections",
+  "createCollection": "+ Create collection",
+  "createFirst": "+ Create first collection",
+  "empty": {
+    "title": "No collections yet",
+    "description": "Group your vocabulary by topic, exam, or personal interest for easier review."
+  },
+  "card": {
+    "default": "Default",
+    "ai": "AI",
+    "wordCount": "{{count}} words",
+    "wordCount_one": "{{count}} word",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "form": {
+    "createTitle": "Create new collection",
+    "editTitle": "Edit collection",
+    "nameLabel": "Collection name",
+    "namePlaceholder": "E.g., IELTS Vocabulary, Travel, Tech...",
+    "nameRequired": "Collection name cannot be empty",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Short notes about this collection...",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "create": "Create collection",
+    "saving": "Saving..."
+  },
+  "detail": {
+    "back": "← Back",
+    "selectExisting": "+ Select existing word",
+    "addNew": "+ Add new word",
+    "wordsTitle": "Vocabulary ({{count}})",
+    "emptyWords": "No vocabulary in this collection yet.",
+    "removeFromCollection": "Remove",
+    "removeTitle": "Remove from collection",
+    "removeConfirmTitle": "Remove word from collection",
+    "removeConfirmMessage": "The word will still remain in your notebook, only unlinked from this collection.",
+    "removeConfirmButton": "Remove",
+    "modalTitle": "Add vocabulary to collection",
+    "modalSearchPlaceholder": "Search vocabulary in your library...",
+    "modalEmpty": "No vocabulary in your library yet.",
+    "modalNotFound": "No matching vocabulary found.",
+    "modalAlreadyIn": "✓ Added",
+    "modalAddButton": "+ Add",
+    "modalCreateNew": "+ Or create brand new word",
+    "modalClose": "Close"
+  },
+  "deleteConfirm": {
+    "title": "Confirm Delete Collection",
+    "message": "Are you sure you want to delete \"{{name}}\"? Vocabulary words inside will not be deleted.",
+    "confirm": "Delete"
+  },
+  "toasts": {
+    "createSuccess": "Collection created successfully!",
+    "updateSuccess": "Collection updated successfully!",
+    "deleteSuccess": "Collection deleted",
+    "errorAction": "Error processing collection",
+    "errorDelete": "Error deleting collection",
+    "notFound": "Collection not found",
+    "loadError": "Error loading collection",
+    "loadVocabsError": "Error loading vocabulary list",
+    "addWordSuccess": "Word added to collection!",
+    "addWordError": "Error adding word",
+    "removeWordSuccess": "Word removed from collection",
+    "removeWordError": "Error removing word"
+  }
+}

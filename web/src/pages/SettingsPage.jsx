@@ -164,7 +164,7 @@ export default function SettingsPage() {
                       ai_model:
                         e.target.value === "gemini"
                           ? "gemini-3.6-flash"
-                          : "nvidia/nemotron-3-ultra-550b-a55b:free",
+                          : "google/gemma-4-31b-it:free",
                     })
                   }
                   className="w-full px-3 py-2 rounded-lg border border-stone bg-eggshell text-body text-graphite focus:outline-none focus:border-ink"
@@ -202,17 +202,17 @@ export default function SettingsPage() {
                     onClick={() =>
                       setFormData({
                         ...formData,
-                        ai_model: "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        ai_model: "google/gemma-4-31b-it:free",
                       })
                     }
                     className={`text-caption px-2.5 py-1 rounded-pill border transition-colors cursor-pointer ${
                       formData.ai_model ===
-                      "nvidia/nemotron-3-ultra-550b-a55b:free"
+                      "google/gemma-4-31b-it:free"
                         ? "bg-ink text-eggshell border-ink font-medium"
                         : "bg-eggshell text-smoke border-stone hover:text-ink hover:border-graphite"
                     }`}
                   >
-                    ✨ NVIDIA Nemotron 3 Ultra (Khuyên dùng)
+                    ✨ Google Gemma 4 31B (Khuyên dùng)
                   </button>
                   <button
                     type="button"
@@ -235,17 +235,17 @@ export default function SettingsPage() {
                     onClick={() =>
                       setFormData({
                         ...formData,
-                        ai_model: "meta-llama/llama-3.3-70b-instruct:free",
+                        ai_model: "nvidia/nemotron-3.5-lightning:free",
                       })
                     }
                     className={`text-caption px-2.5 py-1 rounded-pill border transition-colors cursor-pointer ${
                       formData.ai_model ===
-                      "meta-llama/llama-3.3-70b-instruct:free"
+                      "nvidia/nemotron-3.5-lightning:free"
                         ? "bg-ink text-eggshell border-ink font-medium"
                         : "bg-eggshell text-smoke border-stone hover:text-ink hover:border-graphite"
                     }`}
                   >
-                    Llama 3.3 70B (free)
+                    ⚡ Nemotron Lightning (Siêu tốc)
                   </button>
                 </div>
               </div>

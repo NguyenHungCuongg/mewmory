@@ -157,19 +157,14 @@ async function callOpenRouter(prompt: string, model?: string): Promise<string> {
   const apiKey = Deno.env.get("OPENROUTER_API_KEY");
   if (!apiKey) throw new Error("OPENROUTER_API_KEY not set");
 
-  const primaryModel = model || "nvidia/nemotron-3-ultra-550b-a55b:free";
+  const primaryModel = model || "google/gemma-4-31b-it:free";
 
   try {
     return await executeOpenRouterRequest(apiKey, prompt, primaryModel);
   } catch (err: any) {
-    if (
-      primaryModel === "nvidia/nemotron-3-ultra-550b-a55b:free" &&
-      (err.message.includes("502") ||
-        err.message.includes("503") ||
-        err.message.includes("Upstream error"))
-    ) {
+    if (primaryModel === "google/gemma-4-31b-it:free") {
       console.warn(
-        "Nemotron 3 Ultra upstream error, falling back to nvidia/nemotron-3.5-lightning:free:",
+        "Gemma 4 31B error, falling back to nvidia/nemotron-3.5-lightning:free:",
         err.message,
       );
       return await executeOpenRouterRequest(
@@ -192,11 +187,6 @@ async function executeOpenRouterRequest(
     messages: [{ role: "user", content: prompt }],
   };
 
-  if (modelName.includes("nemotron")) {
-    requestBody.reasoning = { max_tokens: 300 };
-    requestBody.max_tokens = 2500;
-  }
-
   const response = await fetch(
     "https://openrouter.ai/api/v1/chat/completions",
     {
@@ -208,7 +198,7 @@ async function executeOpenRouterRequest(
         "X-Title": "Mewmory",
       },
       body: JSON.stringify(requestBody),
-      signal: AbortSignal.timeout(90000),
+      signal: AbortSignal.timeout(45000),
     },
   );
 

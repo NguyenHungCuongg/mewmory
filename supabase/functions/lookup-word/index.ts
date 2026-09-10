@@ -157,7 +157,9 @@ function extractJSON(raw: string): any {
       const sliced = cleaned.substring(firstBrace, lastBrace + 1);
       return JSON.parse(sliced);
     }
-    throw new Error(`Failed to parse AI response as JSON: ${raw.slice(0, 120)}`);
+    throw new Error(
+      `Failed to parse AI response as JSON: ${raw.slice(0, 120)}`,
+    );
   }
 }
 

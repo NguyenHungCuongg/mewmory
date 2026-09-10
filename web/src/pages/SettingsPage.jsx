@@ -214,39 +214,6 @@ export default function SettingsPage() {
                   >
                     ✨ Google Gemma 4 31B (Khuyên dùng)
                   </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData({
-                        ...formData,
-                        ai_model: "google/gemini-2.0-flash-exp:free",
-                      })
-                    }
-                    className={`text-caption px-2.5 py-1 rounded-pill border transition-colors cursor-pointer ${
-                      formData.ai_model === "google/gemini-2.0-flash-exp:free"
-                        ? "bg-ink text-eggshell border-ink font-medium"
-                        : "bg-eggshell text-smoke border-stone hover:text-ink hover:border-graphite"
-                    }`}
-                  >
-                    Gemini 2.0 Flash (free)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData({
-                        ...formData,
-                        ai_model: "nvidia/nemotron-3.5-lightning:free",
-                      })
-                    }
-                    className={`text-caption px-2.5 py-1 rounded-pill border transition-colors cursor-pointer ${
-                      formData.ai_model ===
-                      "nvidia/nemotron-3.5-lightning:free"
-                        ? "bg-ink text-eggshell border-ink font-medium"
-                        : "bg-eggshell text-smoke border-stone hover:text-ink hover:border-graphite"
-                    }`}
-                  >
-                    ⚡ Nemotron Lightning (Siêu tốc)
-                  </button>
                 </div>
               </div>
             )}

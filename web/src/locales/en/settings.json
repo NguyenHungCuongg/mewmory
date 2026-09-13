@@ -1,0 +1,48 @@
+{
+  "title": "System Settings",
+  "appearance": {
+    "title": "Appearance",
+    "description": "Customize light, dark or automatic system display theme.",
+    "light": "Light",
+    "lightDesc": "Warm and bright",
+    "dark": "Dark",
+    "darkDesc": "Easy on the eyes at night",
+    "system": "System",
+    "systemDesc": "Match device system"
+  },
+  "ai": {
+    "title": "AI & Lookup Configuration",
+    "description": "Configure AI model provider used for word extraction and classification.",
+    "provider": "AI Provider",
+    "modelName": "Model Name",
+    "openrouterTip": "Suggested Free OpenRouter Models:",
+    "apiKeyNote": "API key: Supabase Secret (OPENROUTER_API_KEY)",
+    "gemmaRecommend": "Google Gemma 4 31B (Recommended)"
+  },
+  "notifications": {
+    "title": "Reminders & Daily Review",
+    "description": "Configure flashcard review mode and study schedule.",
+    "enable": "Enable periodic reminder",
+    "enableDesc": "Display vocabulary review notifications at chosen time",
+    "defaultMode": "Default review mode",
+    "gentleMode": "Quick view (Gentle mode)",
+    "quizMode": "Quiz mode (Hide definitions)",
+    "time": "Reminder time",
+    "collectionPriority": "Prioritize review from collections:"
+  },
+  "account": {
+    "title": "Account & Security",
+    "email": "Login Email:",
+    "userId": "User ID:",
+    "signOut": "Sign out account",
+    "signOutConfirmTitle": "Confirm Sign Out",
+    "signOutConfirmMessage": "Are you sure you want to sign out of Mewmory on this device?",
+    "signOutButton": "Sign out"
+  },
+  "saveAll": "Save all changes",
+  "saving": "Saving settings...",
+  "saveSuccess": "Settings saved successfully!",
+  "saveError": "Error saving settings",
+  "signOutSuccess": "Signed out",
+  "signOutError": "Sign out error"
+}

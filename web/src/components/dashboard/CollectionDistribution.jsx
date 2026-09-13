@@ -6,15 +6,21 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import { useTranslation } from "react-i18next";
+import { useChartColors } from "../../hooks/useChartColors";
 
 export default function CollectionDistribution({ data = [] }) {
+  const { t } = useTranslation("dashboard");
+  const { axisStroke, tooltipBg, tooltipBorder, tooltipShadow, tooltipText, barFillSecondary } =
+    useChartColors();
+
   if (!data || data.length === 0) {
     return (
       <div className="card-taupe p-6 rounded-card flex flex-col items-center justify-center min-h-[260px] text-center">
         <h3 className="text-subheading font-display font-light text-ink mb-2">
-          Từ vựng theo bộ sưu tập
+          {t("charts.collectionDistribution")}
         </h3>
-        <p className="text-body-sm text-smoke">Chưa có bộ sưu tập nào</p>
+        <p className="text-body-sm text-smoke">{t("charts.noCollectionData")}</p>
       </div>
     );
   }
@@ -24,7 +30,7 @@ export default function CollectionDistribution({ data = [] }) {
   return (
     <div className="card-taupe p-6 rounded-card flex flex-col gap-4">
       <h3 className="text-subheading font-display font-light text-ink">
-        📁 Từ vựng theo bộ sưu tập
+        {t("charts.collectionDistribution")}
       </h3>
 
       <div className="h-60 w-full pt-2">
@@ -34,29 +40,36 @@ export default function CollectionDistribution({ data = [] }) {
             layout="vertical"
             margin={{ top: 5, right: 20, left: 20, bottom: 5 }}
           >
-            <XAxis type="number" allowDecimals={false} stroke="#a59f97" fontSize={12} />
+            <XAxis type="number" allowDecimals={false} stroke={axisStroke} fontSize={12} />
             <YAxis
               dataKey="name"
               type="category"
-              stroke="#a59f97"
+              stroke={axisStroke}
               fontSize={12}
               width={90}
               tickFormatter={(v) => (v.length > 10 ? `${v.substring(0, 10)}...` : v)}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#fdfcfc",
-                borderColor: "#ebe8e4",
+                backgroundColor: tooltipBg,
+                borderColor: tooltipBorder,
                 borderRadius: "12px",
-                boxShadow: "rgba(0, 0, 0, 0.04) 0px 2px 4px",
+                boxShadow: tooltipShadow,
                 fontSize: "13px",
+                color: tooltipText,
               }}
-              formatter={(val) => [`${val} từ`, "Số lượng"]}
+              itemStyle={{ color: tooltipText }}
+              labelStyle={{ color: tooltipText, fontWeight: 500 }}
+              formatter={(val) => [
+                t("charts.wordsCount", { count: val }),
+                t("charts.quantity"),
+              ]}
             />
-            <Bar dataKey="count" fill="#777169" radius={[0, 4, 4, 0]} maxBarSize={20} />
+            <Bar dataKey="count" fill={barFillSecondary} radius={[0, 4, 4, 0]} maxBarSize={20} />
           </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
   );
 }
+

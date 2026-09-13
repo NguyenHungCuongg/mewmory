@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../stores/auth.store";
 import { useCollectionStore } from "../stores/collection.store";
 import { useUIStore } from "../stores/ui.store";
@@ -9,8 +10,10 @@ import ConfirmDialog from "../components/common/ConfirmDialog";
 import CollectionCard from "../components/collection/CollectionCard";
 import CollectionForm from "../components/collection/CollectionForm";
 import EmptyState from "../components/common/EmptyState";
+import { IconFolder } from "../components/common/Icons";
 
 export default function CollectionsPage() {
+  const { t } = useTranslation("collection");
   const { user } = useAuthStore();
   const { items, isLoading, fetchCollections, addCollection, updateCollection, deleteCollection } =
     useCollectionStore();
@@ -42,17 +45,17 @@ export default function CollectionsPage() {
     try {
       if (editingCollection) {
         await updateCollection(editingCollection.id, formData);
-        addToast("Đã cập nhật bộ sưu tập!", "success");
+        addToast(t("toasts.updateSuccess"), "success");
       } else {
         await addCollection({
           ...formData,
           user_id: user.id,
         });
-        addToast("Đã tạo bộ sưu tập mới!", "success");
+        addToast(t("toasts.createSuccess"), "success");
       }
       setIsFormOpen(false);
     } catch (err) {
-      addToast(err.message || "Lỗi xử lý bộ sưu tập", "error");
+      addToast(err.message || t("toasts.errorAction"), "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -62,19 +65,19 @@ export default function CollectionsPage() {
     if (!deletingCollection) return;
     try {
       await deleteCollection(deletingCollection.id);
-      addToast("Đã xóa bộ sưu tập", "success");
+      addToast(t("toasts.deleteSuccess"), "success");
       setDeletingCollection(null);
     } catch (err) {
-      addToast(err.message || "Lỗi xóa bộ sưu tập", "error");
+      addToast(err.message || t("toasts.errorDelete"), "error");
     }
   };
 
   return (
     <>
       <Header
-        title="Bộ sưu tập"
+        title={t("title")}
         actions={
-          <Button onClick={handleOpenCreate}>+ Tạo bộ sưu tập</Button>
+          <Button onClick={handleOpenCreate}>{t("createCollection")}</Button>
         }
       />
 
@@ -85,12 +88,12 @@ export default function CollectionsPage() {
           </div>
         ) : items.length === 0 ? (
           <EmptyState
-            icon="📁"
-            title="Chưa có bộ sưu tập nào"
-            description="Nhóm từ vựng của bạn theo chủ đề, kỳ thi hoặc sở thích cá nhân để dễ dàng ôn tập."
+            icon={<IconFolder className="w-7 h-7 text-smoke" />}
+            title={t("empty.title")}
+            description={t("empty.description")}
             action={
               <Button onClick={handleOpenCreate}>
-                + Tạo bộ sưu tập đầu tiên
+                {t("createFirst")}
               </Button>
             }
           />
@@ -118,9 +121,9 @@ export default function CollectionsPage() {
 
       <ConfirmDialog
         isOpen={!!deletingCollection}
-        title="Xác nhận xóa bộ sưu tập"
-        message={`Bạn có chắc muốn xóa bộ sưu tập "${deletingCollection?.name}"? Các từ vựng bên trong sẽ không bị xóa.`}
-        confirmText="Xóa"
+        title={t("deleteConfirm.title")}
+        message={t("deleteConfirm.message", { name: deletingCollection?.name })}
+        confirmText={t("deleteConfirm.confirm")}
         variant="danger"
         onConfirm={handleDelete}
         onCancel={() => setDeletingCollection(null)}
@@ -128,3 +131,4 @@ export default function CollectionsPage() {
     </>
   );
 }
+

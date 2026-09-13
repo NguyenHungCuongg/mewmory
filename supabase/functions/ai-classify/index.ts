@@ -20,7 +20,13 @@ serve(async (req) => {
       });
     }
 
-    const { word, definitions_vi, existing_collections } = await req.json();
+    const {
+      word,
+      definitions_vi,
+      existing_collections,
+      provider = "gemini",
+      model,
+    } = await req.json();
 
     if (!word) {
       return new Response(JSON.stringify({ error: "Word is required" }), {
@@ -44,42 +50,135 @@ Rules:
 - Use broad, reusable topic names (Travel, Business, Technology, etc.).
 - Return ONLY valid JSON.`;
 
-    const apiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: "AI API key not configured" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+    let result: any;
+    if (provider === "gemini") {
+      result = await callGemini(prompt, model);
+    } else {
+      result = await callOpenRouter(prompt, model);
     }
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { responseMimeType: "application/json" },
-        }),
-      },
-    );
-
-    if (!response.ok) throw new Error(`AI API error: ${response.status}`);
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    const result = JSON.parse(text);
 
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  } catch (error: any) {
+    console.error("ai-classify error:", error);
+    return new Response(
+      JSON.stringify({ error: error.message || "Internal server error" }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 });
+
+function extractJSON(raw: string): any {
+  if (!raw) return null;
+  let cleaned = raw.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  const markdownMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  const textToParse = markdownMatch ? markdownMatch[1].trim() : cleaned;
+
+  try {
+    return JSON.parse(textToParse);
+  } catch {
+    const firstBrace = cleaned.indexOf("{");
+    const lastBrace = cleaned.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      const sliced = cleaned.substring(firstBrace, lastBrace + 1);
+      return JSON.parse(sliced);
+    }
+    throw new Error(`Failed to parse AI response as JSON: ${raw.slice(0, 120)}`);
+  }
+}
+
+async function callGemini(prompt: string, model?: string) {
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
+
+  const modelName = model || "gemini-3.6-flash";
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      }),
+    },
+  );
+
+  if (!response.ok) throw new Error(`AI API error: ${response.status}`);
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  return extractJSON(text);
+}
+
+async function callOpenRouter(prompt: string, model?: string) {
+  const apiKey = Deno.env.get("OPENROUTER_API_KEY");
+  if (!apiKey) throw new Error("OPENROUTER_API_KEY not set");
+
+  const primaryModel = model || "google/gemma-4-31b-it:free";
+
+  try {
+    return await executeOpenRouterRequest(apiKey, prompt, primaryModel);
+  } catch (err: any) {
+    if (primaryModel === "google/gemma-4-31b-it:free") {
+      console.warn(
+        "Gemma 4 31B error, falling back to nvidia/nemotron-3.5-lightning:free:",
+        err.message,
+      );
+      return await executeOpenRouterRequest(
+        apiKey,
+        prompt,
+        "nvidia/nemotron-3.5-lightning:free",
+      );
+    }
+    throw err;
+  }
+}
+
+async function executeOpenRouterRequest(
+  apiKey: string,
+  prompt: string,
+  modelName: string,
+) {
+  const requestBody: any = {
+    model: modelName,
+    messages: [{ role: "user", content: prompt }],
+  };
+
+  const response = await fetch(
+    "https://openrouter.ai/api/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://mewmory.app",
+        "X-Title": "Mewmory",
+      },
+      body: JSON.stringify(requestBody),
+      signal: AbortSignal.timeout(45000),
+    },
+  );
+
+  if (!response.ok) {
+    const errText = await response.text();
+    console.error(`OpenRouter error ${response.status}:`, errText);
+    throw new Error(`OpenRouter API error: ${response.status} - ${errText}`);
+  }
+
+  const data = await response.json();
+  if (data.error) {
+    console.error("OpenRouter payload error:", data.error);
+    throw new Error(
+      `OpenRouter error: ${data.error.message || JSON.stringify(data.error)}`,
+    );
+  }
+
+  const choice = data.choices?.[0];
+  const text = choice?.message?.content || choice?.message?.reasoning;
+  return extractJSON(text);
+}

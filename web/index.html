@@ -4,7 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>web</title>
+    <title>Mewmory - Vocabulary Learning</title>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("mewmory-theme");
+          if (
+            t === "dark" ||
+            (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)
+          ) {
+            document.documentElement.dataset.theme = "dark";
+          } else {
+            document.documentElement.dataset.theme = "light";
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

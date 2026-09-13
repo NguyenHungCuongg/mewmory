@@ -9,6 +9,7 @@ import { vocabularyService } from "../services/vocabulary.service";
 import { lookupService } from "../services/lookup.service";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { useDebouncedSearch } from "../hooks/useDebouncedSearch";
+import { useRateLimit } from "../hooks/useRateLimit";
 import { validateWord } from "../utils/validators";
 import Header from "../components/layout/Header";
 import Button from "../components/common/Button";
@@ -17,6 +18,7 @@ import LoadingSpinner from "../components/common/LoadingSpinner";
 import LookupResult from "../components/vocabulary/LookupResult";
 import MeaningSelector from "../components/vocabulary/MeaningSelector";
 import DuplicateWarning from "../components/vocabulary/DuplicateWarning";
+import RateLimitBadge from "../components/vocabulary/RateLimitBadge";
 import WordForm from "../components/vocabulary/WordForm";
 import { IconLightning, IconEdit } from "../components/common/Icons";
 
@@ -49,6 +51,18 @@ export default function AddWordPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [duplicateCount, setDuplicateCount] = useState(0);
   const [wordError, setWordError] = useState("");
+
+  // Rate limiting & double-click prevention
+  const {
+    isCoolingDown,
+    isRateLimited,
+    remainingRequests,
+    maxRequests,
+    resetInSeconds,
+    canExecute,
+    recordRequest,
+    triggerCooldown,
+  } = useRateLimit({ maxRequests: 15, windowMs: 60000, cooldownMs: 2000 });
 
   // Quick collection creation
   const [isCreatingCol, setIsCreatingCol] = useState(false);
@@ -165,6 +179,27 @@ export default function AddWordPage() {
       return;
     }
 
+    // Rate limiting & debounce double-click protection
+    const check = canExecute();
+    if (!check.allowed) {
+      if (check.reason === "cooling_down") {
+        addToast(t("rateLimit.toastTooFast"), "warning");
+      } else if (
+        check.reason === "rate_limited" ||
+        check.reason === "extended_cooldown"
+      ) {
+        addToast(
+          t("rateLimit.toastLimitReached", {
+            max: maxRequests,
+            seconds: check.waitSeconds || resetInSeconds,
+          }),
+          "warning",
+        );
+      }
+      return;
+    }
+
+    recordRequest();
     setIsLooking(true);
     try {
       const provider = settings?.ai_provider || "gemini";
@@ -185,7 +220,20 @@ export default function AddWordPage() {
       });
       setSelectedMeanings(selection);
     } catch (err) {
-      addToast(err.message || t("toastLookupError"), "error");
+      const errorMsg = err?.message || "";
+      const isServerRateLimit =
+        err?.status === 429 ||
+        /429|rate limit|quota|resource_exhausted/i.test(errorMsg);
+
+      if (isServerRateLimit) {
+        triggerCooldown(30);
+        addToast(
+          t("rateLimit.toastServerExhausted", { seconds: 30 }),
+          "error",
+        );
+      } else {
+        addToast(err.message || t("toastLookupError"), "error");
+      }
     } finally {
       setIsLooking(false);
     }
@@ -249,7 +297,12 @@ export default function AddWordPage() {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleLookup();
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (!isLooking && !isCoolingDown && !isRateLimited) {
+        handleLookup();
+      }
+    }
   };
 
   const manualInitialData = {
@@ -319,19 +372,51 @@ export default function AddWordPage() {
         ) : (
           <>
             {/* Word input */}
-            <div className="flex gap-3 mb-4">
-              <Input
-                id="word-input"
-                placeholder={t("searchPlaceholder")}
-                value={word}
-                onChange={(e) => setWord(e.target.value)}
-                onKeyDown={handleKeyDown}
-                error={wordError}
-                className="flex-1"
-              />
-              <Button onClick={handleLookup} disabled={isLooking || !isOnline}>
-                {isLooking ? <LoadingSpinner size="sm" /> : t("lookupButton")}
-              </Button>
+            <div className="flex flex-col gap-2 mb-4">
+              <div className="flex gap-3">
+                <Input
+                  id="word-input"
+                  placeholder={t("searchPlaceholder")}
+                  value={word}
+                  onChange={(e) => setWord(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  error={wordError}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={handleLookup}
+                  disabled={
+                    isLooking || isCoolingDown || isRateLimited || !isOnline
+                  }
+                  title={
+                    isRateLimited
+                      ? t("rateLimit.exhaustedTooltip", {
+                          max: maxRequests,
+                          seconds: resetInSeconds,
+                        })
+                      : undefined
+                  }
+                >
+                  {isLooking ? (
+                    <LoadingSpinner size="sm" />
+                  ) : isRateLimited && resetInSeconds > 0 ? (
+                    `${t("lookupButton")} (${resetInSeconds}s)`
+                  ) : (
+                    t("lookupButton")
+                  )}
+                </Button>
+              </div>
+
+              {/* Rate Limit Awareness */}
+              <div className="flex items-center justify-between px-0.5">
+                <RateLimitBadge
+                  remainingRequests={remainingRequests}
+                  maxRequests={maxRequests}
+                  isRateLimited={isRateLimited}
+                  isCoolingDown={isCoolingDown}
+                  resetInSeconds={resetInSeconds}
+                />
+              </div>
             </div>
 
             {/* Duplicate warning */}

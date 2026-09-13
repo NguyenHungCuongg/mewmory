@@ -39,6 +39,16 @@
   "toastLookupError": "Error looking up word",
   "toastSelectMeaning": "Please select at least 1 meaning",
   "toastAudioError": "Cannot play audio",
+  "rateLimit": {
+    "quota": "{{remaining}}/{{max}} lookups/min",
+    "coolingDown": "Readying...",
+    "exhausted": "Quota limit reached (wait {{seconds}}s)",
+    "exhaustedTooltip": "Reached {{max}} lookups/min limit. Please wait {{seconds}}s.",
+    "tooltip": "Maximum AI/Dictionary lookup rate limit per minute",
+    "toastTooFast": "Please wait a moment between lookup requests.",
+    "toastLimitReached": "You have reached the {{max}} lookups/min rate limit. Please try again in {{seconds}} seconds.",
+    "toastServerExhausted": "AI quota is temporarily busy. Please try again in {{seconds}} seconds."
+  },
   "duplicateWarning": {
     "singular": "entry",
     "plural": "entries",

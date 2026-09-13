@@ -39,6 +39,16 @@
   "toastLookupError": "Lỗi tra cứu từ vựng",
   "toastSelectMeaning": "Vui lòng chọn ít nhất 1 nghĩa",
   "toastAudioError": "Không thể phát audio",
+  "rateLimit": {
+    "quota": "{{remaining}}/{{max}} lượt/phút",
+    "coolingDown": "Đang sẵn sàng...",
+    "exhausted": "Hết lượt tra cứu (chờ {{seconds}}s)",
+    "exhaustedTooltip": "Đã đạt giới hạn {{max}} lượt/phút. Vui lòng đợi {{seconds}}s.",
+    "tooltip": "Hạn mức tra cứu AI/Từ điển tối đa trong 1 phút",
+    "toastTooFast": "Vui lòng đợi giây lát giữa các lần bấm tra cứu.",
+    "toastLimitReached": "Bạn đã đạt giới hạn {{max}} lượt tra cứu/phút. Vui lòng thử lại sau {{seconds}} giây.",
+    "toastServerExhausted": "Hạn mức AI tạm thời bị quá tải. Vui lòng thử lại sau {{seconds}} giây."
+  },
   "duplicateWarning": {
     "singular": "bản ghi",
     "plural": "bản ghi",

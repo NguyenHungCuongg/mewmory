@@ -44,5 +44,10 @@
   "saveSuccess": "Settings saved successfully!",
   "saveError": "Error saving settings",
   "signOutSuccess": "Signed out",
-  "signOutError": "Sign out error"
+  "signOutError": "Sign out error",
+  "about": {
+    "title": "About Mewmory",
+    "version": "Version",
+    "tagline": "Smart vocabulary learning with AI assistance and spaced repetition"
+  }
 }

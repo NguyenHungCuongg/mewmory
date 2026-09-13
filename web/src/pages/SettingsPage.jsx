@@ -360,6 +360,28 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* About Mewmory */}
+          <div className="card-taupe flex items-center gap-4">
+            <img
+              src="/mewmory_icon_192.png"
+              alt="Mewmory Logo"
+              className="w-12 h-12 rounded-2xl shadow-subtle object-contain shrink-0"
+            />
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-display font-medium text-ink text-body">
+                  Mewmory
+                </h4>
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone text-smoke">
+                  v1.0.0
+                </span>
+              </div>
+              <p className="text-caption text-smoke mt-0.5">
+                {t("about.tagline")}
+              </p>
+            </div>
+          </div>
+
           {/* Save Button Bar */}
           <div className="flex items-center justify-end gap-4 pt-4 border-t border-stone">
             <Button type="submit" disabled={isSaving}>

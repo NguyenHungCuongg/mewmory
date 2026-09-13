@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../../stores/auth.store";
 import { authService } from "../../services/auth.service";
@@ -48,11 +48,19 @@ export default function Sidebar() {
   return (
     <aside className="w-60 h-screen bg-warm-taupe border-r border-stone flex flex-col fixed left-0 top-0">
       {/* Logo */}
-      <div className="p-6 pb-4">
-        <h1 className="text-heading-sm font-display font-light tracking-tight">
+      <Link
+        to="/"
+        className="p-6 pb-4 flex items-center gap-3 group select-none hover:opacity-95 transition-opacity"
+      >
+        <img
+          src="/mewmory_icon_48.png"
+          alt="Mewmory Logo"
+          className="w-8 h-8 rounded-xl object-contain shadow-xs transition-transform group-hover:scale-105"
+        />
+        <span className="text-heading-sm font-display font-light tracking-tight text-ink">
           Mewmory
-        </h1>
-      </div>
+        </span>
+      </Link>
 
       <div className="h-px bg-stone mx-4" />
 

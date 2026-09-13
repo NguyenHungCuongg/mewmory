@@ -59,24 +59,13 @@ export default function ErrorFallbackPage({
       className="min-h-screen bg-eggshell text-ink flex items-center justify-center p-4 sm:p-6 transition-colors duration-200"
     >
       <div className="w-full max-w-lg bg-warm-taupe border border-stone rounded-card p-6 sm:p-8 shadow-subtle text-center animate-fade-in">
-        {/* Cat Illustration Icon */}
-        <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-5 rounded-full bg-stone/50 flex items-center justify-center text-graphite">
-          <svg
-            className="w-10 h-10 sm:w-12 sm:h-12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            {/* Cute cat with sad/surprised face */}
-            <path d="M12 5c.67 0 1.35.09 2 .26 1.78-2 3.5-1.76 4.5-.5.5 1.5.2 3.2-.5 4.5 1.25 1.63 1.8 3.5 1.5 5.5-.5 3-3 5-7.5 5s-7-2-7.5-5c-.3-2 .25-3.87 1.5-5.5-.7-1.3-1-3-.5-4.5 1-1.26 2.72-1.5 4.5.5.65-.17 1.33-.26 2-.26z" />
-            <circle cx="9.5" cy="13.5" r="1" fill="currentColor" />
-            <circle cx="14.5" cy="13.5" r="1" fill="currentColor" />
-            <path d="M11 16.5c.5-.5 1.5-.5 2 0" />
-            <path d="M5 14h2M17 14h2" />
-          </svg>
+        {/* Mewmory Logo */}
+        <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-5 flex items-center justify-center">
+          <img
+            src="/mewmory_icon_192.png"
+            alt="Mewmory Logo"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl shadow-subtle object-contain"
+          />
         </div>
 
         {/* Headings */}

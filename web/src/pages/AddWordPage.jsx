@@ -18,6 +18,7 @@ import LookupResult from "../components/vocabulary/LookupResult";
 import MeaningSelector from "../components/vocabulary/MeaningSelector";
 import DuplicateWarning from "../components/vocabulary/DuplicateWarning";
 import WordForm from "../components/vocabulary/WordForm";
+import { IconLightning, IconEdit } from "../components/common/Icons";
 
 export default function AddWordPage() {
   const { t } = useTranslation(["addWord", "wordForm"]);
@@ -283,7 +284,7 @@ export default function AddWordPage() {
                 : "text-smoke hover:text-ink"
             }`}
           >
-            <span>⚡</span>
+            <IconLightning className="w-4 h-4 text-current" />
             <span>{t("modes.auto")}</span>
           </button>
           <button
@@ -295,7 +296,7 @@ export default function AddWordPage() {
                 : "text-smoke hover:text-ink"
             }`}
           >
-            <span>✍️</span>
+            <IconEdit className="w-4 h-4 text-current" />
             <span>{t("modes.manual")}</span>
           </button>
         </div>
@@ -541,10 +542,10 @@ export default function AddWordPage() {
                             <span>{col.name}</span>
                             {isAiSuggested && (
                               <span
-                                className={`text-caption px-1.5 py-0.2 rounded-pill font-medium ${
+                                className={`text-caption px-1.5 py-0.2 rounded-md font-mono uppercase tracking-wider text-[10px] ${
                                   isSelected
                                     ? "bg-white/20 text-white"
-                                    : "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                                    : "bg-warm-taupe/80 text-smoke border border-stone"
                                 }`}
                                 title={t("aiBadgeTooltip")}
                               >
@@ -592,9 +593,9 @@ export default function AddWordPage() {
                               type="button"
                               onClick={() => handleCreateFromSuggestion(sName)}
                               disabled={isSubmittingCol}
-                              className="px-2.5 py-1 rounded-pill text-caption bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition-all flex items-center gap-1 cursor-pointer"
+                              className="px-2.5 py-1 rounded-pill text-caption bg-eggshell text-smoke border border-stone border-dashed hover:text-ink hover:border-graphite/40 transition-all flex items-center gap-1 cursor-pointer"
                             >
-                              <span>+ ✨ {sName}</span>
+                              <span>+ {sName}</span>
                             </button>
                           ))}
                       </div>

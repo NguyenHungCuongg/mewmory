@@ -4,11 +4,20 @@ import { useAuthStore } from "../../stores/auth.store";
 import { authService } from "../../services/auth.service";
 import { useUIStore } from "../../stores/ui.store";
 import { useThemeStore } from "../../stores/theme.store";
+import {
+  IconDashboard,
+  IconVocabulary,
+  IconFolder,
+  IconSettings,
+  IconSun,
+  IconMoon,
+  IconMonitor,
+} from "../common/Icons";
 
 const themeIcons = {
-  light: "☀️",
-  dark: "🌙",
-  system: "💻",
+  light: IconSun,
+  dark: IconMoon,
+  system: IconMonitor,
 };
 
 export default function Sidebar() {
@@ -18,14 +27,14 @@ export default function Sidebar() {
   const { theme, toggleTheme } = useThemeStore();
 
   const navItems = [
-    { to: "/", label: t("nav.dashboard"), icon: "📊" },
-    { to: "/vocabulary", label: t("nav.vocabulary"), icon: "📖" },
-    { to: "/collections", label: t("nav.collections"), icon: "📚" },
-    { to: "/settings", label: t("nav.settings"), icon: "⚙️" },
+    { to: "/", label: t("nav.dashboard"), icon: IconDashboard },
+    { to: "/vocabulary", label: t("nav.vocabulary"), icon: IconVocabulary },
+    { to: "/collections", label: t("nav.collections"), icon: IconFolder },
+    { to: "/settings", label: t("nav.settings"), icon: IconSettings },
   ];
 
   const themeLabel = t(`theme.${theme}`, { defaultValue: t("theme.system") });
-  const themeIcon = themeIcons[theme] || themeIcons.system;
+  const ThemeIcon = themeIcons[theme] || themeIcons.system;
 
   const handleSignOut = async () => {
     try {
@@ -62,8 +71,8 @@ export default function Sidebar() {
               }`
             }
           >
-            <span>{item.icon}</span>
-            {item.label}
+            <item.icon className="w-4 h-4 shrink-0 text-current opacity-80" />
+            <span>{item.label}</span>
           </NavLink>
         ))}
       </nav>
@@ -77,7 +86,7 @@ export default function Sidebar() {
           className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-body-sm text-smoke hover:text-ink hover:bg-eggshell/60 transition-colors cursor-pointer"
         >
           <span className="flex items-center gap-2.5">
-            <span>{themeIcon}</span>
+            <ThemeIcon className="w-4 h-4 shrink-0 text-smoke" />
             <span>{t("theme.label")}</span>
           </span>
           <span className="text-caption text-smoke font-medium capitalize bg-stone/50 px-2 py-0.5 rounded-full">

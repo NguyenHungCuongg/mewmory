@@ -7,7 +7,7 @@
   "searchPlaceholder": "Nhập từ tiếng Anh...",
   "lookupButton": "Lookup",
   "looking": "Đang tra cứu...",
-  "offlineTitle": "📡 Bạn đang ngoại tuyến (Offline)",
+  "offlineTitle": "Bạn đang ngoại tuyến (Offline)",
   "offlineNotice": "Tính năng tra cứu từ điển & AI cần mạng. Bạn có thể chuyển sang tự nhập thủ công để lưu từ offline.",
   "manualSwitch": "Tự nhập tay",
   "phonetic": "Phiên âm (IPA)",
@@ -21,9 +21,9 @@
   "createColButton": "Tạo",
   "cancelButton": "Hủy",
   "noCollections": "Chưa có bộ sưu tập nào. Bấm \"+ Tạo mới\" để tạo bộ sưu tập đầu tiên.",
-  "aiBadge": "✨ Gợi ý",
-  "aiBadgeTooltip": "Được AI gợi ý cho từ này",
-  "aiSuggestionsTitle": "✨ Gợi ý từ AI:",
+  "aiBadge": "Gợi ý",
+  "aiBadgeTooltip": "Được gợi ý cho từ này",
+  "aiSuggestionsTitle": "Gợi ý bộ sưu tập:",
   "clickToCreate": "(Bấm để tạo nhanh)",
   "saveCount": "Lưu ({{count}} nghĩa)",
   "saveCount_other": "Lưu ({{count}} nghĩa)",
@@ -47,8 +47,8 @@
   },
   "lookupResult": {
     "pronounce": "Phát âm",
-    "dictionary": "Dictionary ✓",
-    "ai": "AI ✓"
+    "dictionary": "Dictionary",
+    "ai": "AI"
   },
   "meaningSelector": {
     "noMeanings": "Không tìm thấy nghĩa nào.",

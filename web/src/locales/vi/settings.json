@@ -1,7 +1,7 @@
 {
   "title": "Cài đặt hệ thống",
   "appearance": {
-    "title": "🎨 Giao diện",
+    "title": "Giao diện",
     "description": "Tùy chỉnh chế độ hiển thị sáng, tối hoặc tự động theo thiết bị.",
     "light": "Sáng",
     "lightDesc": "Màu ấm sáng sủa",
@@ -11,16 +11,16 @@
     "systemDesc": "Theo hệ thống"
   },
   "ai": {
-    "title": "🤖 Cấu hình AI & Tra cứu",
+    "title": "Cấu hình AI & Tra cứu",
     "description": "Tùy chỉnh nhà cung cấp mô hình trí tuệ nhân tạo dùng để bóc tách từ và phân loại.",
     "provider": "AI Provider",
     "modelName": "Model Name",
-    "openrouterTip": "⚡ Gợi ý Model OpenRouter miễn phí:",
+    "openrouterTip": "Gợi ý model OpenRouter miễn phí:",
     "apiKeyNote": "API key: Supabase Secret (OPENROUTER_API_KEY)",
-    "gemmaRecommend": "✨ Google Gemma 4 31B (Khuyên dùng)"
+    "gemmaRecommend": "Google Gemma 4 31B (Khuyên dùng)"
   },
   "notifications": {
-    "title": "🔔 Nhắc nhở & Ôn tập hàng ngày",
+    "title": "Nhắc nhở & Ôn tập hàng ngày",
     "description": "Thiết lập chế độ hiển thị thẻ flashcard và lịch ôn tập từ vựng.",
     "enable": "Kích hoạt nhắc nhở định kỳ",
     "enableDesc": "Hiển thị thông báo ôn từ vựng theo giờ đã chọn",
@@ -31,7 +31,7 @@
     "collectionPriority": "Ưu tiên ôn tập từ các bộ sưu tập:"
   },
   "account": {
-    "title": "👤 Tài khoản & Bảo mật",
+    "title": "Tài khoản & Bảo mật",
     "email": "Email đăng nhập:",
     "userId": "User ID:",
     "signOut": "Đăng xuất tài khoản",

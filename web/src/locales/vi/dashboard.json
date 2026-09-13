@@ -3,18 +3,18 @@
   "addNewWord": "+ Thêm từ mới",
   "dailyReview": {
     "title": "Ôn tập hàng ngày",
-    "randomReview": "✨ Ôn tập ngẫu nhiên",
+    "randomReview": "Ôn tập ngẫu nhiên",
     "emptyDescription": "Chưa có từ vựng nào để ôn tập. Thêm từ mới vào sổ tay để kích hoạt Daily Review nhé!",
     "addWordNow": "+ Thêm từ ngay",
     "modes": {
       "gentle": "Xem nhanh",
       "quiz": "Quiz (Ẩn nghĩa)"
     },
-    "nextWord": "🎲 Đổi từ",
+    "nextWord": "Đổi từ",
     "nextWordTitle": "Đổi từ khác",
     "pronounce": "Phát âm",
     "noDefinition": "Chưa có định nghĩa",
-    "reveal": "👁️ Nhấn vào đây để xem nghĩa của từ"
+    "reveal": "Nhấn vào đây để xem nghĩa của từ"
   },
   "stats": {
     "totalVocab": "Tổng số từ vựng",
@@ -22,17 +22,17 @@
     "collections": "Bộ sưu tập",
     "manage": "Quản lý →",
     "newThisWeek": "Từ mới (14 ngày qua)",
-    "learning": "🔥 Đang học"
+    "learning": "Đang học"
   },
   "charts": {
-    "wordsAddedProgress": "📈 Tiến độ thêm từ (14 ngày gần nhất)",
+    "wordsAddedProgress": "Tiến độ thêm từ (14 ngày gần nhất)",
     "added": "Đã thêm",
     "wordsCount": "{{count}} từ",
     "dateLabel": "Ngày {{label}}",
-    "levelDistribution": "🎯 Phân bố theo trình độ (CEFR)",
+    "levelDistribution": "Phân bố theo trình độ (CEFR)",
     "noLevelData": "Chưa có dữ liệu phân loại",
     "level": "Cấp độ {{level}}",
-    "collectionDistribution": "📁 Từ vựng theo bộ sưu tập",
+    "collectionDistribution": "Từ vựng theo bộ sưu tập",
     "noCollectionData": "Chưa có bộ sưu tập nào",
     "quantity": "Số lượng"
   }

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Button from "../common/Button";
 import { CEFR_COLORS } from "../../utils/constants";
+import { IconVolume } from "../common/Icons";
 
 export default function DailyReviewWidget({ randomWord, onNextWord, isLoading }) {
   const { t } = useTranslation("dashboard");
@@ -103,7 +104,7 @@ export default function DailyReviewWidget({ randomWord, onNextWord, isLoading })
               className="w-9 h-9 rounded-full bg-eggshell border border-stone flex items-center justify-center hover:bg-stone/50 transition-colors cursor-pointer"
               title={t("dailyReview.pronounce")}
             >
-              🔊
+              <IconVolume className="w-4 h-4 text-graphite" />
             </button>
           )}
         </div>

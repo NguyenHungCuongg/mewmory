@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { IconVolume } from "../common/Icons";
 
 export default function LookupResult({ result, onPlayAudio }) {
   const { t } = useTranslation("addWord");
@@ -14,10 +15,10 @@ export default function LookupResult({ result, onPlayAudio }) {
           {result.audio_url && (
             <button
               onClick={() => onPlayAudio(result.audio_url)}
-              className="w-8 h-8 rounded-full bg-eggshell border border-stone flex items-center justify-center hover:bg-stone/50 transition-colors"
+              className="w-8 h-8 rounded-full bg-eggshell border border-stone flex items-center justify-center hover:bg-stone/50 transition-colors cursor-pointer"
               title={t("lookupResult.pronounce", { defaultValue: "Phát âm" })}
             >
-              🔊
+              <IconVolume className="w-4 h-4 text-graphite" />
             </button>
           )}
         </div>
@@ -27,15 +28,15 @@ export default function LookupResult({ result, onPlayAudio }) {
           </p>
         )}
       </div>
-      <div className="flex gap-2">
+      <div className="flex items-center gap-1.5">
         {result.source?.dictionary && (
-          <span className="px-2 py-0.5 bg-green-50 text-green-700 rounded-pill text-caption border border-green-200">
-            {t("lookupResult.dictionary", { defaultValue: "Dictionary ✓" })}
+          <span className="px-2 py-0.5 bg-eggshell text-smoke border border-stone rounded-md text-caption font-mono uppercase tracking-wider">
+            {t("lookupResult.dictionary", { defaultValue: "Dictionary" })}
           </span>
         )}
         {result.source?.ai && (
-          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-pill text-caption border border-blue-200">
-            {t("lookupResult.ai", { defaultValue: "AI ✓" })}
+          <span className="px-2 py-0.5 bg-eggshell text-smoke border border-stone rounded-md text-caption font-mono uppercase tracking-wider">
+            {t("lookupResult.ai", { defaultValue: "AI" })}
           </span>
         )}
       </div>

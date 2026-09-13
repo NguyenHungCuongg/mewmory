@@ -7,7 +7,7 @@
   "searchPlaceholder": "Enter English word...",
   "lookupButton": "Lookup",
   "looking": "Looking up...",
-  "offlineTitle": "📡 You are offline",
+  "offlineTitle": "You are offline",
   "offlineNotice": "Dictionary & AI lookup requires internet connection. You can switch to manual input to save words offline.",
   "manualSwitch": "Enter manually",
   "phonetic": "Phonetic (IPA)",
@@ -21,9 +21,9 @@
   "createColButton": "Create",
   "cancelButton": "Cancel",
   "noCollections": "No collections yet. Click \"+ Create new\" to create your first collection.",
-  "aiBadge": "✨ Suggested",
-  "aiBadgeTooltip": "Suggested by AI for this word",
-  "aiSuggestionsTitle": "✨ AI Suggestions:",
+  "aiBadge": "Suggested",
+  "aiBadgeTooltip": "Suggested for this word",
+  "aiSuggestionsTitle": "Suggested Collections:",
   "clickToCreate": "(Click to quick create)",
   "saveCount": "Save ({{count}} meaning)",
   "saveCount_other": "Save ({{count}} meanings)",
@@ -47,8 +47,8 @@
   },
   "lookupResult": {
     "pronounce": "Pronounce",
-    "dictionary": "Dictionary ✓",
-    "ai": "AI ✓"
+    "dictionary": "Dictionary",
+    "ai": "AI"
   },
   "meaningSelector": {
     "noMeanings": "No meanings found.",

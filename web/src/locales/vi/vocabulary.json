@@ -43,7 +43,7 @@
     "noDefinitions": "Chưa có định nghĩa nào cho từ này.",
     "collectionsTitle": "Bộ sưu tập",
     "assignCollection": "+ Gán vào bộ sưu tập",
-    "editCollection": "✏️ Chỉnh sửa",
+    "editCollection": "Chỉnh sửa",
     "noCollectionsAssigned": "Từ này chưa được gán vào bộ sưu tập nào. Nhấn \"+ Gán vào bộ sưu tập\" để phân loại.",
     "addedOn": "Thêm vào ngày: {{date}}",
     "updatedOn": "Cập nhật lần cuối: {{date}}",

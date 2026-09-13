@@ -10,6 +10,7 @@ import ConfirmDialog from "../components/common/ConfirmDialog";
 import CollectionCard from "../components/collection/CollectionCard";
 import CollectionForm from "../components/collection/CollectionForm";
 import EmptyState from "../components/common/EmptyState";
+import { IconFolder } from "../components/common/Icons";
 
 export default function CollectionsPage() {
   const { t } = useTranslation("collection");
@@ -87,7 +88,7 @@ export default function CollectionsPage() {
           </div>
         ) : items.length === 0 ? (
           <EmptyState
-            icon="📁"
+            icon={<IconFolder className="w-7 h-7 text-smoke" />}
             title={t("empty.title")}
             description={t("empty.description")}
             action={

@@ -3,18 +3,18 @@
   "addNewWord": "+ Add new word",
   "dailyReview": {
     "title": "Daily Review",
-    "randomReview": "✨ Random Review",
+    "randomReview": "Random Review",
     "emptyDescription": "No vocabulary to review yet. Add new words to your notebook to activate Daily Review!",
     "addWordNow": "+ Add word now",
     "modes": {
       "gentle": "Quick view",
       "quiz": "Quiz (Hide definition)"
     },
-    "nextWord": "🎲 Next word",
+    "nextWord": "Next word",
     "nextWordTitle": "Switch to another word",
     "pronounce": "Pronounce",
     "noDefinition": "No definition yet",
-    "reveal": "👁️ Click here to reveal word definition"
+    "reveal": "Click here to reveal word definition"
   },
   "stats": {
     "totalVocab": "Total Vocabulary",
@@ -22,17 +22,17 @@
     "collections": "Collections",
     "manage": "Manage →",
     "newThisWeek": "New Words (Last 14 days)",
-    "learning": "🔥 Learning"
+    "learning": "Learning"
   },
   "charts": {
-    "wordsAddedProgress": "📈 Words Added Progress (Last 14 days)",
+    "wordsAddedProgress": "Words Added Progress (Last 14 days)",
     "added": "Added",
     "wordsCount": "{{count}} words",
     "dateLabel": "Date {{label}}",
-    "levelDistribution": "🎯 Level Distribution (CEFR)",
+    "levelDistribution": "Level Distribution (CEFR)",
     "noLevelData": "No classification data yet",
     "level": "Level {{level}}",
-    "collectionDistribution": "📁 Vocabulary by Collection",
+    "collectionDistribution": "Vocabulary by Collection",
     "noCollectionData": "No collections yet",
     "quantity": "Count"
   }

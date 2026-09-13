@@ -43,7 +43,7 @@
     "noDefinitions": "No definitions available for this word.",
     "collectionsTitle": "Collections",
     "assignCollection": "+ Assign to collection",
-    "editCollection": "✏️ Edit",
+    "editCollection": "Edit",
     "noCollectionsAssigned": "This word has not been assigned to any collection. Click \"+ Assign to collection\" to organize.",
     "addedOn": "Added on: {{date}}",
     "updatedOn": "Last updated: {{date}}",

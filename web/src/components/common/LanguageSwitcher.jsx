@@ -21,9 +21,9 @@ export default function LanguageSwitcher() {
       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-stone bg-eggshell hover:bg-warm-taupe text-smoke hover:text-ink text-body-sm transition-colors cursor-pointer shadow-subtle-inset"
     >
       <span className="text-xs font-semibold uppercase tracking-wider text-graphite">
-        {currentLang === "vi" ? "🇻🇳 VI" : "🇬🇧 EN"}
+        {currentLang === "vi" ? "VI" : "EN"}
       </span>
-      <span className="text-caption text-ash">|</span>
+      <span className="text-caption text-ash">/</span>
       <span className="text-caption text-smoke hover:text-ink">
         {currentLang === "vi" ? "EN" : "VI"}
       </span>

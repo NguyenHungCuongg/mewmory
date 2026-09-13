@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { lookupService } from "../../services/lookup.service";
+import { IconRefresh } from "../common/Icons";
 
 export default function MeaningSelector({
   meanings = [],
@@ -308,7 +309,7 @@ export default function MeaningSelector({
                           </>
                         ) : (
                           <>
-                            <span>🔄</span>
+                            <IconRefresh className="w-3.5 h-3.5" />
                             <span>{def.definition_vi ? t("meaningSelector.retranslate") : t("meaningSelector.translate")}</span>
                           </>
                         )}

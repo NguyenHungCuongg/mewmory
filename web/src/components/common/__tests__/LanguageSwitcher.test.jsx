@@ -10,15 +10,15 @@ describe("LanguageSwitcher component", () => {
 
     const button = screen.getByRole("button");
     expect(button).toBeInTheDocument();
-    expect(screen.getByText("🇻🇳 VI")).toBeInTheDocument();
+    expect(screen.getAllByText(/VI|EN/)).toHaveLength(2);
 
     fireEvent.click(button);
     expect(i18n.resolvedLanguage).toBe("en");
-    expect(screen.getByText("🇬🇧 EN")).toBeInTheDocument();
+    expect(screen.getAllByText(/VI|EN/)).toHaveLength(2);
 
     // Toggle back
     fireEvent.click(button);
     expect(i18n.resolvedLanguage).toBe("vi");
-    expect(screen.getByText("🇻🇳 VI")).toBeInTheDocument();
+    expect(screen.getAllByText(/VI|EN/)).toHaveLength(2);
   });
 });

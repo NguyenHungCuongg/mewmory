@@ -12,6 +12,7 @@ import LoadingSpinner from "../components/common/LoadingSpinner";
 import WordCard from "../components/vocabulary/WordCard";
 import FilterBar from "../components/vocabulary/FilterBar";
 import EmptyState from "../components/common/EmptyState";
+import { IconSearch } from "../components/common/Icons";
 
 const PAGE_SIZE = 12;
 
@@ -146,7 +147,7 @@ export default function VocabularyPage() {
           </div>
         ) : items.length === 0 ? (
           <EmptyState
-            icon="🔍"
+            icon={<IconSearch className="w-7 h-7 text-smoke" />}
             title={t("empty.title")}
             description={
               searchInput || Object.keys(filters).length > 0

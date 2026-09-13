@@ -21,7 +21,7 @@ export default function CollectionCard({ collection, onEdit, onDelete }) {
               </span>
             )}
             {collection.is_ai_generated && (
-              <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800 rounded-pill text-caption font-medium">
+              <span className="px-2 py-0.5 bg-warm-taupe/60 text-smoke border border-stone rounded-md text-caption font-mono uppercase tracking-wider">
                 {t("card.ai")}
               </span>
             )}

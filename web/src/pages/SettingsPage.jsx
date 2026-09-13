@@ -11,6 +11,7 @@ import Button from "../components/common/Button";
 import Input from "../components/common/Input";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import ConfirmDialog from "../components/common/ConfirmDialog";
+import { IconSun, IconMoon, IconMonitor } from "../components/common/Icons";
 
 export default function SettingsPage() {
   const { t } = useTranslation("settings");
@@ -119,25 +120,30 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
-                { value: "light", icon: "☀️", label: t("appearance.light"), desc: t("appearance.lightDesc") },
-                { value: "dark", icon: "🌙", label: t("appearance.dark"), desc: t("appearance.darkDesc") },
-                { value: "system", icon: "💻", label: t("appearance.system"), desc: t("appearance.systemDesc") },
-              ].map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setTheme(opt.value)}
-                  className={`flex flex-col items-center text-center gap-2 p-4 rounded-xl border transition-all cursor-pointer ${
-                    theme === opt.value
-                      ? "bg-eggshell border-ink ring-2 ring-ink text-ink font-medium shadow-sm"
-                      : "bg-eggshell/40 border-stone text-smoke hover:text-ink hover:border-graphite/40"
-                  }`}
-                >
-                  <span className="text-2xl">{opt.icon}</span>
-                  <span className="text-body-sm font-medium">{opt.label}</span>
-                  <span className="text-caption text-ash">{opt.desc}</span>
-                </button>
-              ))}
+                { value: "light", icon: IconSun, label: t("appearance.light"), desc: t("appearance.lightDesc") },
+                { value: "dark", icon: IconMoon, label: t("appearance.dark"), desc: t("appearance.darkDesc") },
+                { value: "system", icon: IconMonitor, label: t("appearance.system"), desc: t("appearance.systemDesc") },
+              ].map((opt) => {
+                const Icon = opt.icon;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setTheme(opt.value)}
+                    className={`flex flex-col items-center text-center gap-2 p-4 rounded-xl border transition-all cursor-pointer ${
+                      theme === opt.value
+                        ? "bg-eggshell border-ink ring-2 ring-ink text-ink font-medium shadow-sm"
+                        : "bg-eggshell/40 border-stone text-smoke hover:text-ink hover:border-graphite/40"
+                    }`}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-stone/30 flex items-center justify-center">
+                      <Icon className="w-4 h-4 text-current" />
+                    </div>
+                    <span className="text-body-sm font-medium">{opt.label}</span>
+                    <span className="text-caption text-ash">{opt.desc}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

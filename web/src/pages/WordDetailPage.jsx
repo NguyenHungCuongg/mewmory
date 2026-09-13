@@ -12,6 +12,7 @@ import ConfirmDialog from "../components/common/ConfirmDialog";
 import WordForm from "../components/vocabulary/WordForm";
 import { CEFR_COLORS } from "../utils/constants";
 import { formatDate } from "../utils/formatters";
+import { IconVolume, IconFolder } from "../components/common/Icons";
 
 export default function WordDetailPage() {
   const { id } = useParams();
@@ -154,7 +155,7 @@ export default function WordDetailPage() {
                       className="w-9 h-9 rounded-full bg-eggshell border border-stone flex items-center justify-center hover:bg-stone/50 transition-colors cursor-pointer"
                       title={t("detail.pronounce")}
                     >
-                      🔊
+                      <IconVolume className="w-4 h-4 text-graphite" />
                     </button>
                   )}
                 </div>
@@ -249,9 +250,10 @@ export default function WordDetailPage() {
                   {collections.map((col) => (
                     <span
                       key={col.id}
-                      className="px-3 py-1 bg-eggshell border border-stone text-graphite rounded-pill text-body-sm font-medium"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-eggshell border border-stone text-graphite rounded-pill text-body-sm font-medium"
                     >
-                      📁 {col.name}
+                      <IconFolder className="w-3.5 h-3.5 text-smoke" />
+                      <span>{col.name}</span>
                     </span>
                   ))}
                 </div>

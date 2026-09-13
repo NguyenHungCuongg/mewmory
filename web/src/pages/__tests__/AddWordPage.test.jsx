@@ -225,14 +225,14 @@ describe("AddWordPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Lookup" }));
 
     await waitFor(() => {
-      // "Daily English" is in store and in AI suggestions -> should have "✨ Gợi ý"
-      expect(screen.getByText("✨ Gợi ý")).toBeInTheDocument();
+      // "Daily English" is in store and in AI suggestions -> should have "Gợi ý"
+      expect(screen.getByText("Gợi ý")).toBeInTheDocument();
       // "Travel" is suggested by AI but not yet in store -> should appear in unmatched suggestions
-      expect(screen.getByText("+ ✨ Travel")).toBeInTheDocument();
+      expect(screen.getByText("+ Travel")).toBeInTheDocument();
     });
 
-    // Test 1-click creation from AI suggestion "+ ✨ Travel"
-    const travelBtn = screen.getByText("+ ✨ Travel");
+    // Test 1-click creation from AI suggestion "+ Travel"
+    const travelBtn = screen.getByText("+ Travel");
     fireEvent.click(travelBtn);
 
     await waitFor(() => {

@@ -291,9 +291,28 @@ export default function AddWordPage() {
     }
   };
 
-  const handlePlayAudio = (url) => {
-    const audio = new Audio(url);
-    audio.play().catch(() => addToast(t("toastAudioError"), "error"));
+  const speakWithBrowser = (text) => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window && text) {
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-US";
+        window.speechSynthesis.speak(utterance);
+        return;
+      } catch {
+        // Fall through to toast error
+      }
+    }
+    addToast(t("toastAudioError"), "error");
+  };
+
+  const handlePlayAudio = (url, wordText) => {
+    if (url) {
+      const audio = new Audio(url);
+      audio.play().catch(() => speakWithBrowser(wordText || word));
+      return;
+    }
+    speakWithBrowser(wordText || word);
   };
 
   const handleKeyDown = (e) => {

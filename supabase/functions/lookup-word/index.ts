@@ -43,7 +43,6 @@ serve(async (req) => {
 
     const trimmedWord = word.trim().toLowerCase();
 
-    // Call Dictionary API + AI API in parallel
     const [dictResult, aiResult] = await Promise.allSettled([
       fetchDictionary(trimmedWord),
       fetchAI(trimmedWord, provider, model),
@@ -54,6 +53,22 @@ serve(async (req) => {
     const aiData = aiResult.status === "fulfilled" ? aiResult.value : null;
 
     if (!dictData && !aiData) {
+      const dictErr =
+        dictResult.status === "rejected"
+          ? String(dictResult.reason?.message || dictResult.reason)
+          : "null/timeout";
+      const aiErr =
+        aiResult.status === "rejected"
+          ? String(aiResult.reason?.message || aiResult.reason)
+          : aiData === null
+            ? "returned_null_or_empty"
+            : null;
+
+      console.error(`[lookup-word] All services failed for "${trimmedWord}":`, {
+        dictErr,
+        aiErr,
+      });
+
       return new Response(
         JSON.stringify({ error: "All lookup services unavailable" }),
         {
@@ -79,20 +94,26 @@ serve(async (req) => {
 });
 
 async function fetchDictionary(word: string) {
-  const response = await fetch(
-    `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
-  );
-  if (!response.ok) return null;
-  return response.json();
+  try {
+    const response = await fetch(
+      `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`,
+      { signal: AbortSignal.timeout(10000) },
+    );
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
 }
 
 async function fetchAI(word: string, provider: string, model?: string) {
-  const prompt = `You are a vocabulary analysis assistant. Given an English word, provide CEFR level, usage register, and suggested collection topics in JSON format. Also provide basic English definitions in case the word is not in standard dictionaries.
+  const prompt = `You are a vocabulary analysis assistant. Given an English word, provide its accurate international phonetic alphabet (IPA) transcription, CEFR level, usage register, and suggested collection topics in JSON format. Also provide basic English definitions in case the word is not in standard dictionaries.
 
 Word: "${word}"
 
 Return a JSON object with:
 {
+  "phonetic": "<accurate IPA transcription with slashes, e.g. /həˈloʊ/ or /rɪˈzɪl.jənt/>",
   "cefr_level": "A1|A2|B1|B2|C1|C2",
   "usage_register": "formal|informal|slang|neutral|vulgar|technical",
   "suggested_collections": ["<topic categories like Travel, Business, Daily Life, etc.>"],
@@ -106,6 +127,7 @@ Return a JSON object with:
 }
 
 Rules:
+- phonetic MUST be an accurate IPA transcription enclosed in slashes (e.g. /rɪˈzɪl.jənt/).
 - CEFR level should reflect the word's general difficulty for English learners.
 - usage_register must be one of: formal, informal, slang, neutral, vulgar, technical.
 - suggested_collections should contain 1-3 broad topic names.
@@ -123,23 +145,60 @@ async function callGemini(prompt: string, model?: string) {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY not set");
 
-  const modelName = model || "gemini-3.6-flash";
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
-      }),
-    },
-  );
+  const requestedModel = model || "gemini-3.5-flash-lite";
+  const candidateModels = [
+    requestedModel,
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-3.6-flash",
+  ].filter((m, idx, arr) => arr.indexOf(m) === idx);
 
-  if (!response.ok) throw new Error(`Gemini API error: ${response.status}`);
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  return extractJSON(text);
+  let lastError: any = null;
+  for (const modelName of candidateModels) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: "application/json" },
+          }),
+          signal: AbortSignal.timeout(15000),
+        },
+      );
+
+      if (!response.ok) {
+        const errText = await response.text().catch(() => "");
+        lastError = new Error(
+          `Gemini API error (${modelName}): ${response.status} - ${errText}`,
+        );
+        // If high demand (503), rate limit (429), or discontinued model (404), try fallback model
+        if (
+          response.status === 503 ||
+          response.status === 429 ||
+          response.status === 404
+        ) {
+          console.warn(
+            `Gemini model ${modelName} returned ${response.status}. Trying next fallback model...`,
+          );
+          continue;
+        }
+        throw lastError;
+      }
+
+      const data = await response.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const parsed = extractJSON(text);
+      if (parsed) return parsed;
+    } catch (err: any) {
+      lastError = err;
+      console.warn(`Gemini model ${modelName} failed:`, err?.message || err);
+    }
+  }
+
+  throw lastError || new Error("All Gemini candidate models failed");
 }
 
 function extractJSON(raw: string): any {
@@ -208,7 +267,7 @@ async function executeOpenRouterRequest(
         "X-Title": "Mewmory",
       },
       body: JSON.stringify(requestBody),
-      signal: AbortSignal.timeout(45000),
+      signal: AbortSignal.timeout(15000),
     },
   );
 
@@ -245,7 +304,10 @@ function mergeResults(word: string, dictData: any, aiData: any) {
   if (dictData && Array.isArray(dictData) && dictData.length > 0) {
     const entry = dictData[0];
     result.phonetic =
-      entry.phonetic || entry.phonetics?.find((p: any) => p.text)?.text || null;
+      entry.phonetic ||
+      entry.phonetics?.find((p: any) => p.text)?.text ||
+      aiData?.phonetic ||
+      null;
     result.audio_url =
       entry.phonetics?.find((p: any) => p.audio)?.audio || null;
 
@@ -266,6 +328,7 @@ function mergeResults(word: string, dictData: any, aiData: any) {
     }
   } else if (aiData?.definitions && Array.isArray(aiData.definitions)) {
     // Fallback if Dictionary API returned no entry
+    result.phonetic = aiData.phonetic || null;
     const grouped: Record<string, any[]> = {};
     for (const d of aiData.definitions) {
       const pos = d.part_of_speech || "other";
@@ -286,6 +349,8 @@ function mergeResults(word: string, dictData: any, aiData: any) {
         })),
       });
     }
+  } else if (aiData?.phonetic) {
+    result.phonetic = aiData.phonetic;
   }
 
   return result;

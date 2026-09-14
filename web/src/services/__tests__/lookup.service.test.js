@@ -30,6 +30,24 @@ describe("lookupService", () => {
       expect(result).toEqual(mockData);
     });
 
+    it("returns lookup result including fallback phonetic and audio_url", async () => {
+      const mockData = {
+        word: "resilient",
+        phonetic: "/rɪˈzɪl.jənt/",
+        audio_url: null,
+        meanings: [],
+        source: { dictionary: true, ai: true },
+      };
+      supabase.functions.invoke.mockResolvedValueOnce({
+        data: mockData,
+        error: null,
+      });
+
+      const result = await lookupService.lookupWord("resilient");
+      expect(result.phonetic).toBe("/rɪˈzɪl.jənt/");
+      expect(result.source.ai).toBe(true);
+    });
+
     it("throws error when edge function returns error", async () => {
       supabase.functions.invoke.mockResolvedValueOnce({
         data: null,

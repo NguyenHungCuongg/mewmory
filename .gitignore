@@ -20,3 +20,7 @@ supabase/.temp/
 *.log
 .DS_Store
 Thumbs.db
+
+#Development documents
+dev-docs/
+docs/superpowers/

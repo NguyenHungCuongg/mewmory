@@ -11,5 +11,16 @@
   "delete": "Delete",
   "edit": "Edit",
   "close": "Close",
-  "confirm": "Confirm"
+  "confirm": "Confirm",
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "subtitle": "Mewmory encountered an unexpected error while rendering this page. Don't worry, your vocabulary data and learning progress are safe locally.",
+    "tryAgain": "Try again",
+    "reloadPage": "Reload page",
+    "goHome": "Go to Home",
+    "showDetails": "Show technical details",
+    "hideDetails": "Hide technical details",
+    "copyDetails": "Copy error details",
+    "copied": "Copied!"
+  }
 }

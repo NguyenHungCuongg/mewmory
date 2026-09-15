@@ -98,7 +98,12 @@ export default function LoginPage() {
 
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8 flex flex-col items-center">
+          <img
+            src="/mewmory_icon_192.png"
+            alt="Mewmory Logo"
+            className="w-16 h-16 rounded-2xl shadow-subtle mb-4 object-contain"
+          />
           <h1 className="text-display font-display font-light tracking-tight">
             Mewmory
           </h1>

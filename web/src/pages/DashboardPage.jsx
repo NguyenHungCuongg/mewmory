@@ -44,19 +44,14 @@ export default function DashboardPage() {
     if (!user) return;
     setIsLoading(true);
     try {
-      const [
-        count,
-        collectionsData,
-        daily,
-        levels,
-        colDist,
-      ] = await Promise.all([
-        statisticsService.getTotalCount(user.id),
-        collectionService.getAll(user.id),
-        statisticsService.getDailyWordCount(user.id, 14),
-        statisticsService.getLevelDistribution(user.id),
-        statisticsService.getCollectionDistribution(user.id),
-      ]);
+      const [count, collectionsData, daily, levels, colDist] =
+        await Promise.all([
+          statisticsService.getTotalCount(user.id),
+          collectionService.getAll(user.id),
+          statisticsService.getDailyWordCount(user.id, 14),
+          statisticsService.getLevelDistribution(user.id),
+          statisticsService.getCollectionDistribution(user.id),
+        ]);
 
       setTotalVocab(count);
       setTotalCollections(collectionsData.items.length);

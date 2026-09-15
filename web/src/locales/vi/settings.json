@@ -44,5 +44,10 @@
   "saveSuccess": "Đã lưu cài đặt thành công!",
   "saveError": "Lỗi lưu cài đặt",
   "signOutSuccess": "Đã đăng xuất",
-  "signOutError": "Lỗi đăng xuất"
+  "signOutError": "Lỗi đăng xuất",
+  "about": {
+    "title": "Thông tin ứng dụng",
+    "version": "Phiên bản",
+    "tagline": "Ứng dụng học từ vựng thông minh kết hợp AI & Spaced Repetition"
+  }
 }

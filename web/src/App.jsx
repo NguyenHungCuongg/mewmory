@@ -14,6 +14,7 @@ import SettingsPage from "./pages/SettingsPage";
 import Toast from "./components/common/Toast";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import MainLayout from "./components/layout/MainLayout";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -27,15 +28,6 @@ function ProtectedRoute({ children }) {
   }
 
   return isAuthenticated ? children : <Navigate to="/login" replace />;
-}
-
-function PlaceholderPage({ title }) {
-  return (
-    <div className="p-8">
-      <h1 className="text-heading font-display font-light">{title}</h1>
-      <p className="text-smoke mt-2">Coming soon...</p>
-    </div>
-  );
 }
 
 export default function App() {
@@ -63,42 +55,44 @@ export default function App() {
   }, [setUser, setSession, setLoading]);
 
   return (
-    <BrowserRouter>
-      {/* Toast container */}
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
+    <ErrorBoundary>
+      <BrowserRouter>
+        {/* Toast container */}
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
 
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/vocabulary" element={<VocabularyPage />} />
-          <Route path="/vocabulary/add" element={<AddWordPage />} />
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
           <Route
-            path="/vocabulary/:id"
-            element={<WordDetailPage />}
-          />
-          <Route path="/collections" element={<CollectionsPage />} />
-          <Route
-            path="/collections/:id"
-            element={<CollectionDetailPage />}
-          />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+            element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/vocabulary" element={<VocabularyPage />} />
+            <Route path="/vocabulary/add" element={<AddWordPage />} />
+            <Route
+              path="/vocabulary/:id"
+              element={<WordDetailPage />}
+            />
+            <Route path="/collections" element={<CollectionsPage />} />
+            <Route
+              path="/collections/:id"
+              element={<CollectionDetailPage />}
+            />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }

@@ -1,0 +1,28 @@
+{
+  "short_name": "Mewmory",
+  "name": "Mewmory - Vocabulary Learning",
+  "description": "Smart vocabulary learning app with AI-powered lookups and spaced repetition",
+  "icons": [
+    {
+      "src": "/mewmory_icon_48.png",
+      "type": "image/png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "/mewmory_icon_192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mewmory_icon_512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#141413",
+  "display": "standalone"
+}

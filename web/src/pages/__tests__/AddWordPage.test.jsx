@@ -65,6 +65,7 @@ describe("AddWordPage", () => {
       addCollection: mockAddCollection,
     });
     useUIStore.setState({ toasts: [] });
+    sessionStorage.clear();
   });
 
   const renderComponent = () =>
@@ -326,6 +327,63 @@ describe("AddWordPage", () => {
         ],
         [],
       );
+    });
+  });
+
+  it("displays rate limit awareness badge in auto mode", () => {
+    renderComponent();
+    expect(screen.getByTestId("rate-limit-normal")).toBeInTheDocument();
+    expect(screen.getByText(/15\/15/)).toBeInTheDocument();
+  });
+
+  it("prevents double-click by disabling lookup button after click", async () => {
+    lookupService.lookupWord.mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve({ word: "cat" }), 50)),
+    );
+
+    renderComponent();
+
+    fireEvent.change(screen.getByPlaceholderText("Nhập từ tiếng Anh..."), {
+      target: { value: "cat" },
+    });
+
+    const lookupBtn = screen.getByRole("button", { name: "Lookup" });
+    fireEvent.click(lookupBtn);
+
+    // Immediately after click, button should be disabled (either looking or cooling down)
+    expect(lookupBtn).toBeDisabled();
+
+    // Trying to click again while disabled should not trigger extra calls
+    fireEvent.click(lookupBtn);
+
+    await waitFor(() => {
+      expect(lookupService.lookupWord).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("handles 429 rate limit error gracefully and displays cooldown toast", async () => {
+    lookupService.lookupWord.mockRejectedValueOnce(
+      new Error("429 Too Many Requests: Rate limit exceeded"),
+    );
+
+    renderComponent();
+
+    fireEvent.change(screen.getByPlaceholderText("Nhập từ tiếng Anh..."), {
+      target: { value: "overloaded" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Lookup" }));
+
+    await waitFor(() => {
+      const toasts = useUIStore.getState().toasts;
+      expect(toasts.length).toBeGreaterThan(0);
+      expect(
+        toasts.some(
+          (t) =>
+            t.type === "error" &&
+            (t.message.includes("quá tải") || t.message.includes("quota")),
+        ),
+      ).toBe(true);
     });
   });
 });

@@ -57,14 +57,15 @@
   --shadow-subtle-inset: rgba(255, 255, 255, 0.04) 0px 0px 0px 0.5px inset;
 }
 
-
 @layer base {
   body {
     background-color: var(--color-eggshell);
     color: var(--color-ink);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
   }
 
   /* Display headings use Inter 300 (substitute for Waldenburg) */

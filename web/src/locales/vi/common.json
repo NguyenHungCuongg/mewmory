@@ -11,5 +11,16 @@
   "delete": "Xóa",
   "edit": "Chỉnh sửa",
   "close": "Đóng",
-  "confirm": "Xác nhận"
+  "confirm": "Xác nhận",
+  "errorBoundary": {
+    "title": "Đã xảy ra sự cố ngoài ý muốn",
+    "subtitle": "Mewmory gặp lỗi trong quá trình hiển thị giao diện. Đừng lo, dữ liệu từ vựng và tiến độ học của bạn vẫn được lưu an toàn trong máy.",
+    "tryAgain": "Thử lại",
+    "reloadPage": "Tải lại trang",
+    "goHome": "Về trang chủ",
+    "showDetails": "Xem chi tiết kỹ thuật",
+    "hideDetails": "Ẩn chi tiết kỹ thuật",
+    "copyDetails": "Sao chép mã lỗi",
+    "copied": "Đã sao chép!"
+  }
 }

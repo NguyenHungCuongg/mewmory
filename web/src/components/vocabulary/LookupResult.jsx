@@ -12,11 +12,13 @@ export default function LookupResult({ result, onPlayAudio }) {
           <h3 className="text-heading-sm font-display font-light">
             {result.word}
           </h3>
-          {result.audio_url && (
+          {(result.audio_url || result.word) && (
             <button
-              onClick={() => onPlayAudio(result.audio_url)}
+              type="button"
+              onClick={() => onPlayAudio(result.audio_url, result.word)}
               className="w-8 h-8 rounded-full bg-eggshell border border-stone flex items-center justify-center hover:bg-stone/50 transition-colors cursor-pointer"
               title={t("lookupResult.pronounce", { defaultValue: "Phát âm" })}
+              aria-label={t("lookupResult.pronounce", { defaultValue: "Phát âm" })}
             >
               <IconVolume className="w-4 h-4 text-graphite" />
             </button>

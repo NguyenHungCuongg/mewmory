@@ -17,7 +17,7 @@ export default function WordCard({ vocabulary }) {
         {/* Top row: Word and Badges */}
         <div className="flex items-start justify-between gap-2 mb-1">
           <div className="min-w-0 flex-1">
-            <h3 className="text-xl font-medium text-ink tracking-tight group-hover:text-black transition-colors truncate">
+            <h3 className="text-xl font-medium text-ink tracking-tight group-hover:text-black dark:group-hover:text-white transition-colors truncate">
               {vocabulary.word}
             </h3>
             {vocabulary.phonetic && (
@@ -91,4 +91,3 @@ export default function WordCard({ vocabulary }) {
     </Link>
   );
 }
-

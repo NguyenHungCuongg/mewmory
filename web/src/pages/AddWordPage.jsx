@@ -639,17 +639,19 @@ export default function AddWordPage() {
                             className={`px-3 py-1.5 rounded-pill text-body-sm transition-all flex items-center gap-1.5 cursor-pointer ${
                               isSelected
                                 ? "bg-ink text-eggshell font-medium"
-                                : "bg-eggshell text-smoke border border-stone hover:border-graphite/40"
+                                : isAiSuggested
+                                  ? "bg-eggshell text-ink border border-amber-400/40 hover:border-amber-500/60 shadow-2xs"
+                                  : "bg-eggshell text-smoke border border-stone hover:border-graphite/40"
                             }`}
                           >
                             <span>{isSelected ? "✓ " : "+ "}</span>
                             <span>{col.name}</span>
                             {isAiSuggested && (
                               <span
-                                className={`text-caption px-1.5 py-0.2 rounded-md font-mono uppercase tracking-wider text-[10px] ${
+                                className={`text-caption px-1.5 py-0.5 rounded-pill font-mono uppercase tracking-wider text-[10px] font-semibold border transition-colors ${
                                   isSelected
-                                    ? "bg-white/20 text-white"
-                                    : "bg-warm-taupe/80 text-smoke border border-stone"
+                                    ? "bg-amber-400/25 text-amber-300 border-amber-300/40 dark:bg-amber-500/20 dark:text-amber-900 dark:border-amber-600/30"
+                                    : "bg-amber-500/10 text-amber-700 border-amber-500/30 dark:bg-amber-400/15 dark:text-amber-300 dark:border-amber-400/30 shadow-2xs"
                                 }`}
                                 title={t("aiBadgeTooltip")}
                               >

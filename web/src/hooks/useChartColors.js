@@ -17,5 +17,8 @@ export function useChartColors() {
     barFillPrimary: isDark ? "#f0f0ee" : "#0b0b0b",
     barFillSecondary: isDark ? "#8c8c87" : "#60605c",
     legendText: isDark ? "#c8c8c4" : "#30302e",
+
+    barHoverPrimary: isDark ? "#f4f4f2" : "#30302e",
+    tooltipCursor: isDark ? "rgba(255, 255, 255, 0.08)" : "#e6e6e3",
   };
 }

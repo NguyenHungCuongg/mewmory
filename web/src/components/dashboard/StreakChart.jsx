@@ -11,8 +11,17 @@ import { useChartColors } from "../../hooks/useChartColors";
 
 export default function StreakChart({ data = [] }) {
   const { t } = useTranslation("dashboard");
-  const { axisStroke, axisLine, tooltipBg, tooltipBorder, tooltipText, tooltipShadow, barFillPrimary } =
-    useChartColors();
+  const {
+    axisStroke,
+    axisLine,
+    tooltipBg,
+    tooltipBorder,
+    tooltipText,
+    tooltipShadow,
+    barFillPrimary,
+    barHoverPrimary,
+    tooltipCursor,
+  } = useChartColors();
 
   if (!data || data.length === 0) return null;
 
@@ -26,7 +35,10 @@ export default function StreakChart({ data = [] }) {
 
       <div className="h-56 w-full pt-2">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <BarChart
+            data={data}
+            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+          >
             <XAxis
               dataKey="date"
               stroke={axisStroke}
@@ -42,6 +54,7 @@ export default function StreakChart({ data = [] }) {
               axisLine={{ stroke: axisLine }}
             />
             <Tooltip
+              cursor={{ fill: tooltipCursor }}
               contentStyle={{
                 backgroundColor: tooltipBg,
                 borderColor: tooltipBorder,
@@ -52,7 +65,10 @@ export default function StreakChart({ data = [] }) {
               }}
               itemStyle={{ color: tooltipText }}
               labelStyle={{ color: tooltipText, fontWeight: 500 }}
-              formatter={(val) => [t("charts.wordsCount", { count: val }), t("charts.added")]}
+              formatter={(val) => [
+                t("charts.wordsCount", { count: val }),
+                t("charts.added"),
+              ]}
               labelFormatter={(label) => t("charts.dateLabel", { label })}
             />
             <Bar
@@ -60,6 +76,7 @@ export default function StreakChart({ data = [] }) {
               fill={barFillPrimary}
               radius={[4, 4, 0, 0]}
               maxBarSize={32}
+              activeBar={{ fill: barHoverPrimary }}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -67,4 +84,3 @@ export default function StreakChart({ data = [] }) {
     </div>
   );
 }
-

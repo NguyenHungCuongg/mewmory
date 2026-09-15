@@ -24,3 +24,6 @@ Thumbs.db
 #Development documents
 dev-docs/
 docs/superpowers/
+
+# Git Worktrees
+.worktrees/

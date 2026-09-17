@@ -1,16 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../stores/auth.store";
 import { useCollectionStore } from "../stores/collection.store";
 import { useSettingsStore } from "../stores/settings.store";
-import { useUIStore } from "../stores/ui.store";
-import { vocabularyService } from "../services/vocabulary.service";
-import { lookupService } from "../services/lookup.service";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
-import { useDebouncedSearch } from "../hooks/useDebouncedSearch";
-import { useRateLimit } from "../hooks/useRateLimit";
-import { validateWord } from "../utils/validators";
+import { useWordLookup } from "../hooks/useWordLookup";
+import { useWordSave } from "../hooks/useWordSave";
 import Header from "../components/layout/Header";
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
@@ -20,6 +16,7 @@ import MeaningSelector from "../components/vocabulary/MeaningSelector";
 import DuplicateWarning from "../components/vocabulary/DuplicateWarning";
 import RateLimitBadge from "../components/vocabulary/RateLimitBadge";
 import WordForm from "../components/vocabulary/WordForm";
+import CollectionSelector from "../components/vocabulary/CollectionSelector";
 import { IconLightning, IconEdit } from "../components/common/Icons";
 
 export default function AddWordPage() {
@@ -27,12 +24,16 @@ export default function AddWordPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const defaultColId = searchParams.get("collectionId");
+
   const { user } = useAuthStore();
   const { settings, fetchSettings } = useSettingsStore();
-  const { items: collections, fetchCollections, addCollection } =
-    useCollectionStore();
-  const addToast = useUIStore((s) => s.addToast);
+  const { items: collections, fetchCollections } = useCollectionStore();
   const { isOnline } = useOnlineStatus();
+
+  const [mode, setMode] = useState("auto"); // "auto" | "manual"
+  const [selectedColIds, setSelectedColIds] = useState(
+    defaultColId ? [defaultColId] : [],
+  );
 
   useEffect(() => {
     if (user?.id && !settings) {
@@ -40,285 +41,42 @@ export default function AddWordPage() {
     }
   }, [user, settings, fetchSettings]);
 
-  const [mode, setMode] = useState("auto"); // "auto" | "manual"
-  const [word, setWord] = useState("");
-  const [lookupResult, setLookupResult] = useState(null);
-  const [selectedMeanings, setSelectedMeanings] = useState({});
-  const [selectedColIds, setSelectedColIds] = useState(
-    defaultColId ? [defaultColId] : [],
-  );
-  const [isLooking, setIsLooking] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [duplicateCount, setDuplicateCount] = useState(0);
-  const [wordError, setWordError] = useState("");
-
-  // Rate limiting & double-click prevention
-  const {
-    isCoolingDown,
-    isRateLimited,
-    remainingRequests,
-    maxRequests,
-    resetInSeconds,
-    canExecute,
-    recordRequest,
-    triggerCooldown,
-  } = useRateLimit({ maxRequests: 15, windowMs: 60000, cooldownMs: 2000 });
-
-  // Quick collection creation
-  const [isCreatingCol, setIsCreatingCol] = useState(false);
-  const [newColName, setNewColName] = useState("");
-  const [isSubmittingCol, setIsSubmittingCol] = useState(false);
-
-  // Manual field overrides
-  const [editFields, setEditFields] = useState({
-    phonetic: "",
-    cefr_level: "",
-    usage_register: "",
-  });
-
-  const handleQuickCreateCollection = async (e) => {
-    if (e) e.preventDefault();
-    if (!user || !newColName.trim() || isSubmittingCol) return;
-    setIsSubmittingCol(true);
-    try {
-      const newCol = await addCollection({
-        user_id: user.id,
-        name: newColName.trim(),
-      });
-      if (newCol?.id) {
-        setSelectedColIds((prev) => [...prev, newCol.id]);
-      }
-      setNewColName("");
-      setIsCreatingCol(false);
-      addToast(
-        t("toastColCreated", { name: newCol?.name || newColName }),
-        "success",
-      );
-    } catch (err) {
-      addToast(err.message || t("toastColError"), "error");
-    } finally {
-      setIsSubmittingCol(false);
-    }
-  };
-
-  const handleCreateFromSuggestion = async (suggestedName) => {
-    if (!user || isSubmittingCol) return;
-    setIsSubmittingCol(true);
-    try {
-      const newCol = await addCollection({
-        user_id: user.id,
-        name: suggestedName.trim(),
-        is_ai_generated: true,
-      });
-      if (newCol?.id) {
-        setSelectedColIds((prev) => [...prev, newCol.id]);
-      }
-      addToast(t("toastColCreated", { name: suggestedName }), "success");
-    } catch (err) {
-      addToast(err.message || t("toastColError"), "error");
-    } finally {
-      setIsSubmittingCol(false);
-    }
-  };
-
-  const handleManualSave = async ({
-    vocabulary,
-    definitions,
-    collectionIds,
-  }) => {
-    if (!user) return;
-    setIsSaving(true);
-    try {
-      await vocabularyService.create(
-        {
-          ...vocabulary,
-          user_id: user.id,
-        },
-        definitions,
-        collectionIds,
-      );
-      addToast(t("toastSuccess"), "success");
-      navigate(defaultColId ? `/collections/${defaultColId}` : "/vocabulary");
-    } catch (err) {
-      addToast(err.message || t("toastSaveError"), "error");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const debouncedWord = useDebouncedSearch(word, 300);
-
-  // Fetch collections
   useEffect(() => {
     if (user) {
       fetchCollections(user.id);
     }
   }, [user, fetchCollections]);
 
-  // Check for duplicates on debounced word change
-  useEffect(() => {
-    if (debouncedWord && user) {
-      vocabularyService
-        .checkDuplicate(user.id, debouncedWord)
-        .then(({ count }) => setDuplicateCount(count));
-    } else {
-      setDuplicateCount(0);
-    }
-  }, [debouncedWord, user]);
+  // Word save logic & selected meanings
+  const {
+    selectedMeanings,
+    setSelectedMeanings,
+    isSaving,
+    autoSelectAllMeanings,
+    handleSave,
+    handleManualSave,
+  } = useWordSave({ defaultColId });
 
-  const handleLookup = async () => {
-    const validation = validateWord(word);
-    if (!validation.valid) {
-      setWordError(validation.error);
-      return;
-    }
-    setWordError("");
-
-    if (!isOnline) {
-      addToast(t("toastNetworkRequired"), "error");
-      return;
-    }
-
-    // Rate limiting & debounce double-click protection
-    const check = canExecute();
-    if (!check.allowed) {
-      if (check.reason === "cooling_down") {
-        addToast(t("rateLimit.toastTooFast"), "warning");
-      } else if (
-        check.reason === "rate_limited" ||
-        check.reason === "extended_cooldown"
-      ) {
-        addToast(
-          t("rateLimit.toastLimitReached", {
-            max: maxRequests,
-            seconds: check.waitSeconds || resetInSeconds,
-          }),
-          "warning",
-        );
-      }
-      return;
-    }
-
-    recordRequest();
-    setIsLooking(true);
-    try {
-      const provider = settings?.ai_provider || "gemini";
-      const model = settings?.ai_model || undefined;
-      const result = await lookupService.lookupWord(word, provider, model);
-      setLookupResult(result);
-      setEditFields({
-        phonetic: result.phonetic || "",
-        cefr_level: result.meanings?.[0]?.cefr_level || "",
-        usage_register: result.meanings?.[0]?.usage_register || "",
-      });
-      // Auto-select all meanings
-      const selection = {};
-      result.meanings?.forEach((m, mIdx) => {
-        m.definitions?.forEach((_, dIdx) => {
-          selection[`${mIdx}-${dIdx}`] = { meaningIdx: mIdx, defIdx: dIdx };
-        });
-      });
-      setSelectedMeanings(selection);
-    } catch (err) {
-      const errorMsg = err?.message || "";
-      const isServerRateLimit =
-        err?.status === 429 ||
-        /429|rate limit|quota|resource_exhausted/i.test(errorMsg);
-
-      if (isServerRateLimit) {
-        triggerCooldown(30);
-        addToast(
-          t("rateLimit.toastServerExhausted", { seconds: 30 }),
-          "error",
-        );
-      } else {
-        addToast(err.message || t("toastLookupError"), "error");
-      }
-    } finally {
-      setIsLooking(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!user || Object.keys(selectedMeanings).length === 0) {
-      addToast(t("toastSelectMeaning"), "error");
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      // Group selected definitions by meaning (part_of_speech)
-      const groupedByMeaning = {};
-      for (const [key, { meaningIdx, defIdx }] of Object.entries(
-        selectedMeanings,
-      )) {
-        if (!groupedByMeaning[meaningIdx]) groupedByMeaning[meaningIdx] = [];
-        groupedByMeaning[meaningIdx].push(defIdx);
-      }
-
-      // Create one vocabulary entry per part_of_speech
-      for (const [mIdxStr, defIndices] of Object.entries(groupedByMeaning)) {
-        const mIdx = parseInt(mIdxStr);
-        const meaning = lookupResult.meanings[mIdx];
-        if (!meaning) continue;
-
-        const vocabData = {
-          user_id: user.id,
-          word: lookupResult.word || word.trim(),
-          phonetic: editFields.phonetic || lookupResult.phonetic || null,
-          audio_url: lookupResult.audio_url || null,
-          part_of_speech: meaning.part_of_speech || null,
-          cefr_level: editFields.cefr_level || meaning.cefr_level || null,
-          usage_register:
-            editFields.usage_register || meaning.usage_register || null,
-        };
-
-        const definitions = defIndices
-          .map((dIdx) => meaning.definitions?.[dIdx])
-          .filter(Boolean);
-
-        if (definitions.length > 0) {
-          await vocabularyService.create(vocabData, definitions, selectedColIds);
-        }
-      }
-
-      addToast(t("toastSaved"), "success");
-      navigate(defaultColId ? `/collections/${defaultColId}` : "/vocabulary");
-    } catch (err) {
-      addToast(err.message || t("toastSaveError"), "error");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const speakWithBrowser = (text) => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window && text) {
-      try {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "en-US";
-        window.speechSynthesis.speak(utterance);
-        return;
-      } catch {
-        // Fall through to toast error
-      }
-    }
-    addToast(t("toastAudioError"), "error");
-  };
-
-  const handlePlayAudio = (url, wordText) => {
-    if (url) {
-      const audio = new Audio(url);
-      audio.play().catch(() => speakWithBrowser(wordText || word));
-      return;
-    }
-    speakWithBrowser(wordText || word);
-  };
+  // Word lookup logic & related states
+  const {
+    word,
+    setWord,
+    wordError,
+    lookupResult,
+    setLookupResult,
+    isLooking,
+    editFields,
+    setEditFields,
+    rateLimit,
+    duplicateCount,
+    handleLookup,
+    handlePlayAudio,
+  } = useWordLookup({ onLookupSuccess: autoSelectAllMeanings });
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (!isLooking && !isCoolingDown && !isRateLimited) {
+      if (!isLooking && !rateLimit.isCoolingDown && !rateLimit.isRateLimited) {
         handleLookup();
       }
     }
@@ -403,23 +161,26 @@ export default function AddWordPage() {
                   className="flex-1"
                 />
                 <Button
-                  onClick={handleLookup}
+                  onClick={() => handleLookup()}
                   disabled={
-                    isLooking || isCoolingDown || isRateLimited || !isOnline
+                    isLooking ||
+                    rateLimit.isCoolingDown ||
+                    rateLimit.isRateLimited ||
+                    !isOnline
                   }
                   title={
-                    isRateLimited
+                    rateLimit.isRateLimited
                       ? t("rateLimit.exhaustedTooltip", {
-                          max: maxRequests,
-                          seconds: resetInSeconds,
+                          max: rateLimit.maxRequests,
+                          seconds: rateLimit.resetInSeconds,
                         })
                       : undefined
                   }
                 >
                   {isLooking ? (
                     <LoadingSpinner size="sm" />
-                  ) : isRateLimited && resetInSeconds > 0 ? (
-                    `${t("lookupButton")} (${resetInSeconds}s)`
+                  ) : rateLimit.isRateLimited && rateLimit.resetInSeconds > 0 ? (
+                    `${t("lookupButton")} (${rateLimit.resetInSeconds}s)`
                   ) : (
                     t("lookupButton")
                   )}
@@ -429,11 +190,11 @@ export default function AddWordPage() {
               {/* Rate Limit Awareness */}
               <div className="flex items-center justify-between px-0.5">
                 <RateLimitBadge
-                  remainingRequests={remainingRequests}
-                  maxRequests={maxRequests}
-                  isRateLimited={isRateLimited}
-                  isCoolingDown={isCoolingDown}
-                  resetInSeconds={resetInSeconds}
+                  remainingRequests={rateLimit.remainingRequests}
+                  maxRequests={rateLimit.maxRequests}
+                  isRateLimited={rateLimit.isRateLimited}
+                  isCoolingDown={rateLimit.isCoolingDown}
+                  resetInSeconds={rateLimit.resetInSeconds}
                 />
               </div>
             </div>
@@ -445,9 +206,7 @@ export default function AddWordPage() {
             {!isOnline && (
               <div className="mt-4 p-4 bg-amber-50 border border-amber-200 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800 rounded-card text-body-sm text-amber-800 flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-medium">
-                    {t("offlineTitle")}
-                  </p>
+                  <p className="font-medium">{t("offlineTitle")}</p>
                   <p className="text-caption mt-0.5 opacity-90">
                     {t("offlineNotice")}
                   </p>
@@ -562,174 +321,43 @@ export default function AddWordPage() {
                 </div>
 
                 {/* Collection assignment */}
-                <div className="card-taupe flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-subheading font-display font-light text-ink">
-                      {t("collectionsTitle")}
-                    </h3>
-                    {!isCreatingCol && (
-                      <button
-                        type="button"
-                        onClick={() => setIsCreatingCol(true)}
-                        className="text-caption text-ink font-medium px-2.5 py-1 rounded-pill border border-stone bg-eggshell hover:bg-warm-taupe transition-colors flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>{t("createCollection")}</span>
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-caption text-smoke">
-                    {t("collectionsDesc")}
-                  </p>
+                <CollectionSelector
+                  collections={collections}
+                  selectedColIds={selectedColIds}
+                  onChangeSelectedColIds={setSelectedColIds}
+                  suggestedCollections={lookupResult.suggested_collections}
+                />
 
-                  {/* Inline quick create collection form */}
-                  {isCreatingCol && (
-                    <form
-                      onSubmit={handleQuickCreateCollection}
-                      className="flex items-center gap-2 p-2 rounded-card bg-eggshell border border-stone"
-                    >
-                      <input
-                        type="text"
-                        value={newColName}
-                        onChange={(e) => setNewColName(e.target.value)}
-                        placeholder={t("newColPlaceholder")}
-                        autoFocus
-                        className="flex-1 px-3 py-1 text-body-sm bg-warm-taupe/40 dark:bg-stone/30 border border-stone rounded outline-none text-ink placeholder:text-ash focus:border-ink"
-                      />
-                      <Button
-                        size="sm"
-                        type="submit"
-                        disabled={!newColName.trim() || isSubmittingCol}
-                      >
-                        {isSubmittingCol ? "..." : t("createColButton")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        type="button"
-                        onClick={() => {
-                          setIsCreatingCol(false);
-                          setNewColName("");
-                        }}
-                      >
-                        {t("cancelButton")}
-                      </Button>
-                    </form>
-                  )}
-
-                  {collections.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {collections.map((col) => {
-                        const isSelected = selectedColIds.includes(col.id);
-                        const isAiSuggested =
-                          lookupResult?.suggested_collections?.some(
-                            (sc) => sc.toLowerCase() === col.name.toLowerCase(),
-                          );
-
-                        return (
-                          <button
-                            key={col.id}
-                            type="button"
-                            onClick={() =>
-                              setSelectedColIds((prev) =>
-                                isSelected
-                                  ? prev.filter((id) => id !== col.id)
-                                  : [...prev, col.id],
-                              )
-                            }
-                            className={`px-3 py-1.5 rounded-pill text-body-sm transition-all flex items-center gap-1.5 cursor-pointer ${
-                              isSelected
-                                ? "bg-ink text-eggshell font-medium"
-                                : isAiSuggested
-                                  ? "bg-eggshell text-ink border border-amber-400/40 hover:border-amber-500/60 shadow-2xs"
-                                  : "bg-eggshell text-smoke border border-stone hover:border-graphite/40"
-                            }`}
-                          >
-                            <span>{isSelected ? "✓ " : "+ "}</span>
-                            <span>{col.name}</span>
-                            {isAiSuggested && (
-                              <span
-                                className={`text-caption px-1.5 py-0.5 rounded-pill font-mono uppercase tracking-wider text-[10px] font-semibold border transition-colors ${
-                                  isSelected
-                                    ? "bg-amber-400/25 text-amber-300 border-amber-300/40 dark:bg-amber-500/20 dark:text-amber-900 dark:border-amber-600/30"
-                                    : "bg-amber-500/10 text-amber-700 border-amber-500/30 dark:bg-amber-400/15 dark:text-amber-300 dark:border-amber-400/30 shadow-2xs"
-                                }`}
-                                title={t("aiBadgeTooltip")}
-                              >
-                                {t("aiBadge")}
-                              </span>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    !isCreatingCol && (
-                      <p className="text-caption text-ash italic">
-                        {t("noCollections")}
-                      </p>
-                    )
-                  )}
-
-                  {/* AI Suggested Collections that don't exist yet */}
-                  {lookupResult?.suggested_collections?.filter(
-                    (sName) =>
-                      !collections.some(
-                        (c) =>
-                          c.name.toLowerCase() === sName.trim().toLowerCase(),
-                      ),
-                  )?.length > 0 && (
-                    <div className="pt-2 border-t border-stone/60 flex flex-col gap-1.5">
-                      <span className="text-caption text-smoke flex items-center gap-1">
-                        <span>{t("aiSuggestionsTitle")}</span>
-                        <span className="text-ash">{t("clickToCreate")}</span>
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {lookupResult.suggested_collections
-                          .filter(
-                            (sName) =>
-                              !collections.some(
-                                (c) =>
-                                  c.name.toLowerCase() ===
-                                  sName.trim().toLowerCase(),
-                              ),
-                          )
-                          .map((sName) => (
-                            <button
-                              key={sName}
-                              type="button"
-                              onClick={() => handleCreateFromSuggestion(sName)}
-                              disabled={isSubmittingCol}
-                              className="px-2.5 py-1 rounded-pill text-caption bg-eggshell text-smoke border border-stone border-dashed hover:text-ink hover:border-graphite/40 transition-all flex items-center gap-1 cursor-pointer"
-                            >
-                              <span>+ {sName}</span>
-                            </button>
-                          ))}
-                      </div>
-                    </div>
-                  )}
+                {/* Save */}
+                <div className="flex justify-end gap-3 pt-4 border-t border-stone">
+                  <Button
+                    variant="secondary"
+                    onClick={() => navigate("/vocabulary")}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      handleSave({
+                        lookupResult,
+                        editFields,
+                        selectedColIds,
+                        word,
+                      })
+                    }
+                    disabled={
+                      isSaving || Object.keys(selectedMeanings).length === 0
+                    }
+                  >
+                    {isSaving
+                      ? t("saving")
+                      : t("saveCount", {
+                          count: Object.keys(selectedMeanings).length,
+                        })}
+                  </Button>
                 </div>
-
-            {/* Save */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-stone">
-              <Button
-                variant="secondary"
-                onClick={() => navigate("/vocabulary")}
-              >
-                {t("cancel")}
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={
-                  isSaving || Object.keys(selectedMeanings).length === 0
-                }
-              >
-                {isSaving
-                  ? t("saving")
-                  : t("saveCount", { count: Object.keys(selectedMeanings).length })}
-              </Button>
-            </div>
-          </div>
-        )}
+              </div>
+            )}
           </>
         )}
       </div>

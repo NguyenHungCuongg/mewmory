@@ -1,30 +1,64 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:mewmory/main.dart';
+import 'package:mewmory/app.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('MewmoryApp launches and displays AppShell with 4 bottom tabs',
+      (WidgetTester tester) async {
+    // Create a router with auth redirect disabled for pure shell testing
+    final testRouter = createRouter(
+      initialLocation: '/dashboard',
+      enableAuthRedirect: false,
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MewmoryApp(router: testRouter),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Verify initial route shows Trang chủ
+    expect(find.text('Trang chủ'), findsWidgets);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify 4 bottom navigation items are present
+    expect(find.text('Trang chủ'), findsWidgets);
+    expect(find.text('Từ vựng'), findsOneWidget);
+    expect(find.text('Bộ sưu tập'), findsOneWidget);
+    expect(find.text('Cài đặt'), findsOneWidget);
+
+    // Switch to 'Từ vựng' tab
+    await tester.tap(find.text('Từ vựng'));
+    await tester.pumpAndSettle();
+    expect(find.text('/vocabulary'), findsOneWidget);
+
+    // Switch to 'Bộ sưu tập' tab
+    await tester.tap(find.text('Bộ sưu tập'));
+    await tester.pumpAndSettle();
+    expect(find.text('/collections'), findsOneWidget);
+
+    // Switch to 'Cài đặt' tab
+    await tester.tap(find.text('Cài đặt'));
+    await tester.pumpAndSettle();
+    expect(find.text('/settings'), findsOneWidget);
+  });
+
+  testWidgets('MewmoryApp redirects to login when auth redirect is active without session',
+      (WidgetTester tester) async {
+    final testRouter = createRouter(
+      initialLocation: '/dashboard',
+      enableAuthRedirect: true,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MewmoryApp(router: testRouter),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Because Supabase is not logged in / no session, redirects to /login
+    expect(find.text('Đăng nhập'), findsWidgets);
+    expect(find.text('/login'), findsOneWidget);
   });
 }

@@ -52,8 +52,17 @@ function translateMessage(rawMessage) {
     return "Mật khẩu phải có ít nhất 6 ký tự.";
   }
 
-  if (lower.includes("rate limit") || lower.includes("too many requests")) {
+  if (
+    lower.includes("rate limit") ||
+    lower.includes("too many requests") ||
+    lower.includes("over_email_send_rate_limit") ||
+    lower.includes("email rate limit exceeded")
+  ) {
     return "Quá nhiều yêu cầu. Vui lòng thử lại sau giây lát.";
+  }
+
+  if (lower.includes("database error saving new user")) {
+    return "Lỗi cơ sở dữ liệu khi tạo tài khoản. Vui lòng thử lại sau.";
   }
 
   if (

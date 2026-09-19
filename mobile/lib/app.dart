@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/theme.dart';
+import 'pages/login_page.dart';
+import 'pages/register_page.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -58,18 +60,12 @@ GoRouter createRouter({
       GoRoute(
         path: '/login',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const PlaceholderPage(
-          title: 'Đăng nhập',
-          route: '/login',
-        ),
+        builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
         path: '/register',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const PlaceholderPage(
-          title: 'Đăng ký',
-          route: '/register',
-        ),
+        builder: (context, state) => const RegisterPage(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

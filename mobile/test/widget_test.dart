@@ -59,6 +59,6 @@ void main() {
 
     // Because Supabase is not logged in / no session, redirects to /login
     expect(find.text('Đăng nhập'), findsWidgets);
-    expect(find.text('/login'), findsOneWidget);
+    expect(find.text('Đăng nhập với Google'), findsOneWidget);
   });
 }

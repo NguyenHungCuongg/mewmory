@@ -7,6 +7,7 @@ import 'pages/add_word_page.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
 import 'pages/vocabulary_list_page.dart';
+import 'pages/word_detail_page.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -101,9 +102,8 @@ GoRouter createRouter({
                   GoRoute(
                     path: ':id',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (context, state) => PlaceholderPage(
-                      title: 'Chi tiết từ vựng',
-                      route: '/vocabulary/${state.pathParameters['id']}',
+                    builder: (context, state) => WordDetailPage(
+                      id: state.pathParameters['id']!,
                     ),
                   ),
                 ],

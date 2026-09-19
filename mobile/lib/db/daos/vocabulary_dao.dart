@@ -190,6 +190,16 @@ class VocabularyDao extends DatabaseAccessor<AppDatabase>
     return list.isNotEmpty ? list.first : null;
   }
 
+  Stream<VocabularyWithDefinitions?> watchById(String id) {
+    final query = select(vocabularies)
+      ..where((v) => v.id.equals(id) & v.isDeleted.equals(false));
+    return query.watchSingleOrNull().asyncMap((vocab) async {
+      if (vocab == null) return null;
+      final list = await _loadDefinitionsAndCollections([vocab]);
+      return list.isNotEmpty ? list.first : null;
+    });
+  }
+
   Future<void> upsertVocabulary(VocabulariesCompanion entry) async {
     await into(vocabularies).insertOnConflictUpdate(entry);
   }

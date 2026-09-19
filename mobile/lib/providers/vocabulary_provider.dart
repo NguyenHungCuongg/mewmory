@@ -157,3 +157,9 @@ final vocabularyListProvider =
     ascending: filters.ascending,
   );
 });
+
+final vocabularyDetailProvider =
+    StreamProvider.family<db.VocabularyWithDefinitions?, String>((ref, id) {
+  final vocabService = ref.watch(vocabularyServiceProvider);
+  return vocabService.watchById(id);
+});

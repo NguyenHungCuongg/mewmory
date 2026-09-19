@@ -67,6 +67,11 @@ class VocabularyService {
     return await _db.vocabularyDao.getById(id);
   }
 
+  /// Watch single vocabulary by ID reactively from local Drift cache
+  Stream<db.VocabularyWithDefinitions?> watchById(String id) {
+    return _db.vocabularyDao.watchById(id);
+  }
+
   /// Search vocabulary by keyword (matches word or English/Vietnamese definitions)
   Future<List<db.VocabularyWithDefinitions>> search(
     String userId,

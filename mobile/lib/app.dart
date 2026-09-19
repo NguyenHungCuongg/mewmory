@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/theme.dart';
+import 'pages/add_word_page.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
 import 'pages/vocabulary_list_page.dart';
@@ -95,10 +96,7 @@ GoRouter createRouter({
                   GoRoute(
                     path: 'add',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (context, state) => const PlaceholderPage(
-                      title: 'Thêm từ mới',
-                      route: '/vocabulary/add',
-                    ),
+                    builder: (context, state) => const AddWordPage(),
                   ),
                   GoRoute(
                     path: ':id',

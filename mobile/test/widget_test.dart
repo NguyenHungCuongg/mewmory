@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mewmory/app.dart';
@@ -30,7 +31,7 @@ void main() {
     // Switch to 'Từ vựng' tab
     await tester.tap(find.text('Từ vựng'));
     await tester.pumpAndSettle();
-    expect(find.text('/vocabulary'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
 
     // Switch to 'Bộ sưu tập' tab
     await tester.tap(find.text('Bộ sưu tập'));

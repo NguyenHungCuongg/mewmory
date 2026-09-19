@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/theme.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
+import 'pages/vocabulary_list_page.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -89,10 +90,7 @@ GoRouter createRouter({
             routes: [
               GoRoute(
                 path: '/vocabulary',
-                builder: (context, state) => const PlaceholderPage(
-                  title: 'Từ vựng',
-                  route: '/vocabulary',
-                ),
+                builder: (context, state) => const VocabularyListPage(),
                 routes: [
                   GoRoute(
                     path: 'add',

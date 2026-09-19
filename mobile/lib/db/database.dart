@@ -13,6 +13,10 @@ import 'daos/vocabulary_dao.dart';
 import 'daos/collection_dao.dart';
 import 'daos/stats_dao.dart';
 
+export 'daos/vocabulary_dao.dart';
+export 'daos/collection_dao.dart';
+export 'daos/stats_dao.dart';
+
 part 'database.g.dart';
 
 @DriftDatabase(

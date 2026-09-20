@@ -36,6 +36,16 @@ describe("getAuthErrorMessage", () => {
     expect(
       getAuthErrorMessage({ message: "Rate limit exceeded" })
     ).toBe("Quá nhiều yêu cầu. Vui lòng thử lại sau giây lát.");
+
+    expect(
+      getAuthErrorMessage({ message: "over_email_send_rate_limit: email rate limit exceeded" })
+    ).toBe("Quá nhiều yêu cầu. Vui lòng thử lại sau giây lát.");
+  });
+
+  it("translates database error saving new user", () => {
+    expect(
+      getAuthErrorMessage({ message: "Database error saving new user" })
+    ).toBe("Lỗi cơ sở dữ liệu khi tạo tài khoản. Vui lòng thử lại sau.");
   });
 
   it("falls back to raw message for unhandled errors", () => {

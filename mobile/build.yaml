@@ -1,0 +1,10 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          store_date_time_values_as_text: true
+      riverpod_generator:
+        enabled: false
+      custom_lint:
+        enabled: false

@@ -14,13 +14,24 @@ export const syncEngine = {
       const { id, table_name, record_id, operation, payload } = entry;
 
       try {
+        let pushPayload = payload;
+        if (table_name === "user_settings" && payload) {
+          const { is_deleted, created_at, notification_collection_ids, ...rest } = payload;
+          pushPayload = {
+            ...rest,
+            ...(notification_collection_ids !== undefined && rest.notification_collections === undefined
+              ? { notification_collections: notification_collection_ids }
+              : {}),
+          };
+        }
+
         if (operation === "CREATE") {
-          const { error } = await supabase.from(table_name).upsert(payload);
+          const { error } = await supabase.from(table_name).upsert(pushPayload);
           if (error) throw error;
         } else if (operation === "UPDATE") {
           const { error } = await supabase
             .from(table_name)
-            .update(payload)
+            .update(pushPayload)
             .eq("id", record_id);
           if (error) throw error;
         } else if (operation === "DELETE") {

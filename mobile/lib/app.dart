@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/theme.dart';
+import 'l10n/app_localizations.dart';
+import 'providers/locale_provider.dart';
+import 'providers/theme_provider.dart';
 import 'pages/add_word_page.dart';
 import 'pages/collection_detail_page.dart';
 import 'pages/collections_page.dart';
@@ -147,16 +151,24 @@ GoRouter createRouter({
 
 final GoRouter appRouter = createRouter();
 
-class MewmoryApp extends StatelessWidget {
+class MewmoryApp extends ConsumerWidget {
   final GoRouter? router;
 
   const MewmoryApp({super.key, this.router});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
+
     return MaterialApp.router(
       title: 'Mewmory',
       theme: MewTheme.light,
+      darkTheme: MewTheme.dark,
+      themeMode: themeMode,
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       routerConfig: router ?? appRouter,
       debugShowCheckedModeBanner: false,
     );

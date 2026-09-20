@@ -21,6 +21,8 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
@@ -30,14 +32,14 @@ class EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: MewColors.warmTaupe,
+                color: colors.warmTaupe,
                 shape: BoxShape.circle,
-                border: Border.all(color: MewColors.stone, width: 1),
+                border: Border.all(color: colors.stone, width: 1),
               ),
               child: Icon(
                 icon,
                 size: 40,
-                color: MewColors.smoke,
+                color: colors.smoke,
               ),
             ),
             const SizedBox(height: 20),
@@ -46,7 +48,7 @@ class EmptyState extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: MewColors.ink,
+                color: colors.ink,
               ),
               textAlign: TextAlign.center,
             ),
@@ -56,7 +58,7 @@ class EmptyState extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: MewColors.smoke,
+                color: colors.smoke,
                 height: 1.4,
               ),
               textAlign: TextAlign.center,

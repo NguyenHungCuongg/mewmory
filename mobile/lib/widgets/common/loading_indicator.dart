@@ -15,13 +15,15 @@ class LoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
+
     return Center(
       child: SizedBox(
         width: size,
         height: size,
         child: CircularProgressIndicator(
           strokeWidth: strokeWidth,
-          valueColor: AlwaysStoppedAnimation<Color>(color ?? MewColors.ink),
+          valueColor: AlwaysStoppedAnimation<Color>(color ?? colors.ink),
         ),
       ),
     );

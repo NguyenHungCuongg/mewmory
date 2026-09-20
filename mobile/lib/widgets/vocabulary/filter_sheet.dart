@@ -12,10 +12,11 @@ class FilterSheet extends ConsumerStatefulWidget {
   const FilterSheet({super.key});
 
   static Future<void> show(BuildContext context) {
+    final colors = context.mewColors;
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: MewColors.eggshell,
+      backgroundColor: colors.eggshell,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -80,6 +81,8 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
+
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
       minChildSize: 0.5,
@@ -94,7 +97,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: MewColors.stone,
+                color: colors.stone,
                 borderRadius: BorderRadius.circular(9999),
               ),
             ),
@@ -111,7 +114,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                     style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: MewColors.ink,
+                      color: colors.ink,
                     ),
                   ),
                   TextButton(
@@ -121,14 +124,14 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: MewColors.smoke,
+                        color: colors.smoke,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            const Divider(color: MewColors.stone, height: 1),
+            Divider(color: colors.stone, height: 1),
 
             // Filter Options Body
             Expanded(
@@ -258,6 +261,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
   }
 
   Widget _buildSectionTitle(String title) {
+    final colors = context.mewColors;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Text(
@@ -265,7 +269,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
         style: GoogleFonts.inter(
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          color: MewColors.ink,
+          color: colors.ink,
         ),
       ),
     );
@@ -276,6 +280,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
     required bool selected,
     required VoidCallback onTap,
   }) {
+    final colors = context.mewColors;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       dense: true,
@@ -284,11 +289,11 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
         style: GoogleFonts.inter(
           fontSize: 14,
           fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-          color: selected ? MewColors.ink : MewColors.graphite,
+          color: selected ? colors.ink : colors.graphite,
         ),
       ),
       trailing: selected
-          ? const Icon(Icons.check_circle_rounded, color: MewColors.ink, size: 20)
+          ? Icon(Icons.check_circle_rounded, color: colors.ink, size: 20)
           : null,
       onTap: onTap,
     );

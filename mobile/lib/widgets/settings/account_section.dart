@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../config/theme.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../common/mew_button.dart';
 import '../common/mew_card.dart';
@@ -41,12 +42,14 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
     if (newName.isEmpty) return;
 
     setState(() => _isUpdatingName = true);
+    final colors = context.mewColors;
     try {
       await ref.read(authServiceProvider).updateDisplayName(newName);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã cập nhật tên hiển thị'),
+          SnackBar(
+            content: const Text('Đã cập nhật tên hiển thị'),
+            backgroundColor: colors.ink,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -56,7 +59,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Lỗi khi cập nhật: $e'),
-            backgroundColor: MewColors.error,
+            backgroundColor: colors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -69,28 +72,38 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
   }
 
   Future<void> _handleSignOut() async {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+    final isVi = (l10n?.localeName ?? 'vi') == 'vi';
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor: MewColors.eggshell,
+        backgroundColor: colors.warmTaupe,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Đăng xuất',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          isVi ? 'Đăng xuất' : 'Sign Out',
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: colors.ink),
         ),
         content: Text(
-          'Bạn có chắc chắn muốn đăng xuất khỏi Mewmory? Dữ liệu ngoại tuyến trên thiết bị vẫn được bảo lưu an toàn.',
-          style: GoogleFonts.inter(color: MewColors.smoke),
+          l10n?.signOutConfirm ??
+              'Bạn có chắc chắn muốn đăng xuất khỏi Mewmory? Dữ liệu ngoại tuyến trên thiết bị vẫn được bảo lưu an toàn.',
+          style: GoogleFonts.inter(color: colors.smoke),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: const Text('Hủy', style: TextStyle(color: MewColors.smoke)),
+            child: Text(
+              isVi ? 'Hủy' : 'Cancel',
+              style: TextStyle(color: colors.smoke),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
-            child: const Text('Đăng xuất',
-                style: TextStyle(color: MewColors.error)),
+            child: Text(
+              isVi ? 'Đăng xuất' : 'Sign Out',
+              style: TextStyle(color: colors.error),
+            ),
           ),
         ],
       ),
@@ -107,7 +120,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Lỗi khi đăng xuất: $e'),
-              backgroundColor: MewColors.error,
+              backgroundColor: colors.error,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -120,9 +133,11 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final email = user?.email ?? 'Chưa xác định';
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
 
     return MewCard(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -132,23 +147,23 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: MewColors.eggshell,
+                  color: colors.eggshell,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: MewColors.stone),
+                  border: Border.all(color: colors.stone),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.person_outline_rounded,
                   size: 20,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
               ),
               const SizedBox(width: 10),
               Text(
-                'Tài khoản người dùng',
+                l10n?.accountTitle ?? 'Tài khoản người dùng',
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
               ),
             ],
@@ -160,9 +175,9 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: MewColors.eggshell,
+              color: colors.eggshell,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: MewColors.stone),
+              border: Border.all(color: colors.stone),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +186,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
                   'Email đăng nhập',
                   style: GoogleFonts.inter(
                     fontSize: 11,
-                    color: MewColors.ash,
+                    color: colors.ash,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -180,7 +195,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: MewColors.ink,
+                    color: colors.ink,
                   ),
                 ),
               ],
@@ -195,7 +210,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
               Expanded(
                 child: MewTextField(
                   controller: _nameController,
-                  label: 'Tên hiển thị',
+                  label: l10n?.displayName ?? 'Tên hiển thị',
                   hintText: 'Nhập tên hiển thị...',
                 ),
               ),
@@ -214,7 +229,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
           // Sign Out Button
           MewButton.outlined(
             label: 'Đăng xuất',
-            icon: const Icon(Icons.logout_rounded, size: 18, color: MewColors.error),
+            icon: Icon(Icons.logout_rounded, size: 18, color: colors.error),
             onPressed: _handleSignOut,
           ),
         ],

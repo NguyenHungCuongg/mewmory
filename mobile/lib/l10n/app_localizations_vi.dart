@@ -319,7 +319,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get aiModel => 'Mô hình AI';
 
   @override
-  String get accountTitle => 'Tài khoản';
+  String get accountTitle => 'Tài khoản người dùng';
 
   @override
   String get appVersion => 'Phiên bản ứng dụng';

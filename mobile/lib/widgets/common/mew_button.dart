@@ -38,6 +38,10 @@ class MewButton extends StatelessWidget {
     final colors = context.mewColors;
     final isFilled = variant == MewButtonVariant.filled;
     final isEnabled = onPressed != null && !isLoading;
+    final isCompact = height < 44;
+    final verticalPadding = isCompact ? 0.0 : (height <= 46 ? 8.0 : 14.0);
+    final horizontalPadding = isCompact ? 16.0 : 24.0;
+    final fontSize = isCompact ? 13.0 : 14.0;
 
     final child = isLoading
         ? SizedBox(
@@ -61,7 +65,7 @@ class MewButton extends StatelessWidget {
               Text(
                 label,
                 style: GoogleFonts.inter(
-                  fontSize: 14,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w500,
                   color: isFilled ? colors.eggshell : colors.ink,
                   letterSpacing: 0.14,
@@ -73,8 +77,13 @@ class MewButton extends StatelessWidget {
     final buttonStyle = ButtonStyle(
       elevation: const WidgetStatePropertyAll(0),
       shape: const WidgetStatePropertyAll(StadiumBorder()),
-      padding: const WidgetStatePropertyAll(
-        EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      minimumSize: const WidgetStatePropertyAll(Size.zero),
+      tapTargetSize: isCompact ? MaterialTapTargetSize.shrinkWrap : null,
+      padding: WidgetStatePropertyAll(
+        EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: verticalPadding,
+        ),
       ),
       backgroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {

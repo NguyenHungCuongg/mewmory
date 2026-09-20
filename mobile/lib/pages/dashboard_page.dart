@@ -7,6 +7,7 @@ import '../config/theme.dart';
 import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
 import '../providers/stats_provider.dart';
+import '../widgets/common/language_switcher.dart';
 import '../widgets/dashboard/daily_review_card.dart';
 import '../widgets/dashboard/stats_summary_card.dart';
 
@@ -87,10 +88,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final weekCountAsync = ref.watch(wordsLearnedThisWeekProvider(userId));
     final distributionAsync = ref.watch(levelDistributionProvider(userId));
 
+    final colors = context.mewColors;
+
     return Scaffold(
-      backgroundColor: MewColors.eggshell,
+      backgroundColor: colors.eggshell,
       appBar: AppBar(
-        backgroundColor: MewColors.eggshell,
+        backgroundColor: colors.eggshell,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
@@ -99,13 +102,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             fontSize: 24,
             fontWeight: FontWeight.w300,
             letterSpacing: -0.48,
-            color: MewColors.ink,
+            color: colors.ink,
           ),
         ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: LanguageSwitcher(),
+          ),
+        ],
       ),
       body: RefreshIndicator(
-        color: MewColors.ink,
-        backgroundColor: MewColors.eggshell,
+        color: colors.ink,
+        backgroundColor: colors.eggshell,
         onRefresh: () => _handleRefresh(userId),
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),

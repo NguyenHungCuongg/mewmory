@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../config/theme.dart';
 import '../../db/daos/vocabulary_dao.dart';
+import '../../l10n/app_localizations.dart';
 import '../common/mew_card.dart';
 import '../common/mew_chip.dart';
 
@@ -21,6 +22,8 @@ class WordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
     final vocab = item.vocabulary;
     final firstDef =
         item.definitions.isNotEmpty ? item.definitions.first : null;
@@ -41,7 +44,7 @@ class WordCard extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
               ),
               if (vocab.phonetic != null && vocab.phonetic!.isNotEmpty) ...[
@@ -51,7 +54,7 @@ class WordCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
-                    color: MewColors.ash,
+                    color: colors.ash,
                   ),
                 ),
               ],
@@ -59,8 +62,8 @@ class WordCard extends StatelessWidget {
               if (vocab.cefrLevel != null && vocab.cefrLevel!.isNotEmpty) ...[
                 MewChip(
                   label: vocab.cefrLevel!,
-                  customBgColor: MewColors.ink,
-                  customTextColor: MewColors.eggshell,
+                  customBgColor: colors.ink,
+                  customTextColor: colors.eggshell,
                 ),
                 const SizedBox(width: 6),
               ],
@@ -82,7 +85,7 @@ class WordCard extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: MewColors.graphite,
+                color: colors.graphite,
                 height: 1.4,
               ),
               maxLines: 2,
@@ -100,7 +103,7 @@ class WordCard extends StatelessWidget {
                 fontSize: 12,
                 fontStyle: FontStyle.italic,
                 fontWeight: FontWeight.w400,
-                color: MewColors.smoke,
+                color: colors.smoke,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -119,10 +122,10 @@ class WordCard extends StatelessWidget {
           children: [
             SlidableAction(
               onPressed: (_) => onDelete!(),
-              backgroundColor: MewColors.error,
-              foregroundColor: MewColors.eggshell,
+              backgroundColor: colors.error,
+              foregroundColor: colors.eggshell,
               icon: Icons.delete_outline_rounded,
-              label: 'Xóa',
+              label: l10n?.delete ?? 'Xóa',
               borderRadius: BorderRadius.circular(20),
             ),
           ],

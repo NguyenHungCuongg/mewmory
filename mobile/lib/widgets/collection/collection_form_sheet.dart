@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../config/theme.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/collection.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/services_provider.dart';
@@ -21,10 +22,11 @@ class CollectionFormSheet extends ConsumerStatefulWidget {
     BuildContext context, {
     Collection? collection,
   }) {
+    final colors = context.mewColors;
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: MewColors.eggshell,
+      backgroundColor: colors.eggshell,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -113,6 +115,8 @@ class _CollectionFormSheetState extends ConsumerState<CollectionFormSheet> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -133,7 +137,7 @@ class _CollectionFormSheetState extends ConsumerState<CollectionFormSheet> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: MewColors.stone,
+                  color: colors.stone,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -142,11 +146,13 @@ class _CollectionFormSheetState extends ConsumerState<CollectionFormSheet> {
 
             // Header title
             Text(
-              _isEditMode ? 'Chỉnh sửa bộ sưu tập' : 'Tạo bộ sưu tập mới',
+              _isEditMode
+                  ? (l10n?.editCollectionTitle ?? 'Chỉnh sửa bộ sưu tập')
+                  : (l10n?.createCollectionTitle ?? 'Tạo bộ sưu tập mới'),
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: MewColors.ink,
+                color: colors.ink,
               ),
             ),
             const SizedBox(height: 16),
@@ -155,17 +161,17 @@ class _CollectionFormSheetState extends ConsumerState<CollectionFormSheet> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: MewColors.error.withValues(alpha: 0.1),
+                  color: colors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: MewColors.error.withValues(alpha: 0.3),
+                    color: colors.error.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Text(
                   _errorMessage!,
                   style: GoogleFonts.inter(
                     fontSize: 13,
-                    color: MewColors.error,
+                    color: colors.error,
                   ),
                 ),
               ),
@@ -175,11 +181,11 @@ class _CollectionFormSheetState extends ConsumerState<CollectionFormSheet> {
             // Collection Name Field
             MewTextField(
               controller: _nameController,
-              label: 'Tên bộ sưu tập',
+              label: l10n?.collectionName ?? 'Tên bộ sưu tập',
               hintText: 'Ví dụ: Business English, IELTS Band 7...',
               validator: (val) {
                 if (val == null || val.trim().isEmpty) {
-                  return 'Vui lòng nhập tên bộ sưu tập';
+                  return l10n?.requiredField ?? 'Vui lòng nhập tên bộ sưu tập';
                 }
                 return null;
               },
@@ -189,7 +195,7 @@ class _CollectionFormSheetState extends ConsumerState<CollectionFormSheet> {
             // Collection Description Field
             MewTextField(
               controller: _descController,
-              label: 'Mô tả (tùy chọn)',
+              label: l10n?.collectionDesc ?? 'Mô tả (tùy chọn)',
               hintText: 'Ghi chú về mục đích hoặc chủ đề của bộ sưu tập...',
               maxLines: 3,
             ),
@@ -200,14 +206,16 @@ class _CollectionFormSheetState extends ConsumerState<CollectionFormSheet> {
               children: [
                 Expanded(
                   child: MewButton.outlined(
-                    label: 'Hủy',
+                    label: l10n?.cancel ?? 'Hủy',
                     onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: MewButton.filled(
-                    label: _isEditMode ? 'Lưu' : 'Tạo',
+                    label: _isEditMode
+                        ? (l10n?.save ?? 'Lưu')
+                        : (l10n?.createCollection ?? 'Tạo'),
                     isLoading: _isLoading,
                     onPressed: _isLoading ? null : _handleSubmit,
                   ),

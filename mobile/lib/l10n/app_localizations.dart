@@ -335,8 +335,38 @@ abstract class AppLocalizations {
   /// No description provided for @searchPlaceholder.
   ///
   /// In vi, this message translates to:
-  /// **'Tìm kiếm từ vựng...'**
+  /// **'Tìm kiếm từ hoặc nghĩa tiếng Việt...'**
   String get searchPlaceholder;
+
+  /// No description provided for @emptyVocabulary.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có từ vựng nào'**
+  String get emptyVocabulary;
+
+  /// No description provided for @addFirstWord.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm từ đầu tiên'**
+  String get addFirstWord;
+
+  /// No description provided for @filterAndSort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bộ lọc & Sắp xếp'**
+  String get filterAndSort;
+
+  /// No description provided for @cefrLevel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cấp độ (CEFR)'**
+  String get cefrLevel;
+
+  /// No description provided for @clearAll.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa tất cả'**
+  String get clearAll;
 
   /// No description provided for @addWord.
   ///
@@ -416,6 +446,66 @@ abstract class AppLocalizations {
   /// **'Bạn có chắc chắn muốn xóa từ này?'**
   String get deleteWordConfirm;
 
+  /// No description provided for @wordInputPlaceholder.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập từ tiếng Anh...'**
+  String get wordInputPlaceholder;
+
+  /// No description provided for @lookupLoading.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tra từ...'**
+  String get lookupLoading;
+
+  /// No description provided for @noDefinitions.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có định nghĩa nào'**
+  String get noDefinitions;
+
+  /// No description provided for @addDefinition.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm định nghĩa'**
+  String get addDefinition;
+
+  /// No description provided for @meaningVi.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nghĩa tiếng Việt'**
+  String get meaningVi;
+
+  /// No description provided for @meaningEn.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nghĩa tiếng Anh'**
+  String get meaningEn;
+
+  /// No description provided for @exampleSentence.
+  ///
+  /// In vi, this message translates to:
+  /// **'Câu ví dụ'**
+  String get exampleSentence;
+
+  /// No description provided for @exampleTranslation.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dịch ví dụ'**
+  String get exampleTranslation;
+
+  /// No description provided for @addWordSuccess.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã lưu từ vựng thành công'**
+  String get addWordSuccess;
+
+  /// No description provided for @deleteWordSuccess.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xóa từ vựng'**
+  String get deleteWordSuccess;
+
   /// No description provided for @collectionsTitle.
   ///
   /// In vi, this message translates to:
@@ -427,6 +517,18 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Tạo bộ sưu tập'**
   String get createCollection;
+
+  /// No description provided for @createCollectionTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tạo bộ sưu tập mới'**
+  String get createCollectionTitle;
+
+  /// No description provided for @editCollectionTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chỉnh sửa bộ sưu tập'**
+  String get editCollectionTitle;
 
   /// No description provided for @collectionName.
   ///
@@ -452,11 +554,59 @@ abstract class AppLocalizations {
   /// **'Chưa có bộ sưu tập nào'**
   String get emptyCollections;
 
+  /// No description provided for @addFirstCollection.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tạo bộ sưu tập đầu tiên'**
+  String get addFirstCollection;
+
+  /// No description provided for @searchCollections.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tìm kiếm bộ sưu tập...'**
+  String get searchCollections;
+
   /// No description provided for @deleteCollectionConfirm.
   ///
   /// In vi, this message translates to:
   /// **'Bạn có chắc chắn muốn xóa bộ sưu tập này?'**
   String get deleteCollectionConfirm;
+
+  /// No description provided for @deleteCollectionSuccess.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xóa bộ sưu tập'**
+  String get deleteCollectionSuccess;
+
+  /// No description provided for @saveCollection.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu bộ sưu tập'**
+  String get saveCollection;
+
+  /// No description provided for @loginTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chào mừng trở lại'**
+  String get loginTitle;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập để tiếp tục học từ vựng'**
+  String get loginSubtitle;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tạo tài khoản'**
+  String get registerTitle;
+
+  /// No description provided for @registerSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bắt đầu ghi nhớ từ vựng thông minh'**
+  String get registerSubtitle;
 
   /// No description provided for @settingsTitle.
   ///

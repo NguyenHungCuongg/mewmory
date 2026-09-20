@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
 import '../providers/stats_provider.dart';
@@ -89,6 +90,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final distributionAsync = ref.watch(levelDistributionProvider(userId));
 
     final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: colors.eggshell,
@@ -125,20 +127,21 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 delegate: SliverChildListDelegate([
                   // Greeting
                   Text(
-                    'Xin chào, $displayName! 👋',
+                    '${l10n?.greeting ?? 'Xin chào'}, $displayName! 👋',
                     style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: MewColors.ink,
+                      color: colors.ink,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Hãy duy trì thói quen học từ vựng mỗi ngày cùng Mewmory nhé.',
+                    l10n?.dailyReviewSubtitle ??
+                        'Hãy duy trì thói quen học từ vựng mỗi ngày cùng Mewmory nhé.',
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
-                      color: MewColors.smoke,
+                      color: colors.smoke,
                     ),
                   ),
                   const SizedBox(height: 20),

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../config/constants.dart';
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import '../models/definition.dart';
 import '../providers/auth_provider.dart';
 import '../providers/connectivity_provider.dart';
@@ -264,16 +265,18 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
     final isOnline = ref.watch(connectivityProvider).value ?? true;
     final isLookupLoading = lookupState.status == LookupStatus.loading;
     final hasLookupResult = lookupState.status == LookupStatus.success;
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: MewColors.eggshell,
+      backgroundColor: colors.eggshell,
       appBar: AppBar(
         title: Text(
-          'Thêm từ mới',
+          l10n?.addWord ?? 'Thêm từ mới',
           style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: MewColors.ink,
+            color: colors.ink,
           ),
         ),
         actions: [
@@ -282,11 +285,13 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
               setState(() => _manualMode = !_manualMode);
             },
             child: Text(
-              _manualMode ? 'Dùng AI tra cứu' : 'Nhập thủ công',
+              _manualMode
+                  ? (l10n?.autoMode ?? 'Dùng AI tra cứu')
+                  : (l10n?.manualMode ?? 'Nhập thủ công'),
               style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: MewColors.ink,
+                color: colors.ink,
               ),
             ),
           ),
@@ -308,7 +313,7 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
                       Expanded(
                         child: MewTextField(
                           controller: _wordController,
-                          hintText: 'Nhập từ tiếng Anh (ví dụ: resilient)',
+                          hintText: l10n?.wordInputPlaceholder ?? 'Nhập từ tiếng Anh (ví dụ: resilient)',
                           textInputAction: TextInputAction.search,
                           onSubmitted: (_) => _handleLookup(),
                         ),
@@ -316,7 +321,7 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
                       if (!_manualMode) ...[
                         const SizedBox(width: 10),
                         MewButton.filled(
-                          label: 'Tra cứu',
+                          label: l10n?.lookupWord ?? 'Tra cứu',
                           isLoading: isLookupLoading,
                           isFullWidth: false,
                           height: 48,
@@ -341,10 +346,10 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
                     const LoadingIndicator(size: 36),
                     const SizedBox(height: 16),
                     Text(
-                      'Đang tra từ điển & phân tích AI...',
+                      l10n?.lookupLoading ?? 'Đang tra từ điển & phân tích AI...',
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: MewColors.smoke,
+                        color: colors.smoke,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -355,29 +360,29 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: MewColors.error.withValues(alpha: 0.08),
+                        color: colors.error.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: MewColors.error.withValues(alpha: 0.25),
+                          color: colors.error.withValues(alpha: 0.25),
                         ),
                       ),
                       child: Column(
                         children: [
-                          const Icon(Icons.error_outline_rounded,
-                              color: MewColors.error, size: 32),
+                          Icon(Icons.error_outline_rounded,
+                              color: colors.error, size: 32),
                           const SizedBox(height: 8),
                           Text(
-                            lookupState.errorMessage ?? 'Không tìm thấy từ vựng',
+                            lookupState.errorMessage ?? (l10n?.noWordsFound ?? 'Không tìm thấy từ vựng'),
                             style: GoogleFonts.inter(
                               fontSize: 14,
-                              color: MewColors.error,
+                              color: colors.error,
                               fontWeight: FontWeight.w500,
                             ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 12),
                           MewButton.outlined(
-                            label: 'Chuyển sang nhập thủ công',
+                            label: l10n?.manualAdd ?? 'Chuyển sang nhập thủ công',
                             onPressed: () {
                               setState(() => _manualMode = true);
                             },
@@ -401,15 +406,15 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
       bottomSheet: (hasLookupResult || _manualMode)
           ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: const BoxDecoration(
-                color: MewColors.eggshell,
+              decoration: BoxDecoration(
+                color: colors.eggshell,
                 border: Border(
-                  top: BorderSide(color: MewColors.stone, width: 1),
+                  top: BorderSide(color: colors.stone, width: 1),
                 ),
               ),
               child: SafeArea(
                 child: MewButton.filled(
-                  label: 'Lưu từ vựng',
+                  label: l10n?.saveWord ?? 'Lưu từ vựng',
                   isLoading: _isSaving,
                   onPressed: _isSaving ? null : _handleSave,
                 ),
@@ -420,12 +425,15 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
   }
 
   Widget _buildManualForm() {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         MewTextField(
           controller: _manualPhoneticController,
-          label: 'Phiên âm IPA (tùy chọn)',
+          label: l10n?.phonetic ?? 'Phiên âm IPA (tùy chọn)',
           hintText: '/rɪˈzɪliənt/',
         ),
         const SizedBox(height: 14),
@@ -436,22 +444,24 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Loại từ',
+                    l10n?.partOfSpeech ?? 'Loại từ',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: MewColors.ink,
+                      color: colors.ink,
                     ),
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     initialValue: _manualPos,
+                    dropdownColor: colors.eggshell,
+                    style: GoogleFonts.inter(fontSize: 14, color: colors.ink),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: MewColors.eggshell,
+                      fillColor: colors.warmTaupe,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: MewColors.stone),
+                        borderSide: BorderSide(color: colors.stone),
                       ),
                     ),
                     items: AppConstants.partsOfSpeech.map((pos) {
@@ -470,22 +480,24 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Cấp độ CEFR',
+                    l10n?.cefrLevel ?? 'Cấp độ CEFR',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: MewColors.ink,
+                      color: colors.ink,
                     ),
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     initialValue: _manualCefr,
+                    dropdownColor: colors.eggshell,
+                    style: GoogleFonts.inter(fontSize: 14, color: colors.ink),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: MewColors.eggshell,
+                      fillColor: colors.warmTaupe,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: MewColors.stone),
+                        borderSide: BorderSide(color: colors.stone),
                       ),
                     ),
                     items: AppConstants.cefrLevels.map((lvl) {
@@ -503,19 +515,19 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
         const SizedBox(height: 14),
         MewTextField(
           controller: _manualDefViController,
-          label: 'Nghĩa tiếng Việt',
+          label: l10n?.meaningVi ?? 'Nghĩa tiếng Việt',
           hintText: 'Ví dụ: Kiên cường, mau hồi phục',
         ),
         const SizedBox(height: 14),
         MewTextField(
           controller: _manualDefEnController,
-          label: 'Định nghĩa tiếng Anh (tùy chọn)',
+          label: l10n?.meaningEn ?? 'Định nghĩa tiếng Anh (tùy chọn)',
           hintText: 'Ví dụ: Able to withstand or recover quickly',
         ),
         const SizedBox(height: 14),
         MewTextField(
           controller: _manualExampleController,
-          label: 'Câu ví dụ (tùy chọn)',
+          label: l10n?.exampleSentence ?? 'Câu ví dụ (tùy chọn)',
           hintText: 'Ví dụ: She has a resilient personality.',
           maxLines: 2,
         ),

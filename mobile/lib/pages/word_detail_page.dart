@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import '../config/constants.dart';
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import '../db/database.dart' as db;
 import '../models/definition.dart' as models;
 import '../models/vocabulary.dart' as models;
@@ -247,36 +248,38 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
   }
 
   Future<void> _handleDelete(db.VocabularyWithDefinitions item) async {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: MewColors.eggshell,
+        backgroundColor: colors.eggshell,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Xác nhận xóa',
+          l10n?.deleteWordConfirm ?? 'Xác nhận xóa',
           style: GoogleFonts.inter(
             fontWeight: FontWeight.w600,
-            color: MewColors.ink,
+            color: colors.ink,
           ),
         ),
         content: Text(
           'Bạn có chắc chắn muốn xóa từ "${item.vocabulary.word}" không? Từ vựng sẽ được chuyển vào thùng rác.',
-          style: GoogleFonts.inter(color: MewColors.smoke),
+          style: GoogleFonts.inter(color: colors.smoke),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
-              'Hủy',
-              style: GoogleFonts.inter(color: MewColors.smoke),
+              l10n?.cancel ?? 'Hủy',
+              style: GoogleFonts.inter(color: colors.smoke),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Xóa',
+              l10n?.delete ?? 'Xóa',
               style: GoogleFonts.inter(
-                color: MewColors.error,
+                color: colors.error,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -304,7 +307,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Lỗi khi xóa: ${e.toString()}'),
-            backgroundColor: MewColors.error,
+            backgroundColor: colors.error,
           ),
         );
       }
@@ -318,11 +321,13 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
   void _showCollectionSheet(db.VocabularyWithDefinitions item) {
     final allCollectionsAsync = ref.read(allCollectionsProvider);
     final collections = allCollectionsAsync.value ?? [];
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: MewColors.eggshell,
+      backgroundColor: colors.eggshell,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -337,11 +342,11 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Quản lý Bộ sưu tập',
+                      l10n?.collectionsTitle ?? 'Quản lý Bộ sưu tập',
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: MewColors.ink,
+                        color: colors.ink,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -349,8 +354,8 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 24.0),
                         child: Text(
-                          'Chưa có bộ sưu tập nào',
-                          style: GoogleFonts.inter(color: MewColors.smoke),
+                          l10n?.emptyCollections ?? 'Chưa có bộ sưu tập nào',
+                          style: GoogleFonts.inter(color: colors.smoke),
                           textAlign: TextAlign.center,
                         ),
                       )
@@ -360,7 +365,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                           shrinkWrap: true,
                           itemCount: collections.length,
                           separatorBuilder: (_, __) =>
-                              const Divider(color: MewColors.stone, height: 1),
+                              Divider(color: colors.stone, height: 1),
                           itemBuilder: (ctx, i) {
                             final col = collections[i];
                             final isAssigned =
@@ -368,13 +373,13 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
 
                             return CheckboxListTile(
                               value: isAssigned,
-                              activeColor: MewColors.ink,
-                              checkColor: MewColors.eggshell,
+                              activeColor: colors.ink,
+                              checkColor: colors.eggshell,
                               title: Text(
                                 col.collection.name,
                                 style: GoogleFonts.inter(
                                   fontWeight: FontWeight.w500,
-                                  color: MewColors.ink,
+                                  color: colors.ink,
                                 ),
                               ),
                               subtitle: col.collection.description != null &&
@@ -383,7 +388,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                                       col.collection.description!,
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
-                                        color: MewColors.smoke,
+                                        color: colors.smoke,
                                       ),
                                     )
                                   : null,
@@ -409,7 +414,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                       ),
                     const SizedBox(height: 16),
                     MewButton.filled(
-                      label: 'Xong',
+                      label: l10n?.confirm ?? 'Xong',
                       onPressed: () => Navigator.of(ctx).pop(),
                     ),
                   ],
@@ -427,18 +432,20 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
     final vocabDetailAsync = ref.watch(vocabularyDetailProvider(widget.id));
     final allCollectionsAsync = ref.watch(allCollectionsProvider);
     final collections = allCollectionsAsync.value ?? [];
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
 
     return vocabDetailAsync.when(
       loading: () => Scaffold(
-        backgroundColor: MewColors.eggshell,
+        backgroundColor: colors.eggshell,
         appBar: AppBar(
-          title: const Text('Chi tiết từ vựng'),
+          title: Text(l10n?.wordDetails ?? 'Chi tiết từ vựng'),
         ),
         body: const Center(child: LoadingIndicator()),
       ),
       error: (err, _) => Scaffold(
-        backgroundColor: MewColors.eggshell,
-        appBar: AppBar(title: const Text('Chi tiết từ vựng')),
+        backgroundColor: colors.eggshell,
+        appBar: AppBar(title: Text(l10n?.wordDetails ?? 'Chi tiết từ vựng')),
         body: EmptyState(
           title: 'Không thể tải từ vựng',
           message: err.toString(),
@@ -449,8 +456,8 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
       data: (item) {
         if (item == null) {
           return Scaffold(
-            backgroundColor: MewColors.eggshell,
-            appBar: AppBar(title: const Text('Chi tiết từ vựng')),
+            backgroundColor: colors.eggshell,
+            appBar: AppBar(title: Text(l10n?.wordDetails ?? 'Chi tiết từ vựng')),
             body: EmptyState(
               title: 'Từ vựng không tồn tại',
               message: 'Từ này có thể đã bị xóa hoặc không tìm thấy trong bộ nhớ.',
@@ -461,33 +468,33 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
         }
 
         return Scaffold(
-          backgroundColor: MewColors.eggshell,
+          backgroundColor: colors.eggshell,
           appBar: AppBar(
             title: Text(
               _isEditing ? 'Chỉnh sửa từ vựng' : item.vocabulary.word,
               style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: MewColors.ink,
+                color: colors.ink,
               ),
             ),
             actions: [
               if (!_isEditing) ...[
                 IconButton(
                   icon: const Icon(Icons.edit_outlined),
-                  tooltip: 'Chỉnh sửa',
+                  tooltip: l10n?.edit ?? 'Chỉnh sửa',
                   onPressed: () => _enterEditMode(item),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded,
-                      color: MewColors.error),
-                  tooltip: 'Xóa từ vựng',
+                  icon: Icon(Icons.delete_outline_rounded,
+                      color: colors.error),
+                  tooltip: l10n?.delete ?? 'Xóa từ vựng',
                   onPressed: _isDeleting ? null : () => _handleDelete(item),
                 ),
               ] else ...[
                 IconButton(
                   icon: const Icon(Icons.close_rounded),
-                  tooltip: 'Hủy chỉnh sửa',
+                  tooltip: l10n?.cancel ?? 'Hủy chỉnh sửa',
                   onPressed: _cancelEditMode,
                 ),
               ],
@@ -499,10 +506,10 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
           bottomNavigationBar: _isEditing
               ? Container(
                   padding: const EdgeInsets.all(16.0),
-                  decoration: const BoxDecoration(
-                    color: MewColors.eggshell,
+                  decoration: BoxDecoration(
+                    color: colors.eggshell,
                     border: Border(
-                      top: BorderSide(color: MewColors.stone, width: 1),
+                      top: BorderSide(color: colors.stone, width: 1),
                     ),
                   ),
                   child: SafeArea(
@@ -510,14 +517,14 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                       children: [
                         Expanded(
                           child: MewButton.outlined(
-                            label: 'Hủy',
+                            label: l10n?.cancel ?? 'Hủy',
                             onPressed: _isSaving ? null : _cancelEditMode,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: MewButton.filled(
-                            label: 'Lưu thay đổi',
+                            label: l10n?.save ?? 'Lưu thay đổi',
                             isLoading: _isSaving,
                             onPressed: _isSaving ? null : () => _handleSave(item),
                           ),
@@ -536,6 +543,9 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
     db.VocabularyWithDefinitions item,
     List<db.CollectionWithCount> allCollections,
   ) {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+
     // Lookup names of assigned collections
     final assignedCollectionNames = item.collectionIds.map((cid) {
       final match = allCollections.where((c) => c.collection.id == cid);
@@ -566,7 +576,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                               fontSize: 32,
                               fontWeight: FontWeight.w600,
                               letterSpacing: -0.64,
-                              color: MewColors.ink,
+                              color: colors.ink,
                             ),
                           ),
                           if (item.vocabulary.phonetic != null &&
@@ -576,7 +586,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                               item.vocabulary.phonetic!,
                               style: GoogleFonts.inter(
                                 fontSize: 16,
-                                color: MewColors.ash,
+                                color: colors.ash,
                               ),
                             ),
                           ],
@@ -587,10 +597,10 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                         item.vocabulary.audioUrl!.isNotEmpty) ...[
                       IconButton.filled(
                         style: IconButton.styleFrom(
-                          backgroundColor: MewColors.warmTaupe,
-                          foregroundColor: MewColors.ink,
+                          backgroundColor: colors.warmTaupe,
+                          foregroundColor: colors.ink,
                           shape: const CircleBorder(),
-                          side: const BorderSide(color: MewColors.stone),
+                          side: BorderSide(color: colors.stone),
                         ),
                         icon: Icon(
                           _isPlaying
@@ -618,8 +628,8 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                         item.vocabulary.cefrLevel!.isNotEmpty)
                       MewChip(
                         label: item.vocabulary.cefrLevel!,
-                        customBgColor: MewColors.ink,
-                        customTextColor: MewColors.eggshell,
+                        customBgColor: colors.ink,
+                        customTextColor: colors.eggshell,
                       ),
                     if (item.vocabulary.usageRegister != null &&
                         item.vocabulary.usageRegister!.isNotEmpty)
@@ -642,11 +652,11 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                 Row(
                   children: [
                     Text(
-                      'Định nghĩa & Ví dụ',
+                      l10n?.definitions ?? 'Định nghĩa & Ví dụ',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: MewColors.ink,
+                        color: colors.ink,
                       ),
                     ),
                     const Spacer(),
@@ -654,7 +664,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: MewColors.stone,
+                        color: colors.stone,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
@@ -662,7 +672,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: MewColors.ink,
+                          color: colors.ink,
                         ),
                       ),
                     ),
@@ -671,8 +681,8 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                 const SizedBox(height: 16),
                 if (item.definitions.isEmpty)
                   Text(
-                    'Chưa có định nghĩa nào',
-                    style: GoogleFonts.inter(color: MewColors.smoke),
+                    l10n?.noDefinitions ?? 'Chưa có định nghĩa nào',
+                    style: GoogleFonts.inter(color: colors.smoke),
                   )
                 else
                   ListView.separated(
@@ -680,7 +690,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: item.definitions.length,
                     separatorBuilder: (_, __) =>
-                        const Divider(color: MewColors.stone, height: 24),
+                        Divider(color: colors.stone, height: 24),
                     itemBuilder: (_, idx) {
                       final def = item.definitions[idx];
                       return Column(
@@ -694,9 +704,9 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                                 height: 22,
                                 margin: const EdgeInsets.only(top: 2, right: 10),
                                 decoration: BoxDecoration(
-                                  color: MewColors.eggshell,
+                                  color: colors.eggshell,
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: MewColors.stone),
+                                  border: Border.all(color: colors.stone),
                                 ),
                                 alignment: Alignment.center,
                                 child: Text(
@@ -704,7 +714,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                                   style: GoogleFonts.inter(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: MewColors.smoke,
+                                    color: colors.smoke,
                                   ),
                                 ),
                               ),
@@ -717,7 +727,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                                       style: GoogleFonts.inter(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w500,
-                                        color: MewColors.ink,
+                                        color: colors.ink,
                                       ),
                                     ),
                                     if (def.definitionEn != null &&
@@ -727,7 +737,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                                         def.definitionEn!,
                                         style: GoogleFonts.inter(
                                           fontSize: 13,
-                                          color: MewColors.smoke,
+                                          color: colors.smoke,
                                         ),
                                       ),
                                     ],
@@ -738,18 +748,18 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 10, vertical: 6),
                                         decoration: BoxDecoration(
-                                          color: MewColors.eggshell,
+                                          color: colors.eggshell,
                                           borderRadius:
                                               BorderRadius.circular(8),
                                           border: Border.all(
-                                              color: MewColors.stone),
+                                              color: colors.stone),
                                         ),
                                         child: Text(
                                           '"${def.example!}"',
                                           style: GoogleFonts.inter(
                                             fontSize: 13,
                                             fontStyle: FontStyle.italic,
-                                            color: MewColors.smoke,
+                                            color: colors.smoke,
                                           ),
                                         ),
                                       ),
@@ -777,11 +787,11 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                 Row(
                   children: [
                     Text(
-                      'Bộ sưu tập',
+                      l10n?.collectionsTitle ?? 'Bộ sưu tập',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: MewColors.ink,
+                        color: colors.ink,
                       ),
                     ),
                     const Spacer(),
@@ -799,7 +809,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                     'Chưa gán vào bộ sưu tập nào',
                     style: GoogleFonts.inter(
                       fontSize: 13,
-                      color: MewColors.smoke,
+                      color: colors.smoke,
                     ),
                   )
                 else
@@ -823,7 +833,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
             children: [
               Expanded(
                 child: MewButton.outlined(
-                  label: 'Chỉnh sửa',
+                  label: l10n?.edit ?? 'Chỉnh sửa',
                   icon: const Icon(Icons.edit_outlined, size: 18),
                   onPressed: () => _enterEditMode(item),
                 ),
@@ -831,9 +841,9 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: MewButton.outlined(
-                  label: 'Xóa từ',
-                  icon: const Icon(Icons.delete_outline_rounded,
-                      color: MewColors.error, size: 18),
+                  label: l10n?.delete ?? 'Xóa từ',
+                  icon: Icon(Icons.delete_outline_rounded,
+                      color: colors.error, size: 18),
                   onPressed: _isDeleting ? null : () => _handleDelete(item),
                 ),
               ),
@@ -845,6 +855,9 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
   }
 
   Widget _buildEditModeBody(db.VocabularyWithDefinitions item) {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       child: Column(
@@ -859,7 +872,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
           const SizedBox(height: 14),
           MewTextField(
             controller: _phoneticController,
-            label: 'Phiên âm IPA',
+            label: l10n?.phonetic ?? 'Phiên âm IPA',
             hintText: '/.../',
           ),
           const SizedBox(height: 14),
@@ -872,22 +885,24 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Loại từ',
+                      l10n?.partOfSpeech ?? 'Loại từ',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: MewColors.ink,
+                        color: colors.ink,
                       ),
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       initialValue: _posValue,
+                      dropdownColor: colors.eggshell,
+                      style: GoogleFonts.inter(fontSize: 14, color: colors.ink),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: MewColors.eggshell,
+                        fillColor: colors.warmTaupe,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: MewColors.stone),
+                          borderSide: BorderSide(color: colors.stone),
                         ),
                       ),
                       items: AppConstants.partsOfSpeech.map((pos) {
@@ -906,22 +921,24 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Cấp độ CEFR',
+                      l10n?.cefrLevel ?? 'Cấp độ CEFR',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: MewColors.ink,
+                        color: colors.ink,
                       ),
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       initialValue: _cefrValue,
+                      dropdownColor: colors.eggshell,
+                      style: GoogleFonts.inter(fontSize: 14, color: colors.ink),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: MewColors.eggshell,
+                        fillColor: colors.warmTaupe,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: MewColors.stone),
+                          borderSide: BorderSide(color: colors.stone),
                         ),
                       ),
                       items: AppConstants.cefrLevels.map((lvl) {
@@ -947,18 +964,20 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: _usageValue,
+                dropdownColor: colors.eggshell,
+                style: GoogleFonts.inter(fontSize: 14, color: colors.ink),
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: MewColors.eggshell,
+                  fillColor: colors.warmTaupe,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: MewColors.stone),
+                    borderSide: BorderSide(color: colors.stone),
                   ),
                 ),
                 items: AppConstants.usageRegisters.map((reg) {
@@ -976,17 +995,17 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
           Row(
             children: [
               Text(
-                'Danh sách định nghĩa',
+                l10n?.definitions ?? 'Danh sách định nghĩa',
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
               ),
               const Spacer(),
               TextButton.icon(
                 icon: const Icon(Icons.add_rounded, size: 18),
-                label: const Text('Thêm nghĩa'),
+                label: Text(l10n?.addDefinition ?? 'Thêm nghĩa'),
                 onPressed: () {
                   setState(() {
                     _editDefinitions.add(_EditableDefinitionItem(definitionVi: ''));
@@ -1002,9 +1021,9 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: MewColors.warmTaupe,
+                color: colors.warmTaupe,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: MewColors.stone),
+                border: Border.all(color: colors.stone),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1016,14 +1035,14 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                         style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: MewColors.ink,
+                          color: colors.ink,
                         ),
                       ),
                       const Spacer(),
                       if (_editDefinitions.length > 1)
                         IconButton(
-                          icon: const Icon(Icons.delete_outline,
-                              size: 18, color: MewColors.error),
+                          icon: Icon(Icons.delete_outline,
+                              size: 18, color: colors.error),
                           onPressed: () {
                             setState(() {
                               final removed = _editDefinitions.removeAt(i);
@@ -1036,19 +1055,19 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
                   const SizedBox(height: 8),
                   MewTextField(
                     controller: _editDefinitions[i].viController,
-                    label: 'Nghĩa tiếng Việt *',
+                    label: '${l10n?.meaningVi ?? 'Nghĩa tiếng Việt'} *',
                     hintText: 'Nhập nghĩa tiếng Việt',
                   ),
                   const SizedBox(height: 10),
                   MewTextField(
                     controller: _editDefinitions[i].enController,
-                    label: 'Định nghĩa tiếng Anh (tùy chọn)',
+                    label: l10n?.meaningEn ?? 'Định nghĩa tiếng Anh (tùy chọn)',
                     hintText: 'Nhập định nghĩa tiếng Anh',
                   ),
                   const SizedBox(height: 10),
                   MewTextField(
                     controller: _editDefinitions[i].exampleController,
-                    label: 'Ví dụ minh họa (tùy chọn)',
+                    label: l10n?.exampleSentence ?? 'Ví dụ minh họa (tùy chọn)',
                     hintText: 'Nhập câu ví dụ',
                   ),
                 ],

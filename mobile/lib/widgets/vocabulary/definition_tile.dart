@@ -18,15 +18,16 @@ class DefinitionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
     return Container(
       margin: const EdgeInsets.only(bottom: 8.0),
       decoration: BoxDecoration(
         color: definition.isSelected
-            ? MewColors.eggshell
-            : MewColors.warmTaupe.withValues(alpha: 0.6),
+            ? colors.eggshell
+            : colors.warmTaupe.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: definition.isSelected ? MewColors.stone : Colors.transparent,
+          color: definition.isSelected ? colors.stone : Colors.transparent,
           width: 1.0,
         ),
       ),
@@ -38,8 +39,8 @@ class DefinitionTile extends StatelessWidget {
             Checkbox(
               value: definition.isSelected,
               onChanged: onToggle,
-              activeColor: MewColors.ink,
-              checkColor: MewColors.eggshell,
+              activeColor: colors.ink,
+              checkColor: colors.eggshell,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
               ),
@@ -58,7 +59,7 @@ class DefinitionTile extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: MewColors.ink,
+                        color: colors.ink,
                         height: 1.3,
                       ),
                     ),
@@ -71,7 +72,7 @@ class DefinitionTile extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
-                        color: MewColors.graphite,
+                        color: colors.ash,
                         height: 1.3,
                       ),
                     ),
@@ -86,7 +87,7 @@ class DefinitionTile extends StatelessWidget {
                         fontSize: 12,
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.w400,
-                        color: MewColors.smoke,
+                        color: colors.smoke,
                       ),
                     ),
                   ],
@@ -95,10 +96,10 @@ class DefinitionTile extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.edit_outlined,
                 size: 18,
-                color: MewColors.smoke,
+                color: colors.smoke,
               ),
               onPressed: onEdit,
               tooltip: 'Chỉnh sửa nghĩa',

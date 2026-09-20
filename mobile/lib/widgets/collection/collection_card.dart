@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../config/theme.dart';
 import '../../db/daos/collection_dao.dart';
+import '../../l10n/app_localizations.dart';
 import '../common/mew_card.dart';
 import '../common/mew_chip.dart';
 
@@ -23,6 +24,8 @@ class CollectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
     final col = item.collection;
 
     final cardContent = MewCard(
@@ -38,16 +41,14 @@ class CollectionCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: MewColors.warmTaupe == MewTheme.light.cardColor
-                      ? MewColors.stone
-                      : MewColors.warmTaupe,
+                  color: colors.stone,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: MewColors.stone),
+                  border: Border.all(color: colors.stone),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.folder_outlined,
                   size: 22,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
               ),
               const SizedBox(width: 12),
@@ -63,7 +64,7 @@ class CollectionCard extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: MewColors.ink,
+                              color: colors.ink,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -71,10 +72,10 @@ class CollectionCard extends StatelessWidget {
                         ),
                         if (col.isDefault) ...[
                           const SizedBox(width: 6),
-                          const MewChip(
+                          MewChip(
                             label: 'Mặc định',
-                            customBgColor: MewColors.stone,
-                            customTextColor: MewColors.graphite,
+                            customBgColor: colors.stone,
+                            customTextColor: colors.graphite,
                           ),
                         ],
                       ],
@@ -87,7 +88,7 @@ class CollectionCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
-                          color: MewColors.smoke,
+                          color: colors.smoke,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -100,16 +101,16 @@ class CollectionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: MewColors.eggshell,
+                  color: colors.eggshell,
                   borderRadius: BorderRadius.circular(9999),
-                  border: Border.all(color: MewColors.stone),
+                  border: Border.all(color: colors.stone),
                 ),
                 child: Text(
-                  '${item.wordCount} từ',
+                  l10n?.wordsCount(item.wordCount) ?? '${item.wordCount} từ',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: MewColors.graphite,
+                    color: colors.graphite,
                   ),
                 ),
               ),
@@ -131,10 +132,10 @@ class CollectionCard extends StatelessWidget {
             if (onEdit != null)
               SlidableAction(
                 onPressed: (_) => onEdit!(),
-                backgroundColor: MewColors.warmTaupe,
-                foregroundColor: MewColors.ink,
+                backgroundColor: colors.warmTaupe,
+                foregroundColor: colors.ink,
                 icon: Icons.edit_outlined,
-                label: 'Sửa',
+                label: l10n?.edit ?? 'Sửa',
                 borderRadius: const BorderRadius.horizontal(
                   left: Radius.circular(20),
                 ),
@@ -142,10 +143,10 @@ class CollectionCard extends StatelessWidget {
             if (onDelete != null && !col.isDefault)
               SlidableAction(
                 onPressed: (_) => onDelete!(),
-                backgroundColor: MewColors.error,
-                foregroundColor: MewColors.eggshell,
+                backgroundColor: colors.error,
+                foregroundColor: colors.eggshell,
                 icon: Icons.delete_outline_rounded,
-                label: 'Xóa',
+                label: l10n?.delete ?? 'Xóa',
                 borderRadius: BorderRadius.horizontal(
                   right: const Radius.circular(20),
                   left: onEdit == null ? const Radius.circular(20) : Radius.zero,

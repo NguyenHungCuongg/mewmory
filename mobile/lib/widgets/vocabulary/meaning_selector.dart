@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../config/theme.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/lookup_provider.dart';
 import '../common/mew_button.dart';
 import '../common/mew_chip.dart';
@@ -23,10 +24,13 @@ class MeaningSelector extends ConsumerWidget {
     final enController = TextEditingController(text: def.definitionEn ?? '');
     final exampleController = TextEditingController(text: def.example ?? '');
 
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: MewColors.eggshell,
+      backgroundColor: colors.eggshell,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -47,30 +51,30 @@ class MeaningSelector extends ConsumerWidget {
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
               ),
               const SizedBox(height: 16),
               MewTextField(
                 controller: viController,
-                label: 'Nghĩa tiếng Việt',
+                label: l10n?.meaningVi ?? 'Nghĩa tiếng Việt',
                 hintText: 'Ví dụ: Kiên cường, bền bỉ',
               ),
               const SizedBox(height: 12),
               MewTextField(
                 controller: enController,
-                label: 'Định nghĩa tiếng Anh (tùy chọn)',
+                label: l10n?.meaningEn ?? 'Định nghĩa tiếng Anh (tùy chọn)',
                 hintText: 'Ví dụ: Able to recover quickly',
               ),
               const SizedBox(height: 12),
               MewTextField(
                 controller: exampleController,
-                label: 'Câu ví dụ (tùy chọn)',
+                label: l10n?.exampleSentence ?? 'Câu ví dụ (tùy chọn)',
                 hintText: 'Ví dụ: She is very resilient.',
               ),
               const SizedBox(height: 20),
               MewButton.filled(
-                label: 'Xong',
+                label: l10n?.confirm ?? 'Xong',
                 onPressed: () {
                   ref.read(lookupProvider.notifier).updateDefinition(
                         meaningIndex,
@@ -95,13 +99,14 @@ class MeaningSelector extends ConsumerWidget {
     int mIdx,
     EditableMeaning meaning,
   ) {
+    final colors = context.mewColors;
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),
       padding: const EdgeInsets.all(14.0),
       decoration: BoxDecoration(
-        color: MewColors.warmTaupe,
+        color: colors.warmTaupe,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: MewColors.stone, width: 1.0),
+        border: Border.all(color: colors.stone, width: 1.0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +122,7 @@ class MeaningSelector extends ConsumerWidget {
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.8,
-                    color: MewColors.ink,
+                    color: colors.ink,
                   ),
                 ),
               const Spacer(),
@@ -125,8 +130,8 @@ class MeaningSelector extends ConsumerWidget {
                   meaning.cefrLevel!.isNotEmpty) ...[
                 MewChip(
                   label: meaning.cefrLevel!,
-                  customBgColor: MewColors.ink,
-                  customTextColor: MewColors.eggshell,
+                  customBgColor: colors.ink,
+                  customTextColor: colors.eggshell,
                 ),
                 const SizedBox(width: 6),
               ],

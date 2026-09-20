@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../config/theme.dart';
+import '../../l10n/app_localizations.dart';
 import '../common/mew_card.dart';
 
 class StatsSummaryCard extends StatelessWidget {
@@ -29,6 +30,9 @@ class StatsSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+
     // Standardize CEFR levels order
     final levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
     final nonZeroLevels = levels
@@ -50,14 +54,14 @@ class StatsSummaryCard extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
               ),
               if (onTap != null)
-                const Icon(
+                Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 14,
-                  color: MewColors.smoke,
+                  color: colors.smoke,
                 ),
             ],
           ),
@@ -74,7 +78,7 @@ class StatsSummaryCard extends StatelessWidget {
                   fontSize: 40,
                   fontWeight: FontWeight.w300,
                   letterSpacing: -1.0,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
               ),
               const SizedBox(width: 8),
@@ -83,7 +87,7 @@ class StatsSummaryCard extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: MewColors.smoke,
+                  color: colors.smoke,
                 ),
               ),
               const Spacer(),
@@ -92,10 +96,10 @@ class StatsSummaryCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: MewColors.success.withValues(alpha: 0.1),
+                    color: colors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(9999),
                     border: Border.all(
-                      color: MewColors.success.withValues(alpha: 0.2),
+                      color: colors.success.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Text(
@@ -103,7 +107,7 @@ class StatsSummaryCard extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: MewColors.success,
+                      color: colors.success,
                     ),
                   ),
                 ),
@@ -114,11 +118,11 @@ class StatsSummaryCard extends StatelessWidget {
           // CEFR Level Bar
           if (totalCount > 0 && nonZeroLevels.isNotEmpty) ...[
             Text(
-              'Phân bố cấp độ CEFR',
+              l10n?.cefrDistribution ?? 'Phân bố cấp độ CEFR',
               style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: MewColors.graphite,
+                color: colors.graphite,
               ),
             ),
             const SizedBox(height: 8),
@@ -135,7 +139,7 @@ class StatsSummaryCard extends StatelessWidget {
                     return Expanded(
                       flex: flex > 0 ? flex : 1,
                       child: Container(
-                        color: _levelColors[lvl] ?? MewColors.ash,
+                        color: _levelColors[lvl] ?? colors.ash,
                       ),
                     );
                   }).toList(),
@@ -150,7 +154,7 @@ class StatsSummaryCard extends StatelessWidget {
               runSpacing: 6,
               children: nonZeroLevels.map((lvl) {
                 final count = levelDistribution[lvl] ?? 0;
-                final color = _levelColors[lvl] ?? MewColors.ash;
+                final color = _levelColors[lvl] ?? colors.ash;
 
                 return Row(
                   mainAxisSize: MainAxisSize.min,
@@ -169,7 +173,7 @@ class StatsSummaryCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: MewColors.graphite,
+                        color: colors.graphite,
                       ),
                     ),
                   ],
@@ -181,7 +185,7 @@ class StatsSummaryCard extends StatelessWidget {
               'Chưa có dữ liệu phân bố cấp độ.',
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: MewColors.smoke,
+                color: colors.smoke,
               ),
             ),
           ],

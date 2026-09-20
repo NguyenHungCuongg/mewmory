@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mewmory/app.dart';
-import 'package:mewmory/providers/locale_provider.dart';
 import 'package:mewmory/providers/theme_provider.dart';
 import 'package:mewmory/widgets/common/language_switcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';

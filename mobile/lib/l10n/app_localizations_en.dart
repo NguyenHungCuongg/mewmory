@@ -127,7 +127,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cefrDistribution => 'CEFR Level Distribution';
 
   @override
-  String get searchPlaceholder => 'Search vocabulary...';
+  String get searchPlaceholder => 'Search vocabulary or definitions...';
+
+  @override
+  String get emptyVocabulary => 'No vocabulary words yet';
+
+  @override
+  String get addFirstWord => 'Add first word';
+
+  @override
+  String get filterAndSort => 'Filter & Sort';
+
+  @override
+  String get cefrLevel => 'CEFR Level';
+
+  @override
+  String get clearAll => 'Clear all';
 
   @override
   String get addWord => 'Add Word';
@@ -169,10 +184,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteWordConfirm => 'Are you sure you want to delete this word?';
 
   @override
+  String get wordInputPlaceholder => 'Enter English word...';
+
+  @override
+  String get lookupLoading => 'Looking up word...';
+
+  @override
+  String get noDefinitions => 'No definitions yet';
+
+  @override
+  String get addDefinition => 'Add definition';
+
+  @override
+  String get meaningVi => 'Vietnamese meaning';
+
+  @override
+  String get meaningEn => 'English meaning';
+
+  @override
+  String get exampleSentence => 'Example sentence';
+
+  @override
+  String get exampleTranslation => 'Example translation';
+
+  @override
+  String get addWordSuccess => 'Vocabulary saved successfully';
+
+  @override
+  String get deleteWordSuccess => 'Vocabulary deleted';
+
+  @override
   String get collectionsTitle => 'Collections';
 
   @override
   String get createCollection => 'Create Collection';
+
+  @override
+  String get createCollectionTitle => 'Create New Collection';
+
+  @override
+  String get editCollectionTitle => 'Edit Collection';
 
   @override
   String get collectionName => 'Collection Name';
@@ -195,8 +246,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emptyCollections => 'No collections found';
 
   @override
+  String get addFirstCollection => 'Create first collection';
+
+  @override
+  String get searchCollections => 'Search collections...';
+
+  @override
   String get deleteCollectionConfirm =>
       'Are you sure you want to delete this collection?';
+
+  @override
+  String get deleteCollectionSuccess => 'Collection deleted';
+
+  @override
+  String get saveCollection => 'Save Collection';
+
+  @override
+  String get loginTitle => 'Welcome Back';
+
+  @override
+  String get loginSubtitle => 'Sign in to continue learning';
+
+  @override
+  String get registerTitle => 'Create Account';
+
+  @override
+  String get registerSubtitle => 'Start smart vocabulary retention';
 
   @override
   String get settingsTitle => 'Settings';

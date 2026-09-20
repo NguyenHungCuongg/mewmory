@@ -128,7 +128,22 @@ class AppLocalizationsVi extends AppLocalizations {
   String get cefrDistribution => 'Phân bố theo cấp độ CEFR';
 
   @override
-  String get searchPlaceholder => 'Tìm kiếm từ vựng...';
+  String get searchPlaceholder => 'Tìm kiếm từ hoặc nghĩa tiếng Việt...';
+
+  @override
+  String get emptyVocabulary => 'Chưa có từ vựng nào';
+
+  @override
+  String get addFirstWord => 'Thêm từ đầu tiên';
+
+  @override
+  String get filterAndSort => 'Bộ lọc & Sắp xếp';
+
+  @override
+  String get cefrLevel => 'Cấp độ (CEFR)';
+
+  @override
+  String get clearAll => 'Xóa tất cả';
 
   @override
   String get addWord => 'Thêm từ mới';
@@ -170,10 +185,46 @@ class AppLocalizationsVi extends AppLocalizations {
   String get deleteWordConfirm => 'Bạn có chắc chắn muốn xóa từ này?';
 
   @override
+  String get wordInputPlaceholder => 'Nhập từ tiếng Anh...';
+
+  @override
+  String get lookupLoading => 'Đang tra từ...';
+
+  @override
+  String get noDefinitions => 'Chưa có định nghĩa nào';
+
+  @override
+  String get addDefinition => 'Thêm định nghĩa';
+
+  @override
+  String get meaningVi => 'Nghĩa tiếng Việt';
+
+  @override
+  String get meaningEn => 'Nghĩa tiếng Anh';
+
+  @override
+  String get exampleSentence => 'Câu ví dụ';
+
+  @override
+  String get exampleTranslation => 'Dịch ví dụ';
+
+  @override
+  String get addWordSuccess => 'Đã lưu từ vựng thành công';
+
+  @override
+  String get deleteWordSuccess => 'Đã xóa từ vựng';
+
+  @override
   String get collectionsTitle => 'Bộ sưu tập';
 
   @override
   String get createCollection => 'Tạo bộ sưu tập';
+
+  @override
+  String get createCollectionTitle => 'Tạo bộ sưu tập mới';
+
+  @override
+  String get editCollectionTitle => 'Chỉnh sửa bộ sưu tập';
 
   @override
   String get collectionName => 'Tên bộ sưu tập';
@@ -195,8 +246,32 @@ class AppLocalizationsVi extends AppLocalizations {
   String get emptyCollections => 'Chưa có bộ sưu tập nào';
 
   @override
+  String get addFirstCollection => 'Tạo bộ sưu tập đầu tiên';
+
+  @override
+  String get searchCollections => 'Tìm kiếm bộ sưu tập...';
+
+  @override
   String get deleteCollectionConfirm =>
       'Bạn có chắc chắn muốn xóa bộ sưu tập này?';
+
+  @override
+  String get deleteCollectionSuccess => 'Đã xóa bộ sưu tập';
+
+  @override
+  String get saveCollection => 'Lưu bộ sưu tập';
+
+  @override
+  String get loginTitle => 'Chào mừng trở lại';
+
+  @override
+  String get loginSubtitle => 'Đăng nhập để tiếp tục học từ vựng';
+
+  @override
+  String get registerTitle => 'Tạo tài khoản';
+
+  @override
+  String get registerSubtitle => 'Bắt đầu ghi nhớ từ vựng thông minh';
 
   @override
   String get settingsTitle => 'Cài đặt';

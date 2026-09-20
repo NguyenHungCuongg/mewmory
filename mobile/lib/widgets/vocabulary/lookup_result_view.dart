@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../config/theme.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/lookup_provider.dart';
 import '../common/mew_card.dart';
@@ -62,6 +63,8 @@ class _LookupResultViewState extends ConsumerState<LookupResultView> {
     if (result == null) return const SizedBox.shrink();
 
     final user = ref.watch(currentUserProvider);
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,7 +88,7 @@ class _LookupResultViewState extends ConsumerState<LookupResultView> {
                             fontSize: 28,
                             fontWeight: FontWeight.w600,
                             letterSpacing: -0.56,
-                            color: MewColors.ink,
+                            color: colors.ink,
                           ),
                         ),
                         if (result.phonetic != null &&
@@ -96,7 +99,7 @@ class _LookupResultViewState extends ConsumerState<LookupResultView> {
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w400,
-                              color: MewColors.ash,
+                              color: colors.ash,
                             ),
                           ),
                         ],
@@ -107,10 +110,10 @@ class _LookupResultViewState extends ConsumerState<LookupResultView> {
                       result.audioUrl!.isNotEmpty) ...[
                     IconButton.filled(
                       style: IconButton.styleFrom(
-                        backgroundColor: MewColors.warmTaupe,
-                        foregroundColor: MewColors.ink,
+                        backgroundColor: colors.warmTaupe,
+                        foregroundColor: colors.ink,
                         shape: const CircleBorder(),
-                        side: const BorderSide(color: MewColors.stone),
+                        side: BorderSide(color: colors.stone),
                       ),
                       icon: Icon(
                         _isPlaying
@@ -133,11 +136,11 @@ class _LookupResultViewState extends ConsumerState<LookupResultView> {
           Padding(
             padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
             child: Text(
-              'Gợi ý bộ sưu tập',
+              l10n?.collectionsTitle ?? 'Gợi ý bộ sưu tập',
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: MewColors.ink,
+                color: colors.ink,
               ),
             ),
           ),
@@ -172,7 +175,7 @@ class _LookupResultViewState extends ConsumerState<LookupResultView> {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
               ),
               const Spacer(),
@@ -181,7 +184,7 @@ class _LookupResultViewState extends ConsumerState<LookupResultView> {
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: MewColors.smoke,
+                  color: colors.smoke,
                 ),
               ),
             ],

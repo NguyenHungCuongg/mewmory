@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import '../models/collection.dart' as model;
 import '../providers/auth_provider.dart';
 import '../providers/collection_provider.dart';
@@ -26,27 +27,29 @@ class CollectionDetailPage extends ConsumerWidget {
     WidgetRef ref,
     model.Collection collection,
   ) async {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor: MewColors.eggshell,
+        backgroundColor: colors.eggshell,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Xóa bộ sưu tập',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          l10n?.deleteCollectionConfirm ?? 'Xóa bộ sưu tập',
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: colors.ink),
         ),
         content: Text(
           'Bạn có chắc chắn muốn xóa bộ sưu tập "${collection.name}"? Các từ vựng bên trong sẽ không bị xóa.',
-          style: GoogleFonts.inter(color: MewColors.smoke),
+          style: GoogleFonts.inter(color: colors.smoke),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: const Text('Hủy', style: TextStyle(color: MewColors.smoke)),
+            child: Text(l10n?.cancel ?? 'Hủy', style: TextStyle(color: colors.smoke)),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
-            child: const Text('Xóa', style: TextStyle(color: MewColors.error)),
+            child: Text(l10n?.delete ?? 'Xóa', style: TextStyle(color: colors.error)),
           ),
         ],
       ),
@@ -69,7 +72,7 @@ class CollectionDetailPage extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Không thể xóa: $e'),
-              backgroundColor: MewColors.error,
+              backgroundColor: colors.error,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -84,25 +87,27 @@ class CollectionDetailPage extends ConsumerWidget {
     String vocabId,
     String word,
   ) async {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor: MewColors.eggshell,
+        backgroundColor: colors.eggshell,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text('Xóa từ "$word"?',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+            style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: colors.ink)),
         content: Text(
           'Từ vựng này sẽ bị xóa khỏi kho lưu trữ và đồng bộ lên đám mây.',
-          style: GoogleFonts.inter(color: MewColors.smoke),
+          style: GoogleFonts.inter(color: colors.smoke),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: const Text('Hủy', style: TextStyle(color: MewColors.smoke)),
+            child: Text(l10n?.cancel ?? 'Hủy', style: TextStyle(color: colors.smoke)),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
-            child: const Text('Xóa', style: TextStyle(color: MewColors.error)),
+            child: Text(l10n?.delete ?? 'Xóa', style: TextStyle(color: colors.error)),
           ),
         ],
       ),
@@ -124,7 +129,7 @@ class CollectionDetailPage extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Không thể xóa: $e'),
-              backgroundColor: MewColors.error,
+              backgroundColor: colors.error,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -138,22 +143,24 @@ class CollectionDetailPage extends ConsumerWidget {
     final collectionAsync = ref.watch(collectionDetailProvider(id));
     final wordsAsync = ref.watch(wordsInCollectionProvider(id));
     final user = ref.watch(currentUserProvider);
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
 
     return collectionAsync.when(
-      loading: () => const Scaffold(
-        backgroundColor: MewColors.eggshell,
-        body: Center(child: LoadingIndicator()),
+      loading: () => Scaffold(
+        backgroundColor: colors.eggshell,
+        body: const Center(child: LoadingIndicator()),
       ),
       error: (err, _) => Scaffold(
-        backgroundColor: MewColors.eggshell,
-        appBar: AppBar(backgroundColor: MewColors.eggshell),
+        backgroundColor: colors.eggshell,
+        appBar: AppBar(backgroundColor: colors.eggshell),
         body: Center(child: Text('Lỗi: $err')),
       ),
       data: (col) {
         if (col == null) {
           return Scaffold(
-            backgroundColor: MewColors.eggshell,
-            appBar: AppBar(backgroundColor: MewColors.eggshell),
+            backgroundColor: colors.eggshell,
+            appBar: AppBar(backgroundColor: colors.eggshell),
             body: const Center(child: Text('Bộ sưu tập không tồn tại hoặc đã bị xóa')),
           );
         }
@@ -161,13 +168,13 @@ class CollectionDetailPage extends ConsumerWidget {
         final colModel = model.Collection.fromDrift(col);
 
         return Scaffold(
-          backgroundColor: MewColors.eggshell,
+          backgroundColor: colors.eggshell,
           appBar: AppBar(
-            backgroundColor: MewColors.eggshell,
+            backgroundColor: colors.eggshell,
             elevation: 0,
             scrolledUnderElevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: MewColors.ink),
+              icon: Icon(Icons.arrow_back, color: colors.ink),
               onPressed: () => context.pop(),
             ),
             title: Text(
@@ -175,13 +182,13 @@ class CollectionDetailPage extends ConsumerWidget {
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: MewColors.ink,
+                color: colors.ink,
               ),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.edit_outlined, color: MewColors.ink),
-                tooltip: 'Chỉnh sửa',
+                icon: Icon(Icons.edit_outlined, color: colors.ink),
+                tooltip: l10n?.edit ?? 'Chỉnh sửa',
                 onPressed: () => CollectionFormSheet.show(
                   context,
                   collection: colModel,
@@ -189,17 +196,17 @@ class CollectionDetailPage extends ConsumerWidget {
               ),
               if (!col.isDefault)
                 IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded,
-                      color: MewColors.error),
-                  tooltip: 'Xóa bộ sưu tập',
+                  icon: Icon(Icons.delete_outline_rounded,
+                      color: colors.error),
+                  tooltip: l10n?.delete ?? 'Xóa bộ sưu tập',
                   onPressed: () =>
                       _handleDeleteCollection(context, ref, colModel),
                 ),
             ],
           ),
           body: RefreshIndicator(
-            color: MewColors.ink,
-            backgroundColor: MewColors.eggshell,
+            color: colors.ink,
+            backgroundColor: colors.eggshell,
             onRefresh: () async {
               if (user != null) {
                 try {
@@ -233,7 +240,7 @@ class CollectionDetailPage extends ConsumerWidget {
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
-                              color: MewColors.smoke,
+                              color: colors.smoke,
                               height: 1.5,
                             ),
                           ),
@@ -241,18 +248,20 @@ class CollectionDetailPage extends ConsumerWidget {
                         ],
                         wordsAsync.when(
                           data: (words) => Text(
-                            '${words.length} từ vựng',
+                            l10n != null
+                                ? l10n.wordsCount(words.length)
+                                : '${words.length} từ vựng',
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
-                              color: MewColors.graphite,
+                              color: colors.ash,
                             ),
                           ),
                           loading: () => const SizedBox.shrink(),
                           error: (_, __) => const SizedBox.shrink(),
                         ),
                         const SizedBox(height: 12),
-                        const Divider(color: MewColors.stone, height: 1),
+                        Divider(color: colors.stone, height: 1),
                       ],
                     ),
                   ),
@@ -267,7 +276,7 @@ class CollectionDetailPage extends ConsumerWidget {
                     child: Center(
                       child: Text(
                         'Lỗi khi tải từ vựng: $err',
-                        style: GoogleFonts.inter(color: MewColors.error),
+                        style: GoogleFonts.inter(color: colors.error),
                       ),
                     ),
                   ),
@@ -277,10 +286,10 @@ class CollectionDetailPage extends ConsumerWidget {
                         hasScrollBody: false,
                         child: EmptyState(
                           icon: Icons.menu_book_outlined,
-                          title: 'Chưa có từ vựng nào',
+                          title: l10n?.emptyVocabulary ?? 'Chưa có từ vựng nào',
                           message:
                               'Bộ sưu tập này chưa chứa từ vựng nào. Hãy thêm từ vựng mới hoặc gán các từ có sẵn vào đây!',
-                          actionLabel: 'Thêm từ mới',
+                          actionLabel: l10n?.addWord ?? 'Thêm từ mới',
                           onAction: () => context.push('/vocabulary/add'),
                         ),
                       );

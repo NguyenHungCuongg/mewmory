@@ -72,6 +72,11 @@ class VocabularyService {
     return _db.vocabularyDao.watchById(id);
   }
 
+  /// Get random vocabulary for daily review from local Drift cache
+  Future<db.VocabularyWithDefinitions?> getRandomWord(String userId) async {
+    return await _db.vocabularyDao.getRandomWord(userId);
+  }
+
   /// Search vocabulary by keyword (matches word or English/Vietnamese definitions)
   Future<List<db.VocabularyWithDefinitions>> search(
     String userId,

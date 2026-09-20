@@ -113,4 +113,20 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
     final result = await query.map((row) => row.read(countExp)).getSingle();
     return result ?? 0;
   }
+
+  Future<int> getWordsLearnedThisWeek(String userId) async {
+    final now = DateTime.now();
+    final startOfWeek = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
+    final countExp = vocabularies.id.count();
+    final query = selectOnly(vocabularies)
+      ..addColumns([countExp])
+      ..where(
+        vocabularies.userId.equals(userId) &
+            vocabularies.isDeleted.equals(false) &
+            vocabularies.createdAt.isBiggerOrEqualValue(startOfWeek),
+      );
+    final result = await query.map((row) => row.read(countExp)).getSingle();
+    return result ?? 0;
+  }
 }

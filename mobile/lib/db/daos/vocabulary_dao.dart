@@ -200,6 +200,18 @@ class VocabularyDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
+  Future<VocabularyWithDefinitions?> getRandomWord(String userId) async {
+    final query = select(vocabularies)
+      ..where((v) => v.userId.equals(userId) & v.isDeleted.equals(false))
+      ..orderBy([(v) => OrderingTerm.random()])
+      ..limit(1);
+    final vocab = await query.getSingleOrNull();
+    if (vocab == null) return null;
+
+    final list = await _loadDefinitionsAndCollections([vocab]);
+    return list.isNotEmpty ? list.first : null;
+  }
+
   Future<void> upsertVocabulary(VocabulariesCompanion entry) async {
     await into(vocabularies).insertOnConflictUpdate(entry);
   }

@@ -40,6 +40,8 @@ class MewTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -50,7 +52,7 @@ class MewTextField extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: MewColors.ink,
+              color: colors.ink,
             ),
           ),
           const SizedBox(height: 8),
@@ -69,7 +71,7 @@ class MewTextField extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: MewColors.ink,
+            color: colors.ink,
           ),
           decoration: InputDecoration(
             hintText: hintText,
@@ -77,31 +79,31 @@ class MewTextField extends StatelessWidget {
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: MewColors.eggshell,
+            fillColor: colors.eggshell,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: MewColors.stone),
+              borderSide: BorderSide(color: colors.stone),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: MewColors.stone),
+              borderSide: BorderSide(color: colors.stone),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: MewColors.ink, width: 1.5),
+              borderSide: BorderSide(color: colors.ink, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: MewColors.error),
+              borderSide: BorderSide(color: colors.error),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: MewColors.error, width: 1.5),
+              borderSide: BorderSide(color: colors.error, width: 1.5),
             ),
             hintStyle: GoogleFonts.inter(
-              color: MewColors.ash,
+              color: colors.ash,
               fontSize: 14,
             ),
           ),

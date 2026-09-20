@@ -35,6 +35,7 @@ class MewButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
     final isFilled = variant == MewButtonVariant.filled;
     final isEnabled = onPressed != null && !isLoading;
 
@@ -45,7 +46,7 @@ class MewButton extends StatelessWidget {
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(
-                isFilled ? MewColors.eggshell : MewColors.ink,
+                isFilled ? colors.eggshell : colors.ink,
               ),
             ),
           )
@@ -62,7 +63,7 @@ class MewButton extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: isFilled ? MewColors.eggshell : MewColors.ink,
+                  color: isFilled ? colors.eggshell : colors.ink,
                   letterSpacing: 0.14,
                 ),
               ),
@@ -77,19 +78,19 @@ class MewButton extends StatelessWidget {
       ),
       backgroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
-          return isFilled ? MewColors.ash.withValues(alpha: 0.4) : Colors.transparent;
+          return isFilled ? colors.ash.withValues(alpha: 0.4) : Colors.transparent;
         }
-        return isFilled ? MewColors.ink : MewColors.eggshell;
+        return isFilled ? colors.ink : colors.eggshell;
       }),
       foregroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
-          return MewColors.smoke;
+          return colors.smoke;
         }
-        return isFilled ? MewColors.eggshell : MewColors.ink;
+        return isFilled ? colors.eggshell : colors.ink;
       }),
       side: WidgetStateProperty.resolveWith((states) {
         if (isFilled) return BorderSide.none;
-        return const BorderSide(color: MewColors.stone, width: 1);
+        return BorderSide(color: colors.stone, width: 1);
       }),
     );
 

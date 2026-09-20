@@ -54,6 +54,14 @@ void main() {
       expect(Formatters.formatDate(dt), '20/09/2026');
       expect(Formatters.formatDateTime(dt), '14:30 20/09/2026');
     });
+
+    test('formatters support English locale', () {
+      final now = DateTime.now();
+      expect(Formatters.relativeTime(now.subtract(const Duration(seconds: 10)), locale: 'en'), 'Just now');
+      expect(Formatters.relativeTime(now.subtract(const Duration(days: 1)), locale: 'en'), 'Yesterday');
+      expect(Formatters.cefrLabel('B2', locale: 'en'), 'B2 - Upper Intermediate');
+      expect(Formatters.posLabel('adjective', locale: 'en'), 'Adjective');
+    });
   });
 
   group('Validators Tests', () {

@@ -26,14 +26,15 @@ class MewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
     final decoration = BoxDecoration(
-      color: isElevated ? MewColors.eggshell : MewColors.warmTaupe,
+      color: isElevated ? colors.eggshell : colors.warmTaupe,
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: MewColors.stone, width: 1.0),
+      border: Border.all(color: colors.stone, width: 1.0),
       boxShadow: isElevated
           ? [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
+                color: Colors.black.withValues(alpha: context.isDark ? 0.2 : 0.04),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),

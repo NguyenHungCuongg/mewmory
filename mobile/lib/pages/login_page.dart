@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../config/theme.dart';
 import '../providers/auth_provider.dart';
+import '../providers/services_provider.dart';
 import '../widgets/common/mew_button.dart';
 import '../widgets/common/mew_text_field.dart';
 
@@ -23,6 +24,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _obscurePassword = true;
   bool _isLoading = false;
   bool _isGoogleLoading = false;
+  String? _syncMessage;
 
   @override
   void dispose() {
@@ -34,13 +36,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _handleEmailLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _syncMessage = null;
+    });
     try {
       final authService = ref.read(authServiceProvider);
-      await authService.signInWithEmail(
+      final response = await authService.signInWithEmail(
         _emailController.text,
         _passwordController.text,
       );
+
+      final user = response.user;
+      if (user != null && mounted) {
+        setState(() => _syncMessage = 'Đang đồng bộ dữ liệu...');
+        try {
+          await ref.read(syncServiceProvider).fullSync(user.id);
+        } catch (_) {}
+      }
 
       if (mounted) {
         context.go('/dashboard');
@@ -56,7 +69,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _syncMessage = null;
+        });
       }
     }
   }
@@ -181,7 +197,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                   // Sign In Button
                   MewButton.filled(
-                    label: 'Đăng nhập',
+                    label: _syncMessage ?? 'Đăng nhập',
                     isLoading: _isLoading,
                     onPressed: _isLoading ? null : _handleEmailLogin,
                   ),

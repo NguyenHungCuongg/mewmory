@@ -21,3 +21,18 @@ final currentUserProvider = Provider<User?>((ref) {
     return null;
   }
 });
+
+enum SyncState { idle, syncing, completed, failed }
+
+class SyncStateNotifier extends Notifier<SyncState> {
+  @override
+  SyncState build() => SyncState.idle;
+
+  void setSyncState(SyncState newState) {
+    state = newState;
+  }
+}
+
+final syncStateProvider =
+    NotifierProvider<SyncStateNotifier, SyncState>(SyncStateNotifier.new);
+

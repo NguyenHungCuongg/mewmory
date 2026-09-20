@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../config/theme.dart';
 import '../providers/auth_provider.dart';
+import '../providers/services_provider.dart';
 import '../widgets/common/mew_button.dart';
 import '../widgets/common/mew_text_field.dart';
 
@@ -25,6 +26,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
+  String? _syncMessage;
 
   @override
   void dispose() {
@@ -38,7 +40,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _syncMessage = null;
+    });
     try {
       final authService = ref.read(authServiceProvider);
       final response = await authService.signUpWithEmail(
@@ -49,8 +54,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
       if (mounted) {
         if (response.session != null) {
-          // Direct login after registration
-          context.go('/dashboard');
+          final user = response.user;
+          if (user != null) {
+            setState(() => _syncMessage = 'Đang đồng bộ dữ liệu...');
+            try {
+              await ref.read(syncServiceProvider).fullSync(user.id);
+            } catch (_) {}
+          }
+          if (mounted) {
+            context.go('/dashboard');
+          }
         } else {
           // Confirmation email required
           ScaffoldMessenger.of(context).showSnackBar(
@@ -206,7 +219,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                   // Register Button
                   MewButton.filled(
-                    label: 'Tạo tài khoản',
+                    label: _syncMessage ?? 'Tạo tài khoản',
                     isLoading: _isLoading,
                     onPressed: _isLoading ? null : _handleRegister,
                   ),

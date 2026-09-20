@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../config/theme.dart';
 
-class OfflineBanner extends StatelessWidget {
+import '../../config/theme.dart';
+import '../../providers/connectivity_provider.dart';
+
+class OfflineBanner extends ConsumerWidget {
   const OfflineBanner({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isOnline = ref.watch(connectivityProvider).value ?? true;
+
+    if (isOnline) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

@@ -7,14 +7,42 @@ import '../config/theme.dart';
 import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
 import '../providers/stats_provider.dart';
-import '../widgets/common/offline_banner.dart';
 import '../widgets/dashboard/daily_review_card.dart';
 import '../widgets/dashboard/stats_summary_card.dart';
 
-class DashboardPage extends ConsumerWidget {
+class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
-  Future<void> _handleRefresh(BuildContext context, WidgetRef ref, String userId) async {
+  @override
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends ConsumerState<DashboardPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkAndSyncOnLaunch());
+  }
+
+  Future<void> _checkAndSyncOnLaunch() async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+    try {
+      final syncService = ref.read(syncServiceProvider);
+      final lastSync = await syncService.getLastSyncAt(user.id);
+      if (lastSync == null) {
+        await syncService.fullSync(user.id);
+        if (mounted) {
+          ref.invalidate(totalWordCountProvider(user.id));
+          ref.invalidate(levelDistributionProvider(user.id));
+          ref.invalidate(wordsLearnedThisWeekProvider(user.id));
+          ref.invalidate(dailyReviewWordProvider);
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _handleRefresh(String userId) async {
     try {
       final syncService = ref.read(syncServiceProvider);
       final lastSync = await syncService.getLastSyncAt(userId);
@@ -32,7 +60,7 @@ class DashboardPage extends ConsumerWidget {
     } catch (_) {}
   }
 
-  String _getGreetingName(WidgetRef ref) {
+  String _getGreetingName() {
     final user = ref.watch(currentUserProvider);
     if (user == null) return 'bạn';
 
@@ -50,10 +78,10 @@ class DashboardPage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final userId = user?.id ?? '';
-    final displayName = _getGreetingName(ref);
+    final displayName = _getGreetingName();
 
     final totalCountAsync = ref.watch(totalWordCountProvider(userId));
     final weekCountAsync = ref.watch(wordsLearnedThisWeekProvider(userId));
@@ -78,15 +106,10 @@ class DashboardPage extends ConsumerWidget {
       body: RefreshIndicator(
         color: MewColors.ink,
         backgroundColor: MewColors.eggshell,
-        onRefresh: () => _handleRefresh(context, ref, userId),
+        onRefresh: () => _handleRefresh(userId),
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Offline banner if needed
-            const SliverToBoxAdapter(
-              child: OfflineBanner(),
-            ),
-
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               sliver: SliverList(

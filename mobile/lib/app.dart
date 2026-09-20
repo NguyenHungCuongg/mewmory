@@ -12,6 +12,7 @@ import 'pages/register_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/vocabulary_list_page.dart';
 import 'pages/word_detail_page.dart';
+import 'widgets/common/offline_banner.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -170,7 +171,12 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: navigationShell,
+      body: Column(
+        children: [
+          const OfflineBanner(),
+          Expanded(child: navigationShell),
+        ],
+      ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           border: Border(

@@ -88,6 +88,12 @@ class CollectionDao extends DatabaseAccessor<AppDatabase>
     return query.getSingleOrNull();
   }
 
+  Stream<Collection?> watchById(String id) {
+    final query = select(collections)
+      ..where((c) => c.id.equals(id) & c.isDeleted.equals(false));
+    return query.watchSingleOrNull();
+  }
+
   Future<void> upsert(CollectionsCompanion entry) async {
     await into(collections).insertOnConflictUpdate(entry);
   }

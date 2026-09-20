@@ -30,6 +30,11 @@ class CollectionService {
     return await _db.collectionDao.getById(id);
   }
 
+  /// Watch single collection by ID reactively from local cache
+  Stream<db.Collection?> watchById(String id) {
+    return _db.collectionDao.watchById(id);
+  }
+
   /// Create collection: writes to Supabase, then updates Drift cache
   Future<Collection> create({
     required String userId,

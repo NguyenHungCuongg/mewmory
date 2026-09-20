@@ -55,6 +55,20 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
 
     FocusScope.of(context).unfocus();
 
+    final isOnline = ref.read(connectivityProvider).value ?? true;
+    if (!isOnline) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Không có kết nối mạng. Bạn có thể nhập từ theo cách thủ công.',
+          ),
+          backgroundColor: MewColors.warning,
+        ),
+      );
+      setState(() => _manualMode = true);
+      return;
+    }
+
     // Check duplicate in local Drift cache first
     final user = ref.read(currentUserProvider);
     if (user != null) {
@@ -73,6 +87,17 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
   Future<void> _handleSave() async {
     final user = ref.read(currentUserProvider);
     if (user == null) return;
+
+    final isOnline = ref.read(connectivityProvider).value ?? true;
+    if (!isOnline) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không có kết nối mạng. Bạn chỉ có thể lưu từ khi trực tuyến.'),
+          backgroundColor: MewColors.error,
+        ),
+      );
+      return;
+    }
 
     final word = _wordController.text.trim();
     if (word.isEmpty) {

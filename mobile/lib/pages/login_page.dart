@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../config/theme.dart';
 import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
+import '../utils/validators.dart';
 import '../widgets/common/mew_button.dart';
 import '../widgets/common/mew_text_field.dart';
 
@@ -152,15 +153,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     prefixIcon: const Icon(Icons.mail_outline, size: 20, color: MewColors.ash),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Vui lòng nhập email';
-                      }
-                      if (!value.contains('@') || !value.contains('.')) {
-                        return 'Email không hợp lệ';
-                      }
-                      return null;
-                    },
+                    validator: Validators.email,
                   ),
                   const SizedBox(height: 16),
 
@@ -183,15 +176,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         setState(() => _obscurePassword = !_obscurePassword);
                       },
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Vui lòng nhập mật khẩu';
-                      }
-                      if (value.length < 6) {
-                        return 'Mật khẩu phải từ 6 ký tự trở lên';
-                      }
-                      return null;
-                    },
+                    validator: Validators.password,
                   ),
                   const SizedBox(height: 28),
 

@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/common/loading_indicator.dart';
 import '../widgets/settings/account_section.dart';
 import '../widgets/settings/ai_settings_section.dart';
+import '../widgets/settings/language_section.dart';
+import '../widgets/settings/theme_section.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -17,20 +20,24 @@ class SettingsPage extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final userId = user?.id ?? '';
     final settingsAsync = ref.watch(userSettingsNotifierProvider);
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+
+    final title = l10n?.settingsTitle ?? 'Cài đặt';
 
     return Scaffold(
-      backgroundColor: MewColors.eggshell,
+      backgroundColor: colors.eggshell,
       appBar: AppBar(
-        backgroundColor: MewColors.eggshell,
+        backgroundColor: colors.eggshell,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
-          'Cài đặt',
+          title,
           style: GoogleFonts.inter(
             fontSize: 24,
             fontWeight: FontWeight.w300,
             letterSpacing: -0.48,
-            color: MewColors.ink,
+            color: colors.ink,
           ),
         ),
       ),
@@ -41,7 +48,7 @@ class SettingsPage extends ConsumerWidget {
             padding: const EdgeInsets.all(24.0),
             child: Text(
               'Lỗi khi tải cài đặt: $err',
-              style: GoogleFonts.inter(color: MewColors.error),
+              style: GoogleFonts.inter(color: colors.error),
             ),
           ),
         ),
@@ -50,6 +57,14 @@ class SettingsPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Theme Section
+              const ThemeSection(),
+              const SizedBox(height: 16),
+
+              // Language Section
+              const LanguageSection(),
+              const SizedBox(height: 16),
+
               // AI Settings
               AiSettingsSection(
                 userId: userId,
@@ -70,7 +85,7 @@ class SettingsPage extends ConsumerWidget {
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: MewColors.smoke,
+                        color: colors.smoke,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -78,7 +93,7 @@ class SettingsPage extends ConsumerWidget {
                       'Phiên bản 1.0.0 (Alpha) • Online-First with Drift',
                       style: GoogleFonts.inter(
                         fontSize: 11,
-                        color: MewColors.ash,
+                        color: colors.ash,
                       ),
                     ),
                   ],

@@ -34,6 +34,31 @@ class UserSettings {
 
   Map<String, dynamic> toJson() => _$UserSettingsToJson(this);
 
+  UserSettings copyWith({
+    String? id,
+    String? userId,
+    String? aiProvider,
+    String? aiModel,
+    bool? notificationEnabled,
+    String? notificationMode,
+    String? notificationTime,
+    List<String>? notificationCollections,
+    DateTime? updatedAt,
+  }) {
+    return UserSettings(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      aiProvider: aiProvider ?? this.aiProvider,
+      aiModel: aiModel ?? this.aiModel,
+      notificationEnabled: notificationEnabled ?? this.notificationEnabled,
+      notificationMode: notificationMode ?? this.notificationMode,
+      notificationTime: notificationTime ?? this.notificationTime,
+      notificationCollections:
+          notificationCollections ?? this.notificationCollections,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   UserSettingsTableCompanion toDriftCompanion() {
     return UserSettingsTableCompanion(
       id: Value(id),

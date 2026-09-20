@@ -4,8 +4,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/theme.dart';
 import 'pages/add_word_page.dart';
+import 'pages/collection_detail_page.dart';
+import 'pages/collections_page.dart';
+import 'pages/dashboard_page.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
+import 'pages/settings_page.dart';
 import 'pages/vocabulary_list_page.dart';
 import 'pages/word_detail_page.dart';
 
@@ -80,10 +84,7 @@ GoRouter createRouter({
             routes: [
               GoRoute(
                 path: '/dashboard',
-                builder: (context, state) => const PlaceholderPage(
-                  title: 'Trang chủ',
-                  route: '/dashboard',
-                ),
+                builder: (context, state) => const DashboardPage(),
               ),
             ],
           ),
@@ -115,17 +116,13 @@ GoRouter createRouter({
             routes: [
               GoRoute(
                 path: '/collections',
-                builder: (context, state) => const PlaceholderPage(
-                  title: 'Bộ sưu tập',
-                  route: '/collections',
-                ),
+                builder: (context, state) => const CollectionsPage(),
                 routes: [
                   GoRoute(
                     path: ':id',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (context, state) => PlaceholderPage(
-                      title: 'Chi tiết bộ sưu tập',
-                      route: '/collections/${state.pathParameters['id']}',
+                    builder: (context, state) => CollectionDetailPage(
+                      id: state.pathParameters['id']!,
                     ),
                   ),
                 ],
@@ -137,10 +134,7 @@ GoRouter createRouter({
             routes: [
               GoRoute(
                 path: '/settings',
-                builder: (context, state) => const PlaceholderPage(
-                  title: 'Cài đặt',
-                  route: '/settings',
-                ),
+                builder: (context, state) => const SettingsPage(),
               ),
             ],
           ),

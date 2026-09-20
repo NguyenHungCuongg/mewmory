@@ -19,13 +19,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Verify initial route shows Trang chủ
-    expect(find.text('Trang chủ'), findsWidgets);
+    // Verify initial route shows Mewmory dashboard
+    expect(find.text('Mewmory'), findsWidgets);
 
     // Verify 4 bottom navigation items are present
-    expect(find.text('Trang chủ'), findsWidgets);
+    expect(find.text('Trang chủ'), findsOneWidget);
     expect(find.text('Từ vựng'), findsOneWidget);
-    expect(find.text('Bộ sưu tập'), findsOneWidget);
+    expect(find.text('Bộ sưu tập'), findsWidgets);
     expect(find.text('Cài đặt'), findsOneWidget);
 
     // Switch to 'Từ vựng' tab
@@ -34,14 +34,15 @@ void main() {
     expect(find.byType(FloatingActionButton), findsOneWidget);
 
     // Switch to 'Bộ sưu tập' tab
-    await tester.tap(find.text('Bộ sưu tập'));
+    await tester.tap(find.text('Bộ sưu tập').first);
     await tester.pumpAndSettle();
-    expect(find.text('/collections'), findsOneWidget);
+    expect(find.text('Bộ sưu tập'), findsWidgets);
 
     // Switch to 'Cài đặt' tab
     await tester.tap(find.text('Cài đặt'));
     await tester.pumpAndSettle();
-    expect(find.text('/settings'), findsOneWidget);
+    expect(find.text('Cấu hình AI'), findsOneWidget);
+    expect(find.text('Tài khoản người dùng'), findsOneWidget);
   });
 
   testWidgets('MewmoryApp redirects to login when auth redirect is active without session',

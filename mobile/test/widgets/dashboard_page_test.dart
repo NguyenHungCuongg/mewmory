@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mewmory/config/theme.dart';
 import 'package:mewmory/db/daos/vocabulary_dao.dart';
 import 'package:mewmory/db/database.dart' as db;
+import 'package:mewmory/l10n/app_localizations.dart';
 import 'package:mewmory/pages/dashboard_page.dart';
 import 'package:mewmory/providers/stats_provider.dart';
 import 'package:mewmory/widgets/dashboard/daily_review_card.dart';
@@ -112,6 +114,99 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Sự tình cờ may mắn'), findsOneWidget);
+    });
+
+    testWidgets(
+        'DailyReviewCard renders without overflow in Vietnamese on narrow 360dp screen',
+        (tester) async {
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dailyReviewWordProvider
+                .overrideWith(() => _MockDailyReviewNotifier(testWordItem)),
+          ],
+          child: MaterialApp(
+            theme: MewTheme.light,
+            darkTheme: MewTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('vi'),
+            home: const Scaffold(
+              body: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: DailyReviewCard(userId: 'user-1'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Check Vietnamese title and toggle options
+      expect(find.text('Luyện tập hàng ngày'), findsOneWidget);
+      expect(find.text('Nhẹ nhàng'), findsOneWidget);
+      expect(find.text('Flashcard'), findsOneWidget);
+
+      // Verify toggle functions without any layout overflow
+      await tester.tap(find.text('Flashcard'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lật thẻ xem nghĩa'), findsOneWidget);
+      expect(find.text('Lật thẻ'), findsOneWidget);
+
+      // Flip card
+      await tester.tap(find.text('Lật thẻ'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sự tình cờ may mắn'), findsOneWidget);
+
+      await tester.tap(find.text('Nhẹ nhàng'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sự tình cờ may mắn'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'DailyReviewCard has zero overflow even on ultra-narrow 320dp screen',
+        (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dailyReviewWordProvider
+                .overrideWith(() => _MockDailyReviewNotifier(testWordItem)),
+          ],
+          child: MaterialApp(
+            theme: MewTheme.light,
+            darkTheme: MewTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('vi'),
+            home: const Scaffold(
+              body: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: DailyReviewCard(userId: 'user-1'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Flashcard'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
     });
   });
 }

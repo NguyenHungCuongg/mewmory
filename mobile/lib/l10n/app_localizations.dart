@@ -296,6 +296,12 @@ abstract class AppLocalizations {
   /// **'Lật thẻ xem nghĩa'**
   String get flipCard;
 
+  /// No description provided for @flipCardAction.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lật thẻ'**
+  String get flipCardAction;
+
   /// No description provided for @nextWord.
   ///
   /// In vi, this message translates to:

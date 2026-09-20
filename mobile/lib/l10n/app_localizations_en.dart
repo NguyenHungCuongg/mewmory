@@ -109,6 +109,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get flipCard => 'Flip card to reveal meaning';
 
   @override
+  String get flipCardAction => 'Flip card';
+
+  @override
   String get nextWord => 'Next word';
 
   @override

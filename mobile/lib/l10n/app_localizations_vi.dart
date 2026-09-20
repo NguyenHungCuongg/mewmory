@@ -110,6 +110,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get flipCard => 'Lật thẻ xem nghĩa';
 
   @override
+  String get flipCardAction => 'Lật thẻ';
+
+  @override
   String get nextWord => 'Từ khác';
 
   @override

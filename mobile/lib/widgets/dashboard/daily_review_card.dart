@@ -73,106 +73,70 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
     final flashcardLabel = l10n?.flashcardMode ?? 'Thẻ nhớ';
 
     return MewCard(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Icon + Title + Mode Switch
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
+          // Header: Icon + Title + Mode Switch (Responsive for narrow screens)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isVeryNarrow = constraints.maxWidth < 275;
+
+              final titleRow = Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       color: colors.violetSpark.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.auto_awesome_rounded,
-                      size: 16,
+                      size: 15,
                       color: colors.violetSpark,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    title,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: colors.ink,
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.2,
+                        color: colors.ink,
+                      ),
                     ),
                   ),
                 ],
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  color: colors.warmTaupe,
-                  borderRadius: BorderRadius.circular(9999),
-                  border: Border.all(color: colors.stone),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+              );
+
+              final toggle = _buildModeToggle(colors, gentleLabel, flashcardLabel);
+
+              if (isVeryNarrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    InkWell(
-                      onTap: () => setState(() {
-                        _mode = ReviewMode.gentle;
-                        _isCardFlipped = false;
-                      }),
-                      borderRadius: BorderRadius.circular(9999),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _mode == ReviewMode.gentle
-                              ? colors.ink
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(9999),
-                        ),
-                        child: Text(
-                          gentleLabel,
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: _mode == ReviewMode.gentle
-                                ? colors.eggshell
-                                : colors.smoke,
-                          ),
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () => setState(() {
-                        _mode = ReviewMode.flashcard;
-                        _isCardFlipped = false;
-                      }),
-                      borderRadius: BorderRadius.circular(9999),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _mode == ReviewMode.flashcard
-                              ? colors.ink
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(9999),
-                        ),
-                        child: Text(
-                          flashcardLabel,
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: _mode == ReviewMode.flashcard
-                                ? colors.eggshell
-                                : colors.smoke,
-                          ),
-                        ),
-                      ),
+                    titleRow,
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: toggle,
                     ),
                   ],
-                ),
-              ),
-            ],
+                );
+              }
+
+              return Row(
+                children: [
+                  Expanded(child: titleRow),
+                  const SizedBox(width: 8),
+                  toggle,
+                ],
+              );
+            },
           ),
           const SizedBox(height: 16),
 
@@ -396,12 +360,16 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                             color: colors.smoke,
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            l10n?.flipCard ?? 'Chạm để lật thẻ xem nghĩa',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: colors.smoke,
+                          Flexible(
+                            child: Text(
+                              l10n?.flipCard ?? 'Chạm để lật thẻ xem nghĩa',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: colors.smoke,
+                              ),
                             ),
                           ),
                         ],
@@ -413,19 +381,25 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
         const SizedBox(height: 16),
 
         // Action Buttons: Next Word
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+        Wrap(
+          alignment: WrapAlignment.end,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             if (_mode == ReviewMode.flashcard && !_isCardFlipped)
               TextButton.icon(
                 onPressed: () => setState(() => _isCardFlipped = true),
                 icon: const Icon(Icons.visibility_outlined, size: 16),
-                label: Text(l10n?.flipCard ?? 'Lật thẻ'),
+                label: Text(l10n?.flipCardAction ?? 'Lật thẻ'),
                 style: TextButton.styleFrom(
                   foregroundColor: colors.ink,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ),
-            const SizedBox(width: 8),
             MewButton.outlined(
               label: l10n?.nextWord ?? 'Từ khác',
               icon: const Icon(Icons.refresh_rounded, size: 16),
@@ -436,6 +410,67 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildModeToggle(
+    MewThemeColors colors,
+    String gentleLabel,
+    String flashcardLabel,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.warmTaupe,
+        borderRadius: BorderRadius.circular(9999),
+        border: Border.all(color: colors.stone),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildToggleItem(
+            mode: ReviewMode.gentle,
+            label: gentleLabel,
+            colors: colors,
+          ),
+          _buildToggleItem(
+            mode: ReviewMode.flashcard,
+            label: flashcardLabel,
+            colors: colors,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleItem({
+    required ReviewMode mode,
+    required String label,
+    required MewThemeColors colors,
+  }) {
+    final isSelected = _mode == mode;
+    return InkWell(
+      onTap: () => setState(() {
+        _mode = mode;
+        _isCardFlipped = false;
+      }),
+      borderRadius: BorderRadius.circular(9999),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.ink : Colors.transparent,
+          borderRadius: BorderRadius.circular(9999),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.1,
+            color: isSelected ? colors.eggshell : colors.smoke,
+          ),
+        ),
+      ),
     );
   }
 }

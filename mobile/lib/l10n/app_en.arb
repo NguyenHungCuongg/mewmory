@@ -36,6 +36,7 @@
   "gentleMode": "Gentle",
   "flashcardMode": "Flashcard",
   "flipCard": "Flip card to reveal meaning",
+  "flipCardAction": "Flip card",
   "nextWord": "Next word",
   "noWordsToReview": "No words to review yet",
   "addWordNow": "Add a new word now",

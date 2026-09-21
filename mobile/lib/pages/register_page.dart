@@ -128,13 +128,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Name Field (optional)
+                  // Name Field (Required)
                   MewTextField(
                     controller: _nameController,
                     label: l10n?.displayName ?? 'Họ và tên',
                     hintText: 'Nguyễn Văn A',
                     textInputAction: TextInputAction.next,
                     prefixIcon: Icon(Icons.person_outline, size: 20, color: colors.ash),
+                    validator: (v) {
+                      final req = Validators.required(v, 'Họ và tên');
+                      if (req != null) return req;
+                      return Validators.minLength(v, 2, 'Họ và tên');
+                    },
                   ),
                   const SizedBox(height: 16),
 

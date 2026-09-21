@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
 import '../providers/stats_provider.dart';
 import '../widgets/common/language_switcher.dart';
+import '../widgets/common/user_avatar.dart';
 import '../widgets/dashboard/daily_review_card.dart';
 import '../widgets/dashboard/stats_summary_card.dart';
 
@@ -127,24 +128,46 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // Greeting
-                  Text(
-                    '${l10n?.greeting ?? 'Xin chào'}, $displayName! 👋',
-                    style: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: colors.ink,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n?.dailyReviewSubtitle ??
-                        'Hãy duy trì thói quen học từ vựng mỗi ngày cùng Mewmory nhé.',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      color: colors.smoke,
-                    ),
+                  // Greeting & Avatar Header
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${l10n?.greeting ?? 'Xin chào'}, $displayName! 👋',
+                              style: GoogleFonts.inter(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: colors.ink,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n?.dailyReviewSubtitle ??
+                                  'Hãy duy trì thói quen học từ vựng mỗi ngày cùng Mewmory nhé.',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400,
+                                color: colors.smoke,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: () => context.go('/settings'),
+                        child: UserAvatar(
+                          name: displayName,
+                          email: user?.email ?? '',
+                          photoUrl: user?.userMetadata?['avatar_url'] as String?,
+                          size: 46,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
 

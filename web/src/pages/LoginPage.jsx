@@ -15,6 +15,7 @@ export default function LoginPage() {
   const addToast = useUIStore((s) => s.addToast);
 
   const [isSignUp, setIsSignUp] = useState(false);
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -30,6 +31,12 @@ export default function LoginPage() {
     if (!passwordResult.valid) newErrors.password = passwordResult.error;
 
     if (isSignUp) {
+      if (!displayName.trim()) {
+        newErrors.displayName = t("displayNameRequired");
+      } else if (displayName.trim().length < 2) {
+        newErrors.displayName = t("displayNameMinLength");
+      }
+
       if (!confirmPassword) {
         newErrors.confirmPassword = t("confirmPasswordRequired");
       } else if (password !== confirmPassword) {
@@ -47,7 +54,9 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        const { session, error } = await authService.signUp(email, password);
+        const { session, error } = await authService.signUp(email, password, {
+          displayName: displayName.trim(),
+        });
         if (error) throw error;
 
         if (!session) {
@@ -56,6 +65,7 @@ export default function LoginPage() {
             "info",
           );
           setIsSignUp(false);
+          setDisplayName("");
           setPassword("");
           setConfirmPassword("");
         } else {
@@ -75,6 +85,7 @@ export default function LoginPage() {
         msg.includes("đã được đăng ký")
       ) {
         setIsSignUp(false);
+        setDisplayName("");
         setPassword("");
         setConfirmPassword("");
       }
@@ -119,6 +130,17 @@ export default function LoginPage() {
           </h2>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {isSignUp && (
+              <Input
+                id="display-name"
+                type="text"
+                label={t("displayName")}
+                placeholder={t("displayNamePlaceholder")}
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                error={errors.displayName}
+              />
+            )}
             <Input
               id="email"
               type="email"
@@ -181,6 +203,7 @@ export default function LoginPage() {
               type="button"
               onClick={() => {
                 setIsSignUp(!isSignUp);
+                setDisplayName("");
                 setPassword("");
                 setConfirmPassword("");
                 setErrors({});

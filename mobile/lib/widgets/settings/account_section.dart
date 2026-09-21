@@ -10,6 +10,7 @@ import '../../utils/mew_toast.dart';
 import '../common/mew_button.dart';
 import '../common/mew_card.dart';
 import '../common/mew_text_field.dart';
+import '../common/user_avatar.dart';
 
 class AccountSection extends ConsumerStatefulWidget {
   const AccountSection({super.key});
@@ -28,6 +29,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
     final user = ref.read(currentUserProvider);
     final initialName = (user?.userMetadata?['display_name'] ??
             user?.userMetadata?['full_name'] ??
+            user?.userMetadata?['name'] ??
             '') as String;
     _nameController = TextEditingController(text: initialName);
   }
@@ -40,7 +42,10 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
 
   Future<void> _handleUpdateName() async {
     final newName = _nameController.text.trim();
-    if (newName.isEmpty) return;
+    if (newName.isEmpty) {
+      MewToast.showError(context, 'Tên không được để trống');
+      return;
+    }
 
     setState(() => _isUpdatingName = true);
     try {
@@ -116,6 +121,11 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final email = user?.email ?? 'Chưa xác định';
+    final displayName = (user?.userMetadata?['display_name'] ??
+            user?.userMetadata?['full_name'] ??
+            user?.userMetadata?['name'] ??
+            '') as String;
+    final photoUrl = user?.userMetadata?['avatar_url'] as String?;
     final colors = context.mewColors;
     final l10n = AppLocalizations.of(context);
 
@@ -147,6 +157,49 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: colors.ink,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // User Profile Info with UserAvatar
+          Row(
+            children: [
+              UserAvatar(
+                name: displayName,
+                email: email,
+                photoUrl: photoUrl,
+                size: 48,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName.trim().isNotEmpty
+                          ? displayName.trim()
+                          : (user?.email?.split('@').first ?? 'Người dùng'),
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: colors.ink,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      email,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: colors.smoke,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -32,6 +32,11 @@
   },
   "account": {
     "title": "Account & Security",
+    "displayName": "Display name",
+    "displayNamePlaceholder": "Enter new display name",
+    "updateName": "Update name",
+    "updateNameSuccess": "Display name updated successfully!",
+    "updateNameError": "Error updating display name",
     "email": "Login Email:",
     "userId": "User ID:",
     "signOut": "Sign out account",

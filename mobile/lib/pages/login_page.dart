@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
 import '../utils/mew_toast.dart';
 import '../utils/validators.dart';
+import '../widgets/common/language_switcher.dart';
 import '../widgets/common/mew_button.dart';
 import '../widgets/common/mew_text_field.dart';
 
@@ -37,6 +38,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _handleEmailLogin() async {
+    final l10n = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -52,7 +54,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       final user = response.user;
       if (user != null && mounted) {
-        setState(() => _syncMessage = 'Đang đồng bộ dữ liệu...');
+        setState(() => _syncMessage = l10n?.syncingData ?? 'Đang đồng bộ dữ liệu...');
         try {
           await ref.read(syncServiceProvider).fullSync(user.id);
         } catch (_) {}
@@ -63,7 +65,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     } catch (e) {
       if (mounted) {
-        MewToast.showError(context, e, prefix: 'Đăng nhập thất bại');
+        final isVi = (l10n?.localeName ?? 'vi') == 'vi';
+        MewToast.showError(
+          context,
+          e,
+          prefix: l10n?.signInFailed ?? 'Đăng nhập thất bại',
+          locale: isVi ? 'vi' : 'en',
+        );
       }
     } finally {
       if (mounted) {
@@ -76,16 +84,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _handleGoogleLogin() async {
+    final l10n = AppLocalizations.of(context);
+    final isVi = (l10n?.localeName ?? 'vi') == 'vi';
     setState(() => _isGoogleLoading = true);
     try {
       final authService = ref.read(authServiceProvider);
       final success = await authService.signInWithGoogle();
       if (!success && mounted) {
-        MewToast.showError(context, 'Không thể mở đăng nhập Google.');
+        MewToast.showError(
+          context,
+          l10n?.googleSignInUnavailable ?? 'Không thể mở đăng nhập Google.',
+          locale: isVi ? 'vi' : 'en',
+        );
       }
     } catch (e) {
       if (mounted) {
-        MewToast.showError(context, e, prefix: 'Đăng nhập Google thất bại');
+        MewToast.showError(
+          context,
+          e,
+          prefix: l10n?.googleSignInFailed ?? 'Đăng nhập Google thất bại',
+          locale: isVi ? 'vi' : 'en',
+        );
       }
     } finally {
       if (mounted) {
@@ -98,20 +117,28 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final colors = context.mewColors;
     final l10n = AppLocalizations.of(context);
+    final isVi = (l10n?.localeName ?? 'vi') == 'vi';
 
     return Scaffold(
       backgroundColor: colors.eggshell,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 20),
+        child: Stack(
+          children: [
+            Positioned(
+              top: 12,
+              right: 16,
+              child: const LanguageSwitcher(),
+            ),
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 36),
                   // App Title & Tagline
                   Text(
                     'Mewmory',
@@ -143,7 +170,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     prefixIcon: Icon(Icons.mail_outline, size: 20, color: colors.ash),
-                    validator: Validators.email,
+                    validator: (v) => Validators.email(
+                      v,
+                      emptyMessage: l10n?.requiredField,
+                      invalidMessage: l10n?.invalidEmail,
+                    ),
                   ),
                   const SizedBox(height: 16),
 
@@ -166,7 +197,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         setState(() => _obscurePassword = !_obscurePassword);
                       },
                     ),
-                    validator: Validators.password,
+                    validator: (v) => Validators.password(
+                      v,
+                      emptyMessage: l10n?.requiredField,
+                      minLengthMessage: l10n?.passwordMinLength,
+                    ),
                   ),
                   const SizedBox(height: 28),
 
@@ -178,14 +213,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Divider with "hoặc"
+                  // Divider with "or" / "hoặc"
                   Row(
                     children: [
                       Expanded(child: Divider(color: colors.stone)),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
-                          'hoặc',
+                          l10n?.orDivider ?? 'hoặc',
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             color: colors.ash,
@@ -199,7 +234,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                   // Google Sign-In Button
                   MewButton.outlined(
-                    label: 'Đăng nhập với Google',
+                    label: l10n?.signInWithGoogle ?? 'Đăng nhập với Google',
                     isLoading: _isGoogleLoading,
                     icon: Icon(Icons.g_mobiledata, size: 24, color: colors.ink),
                     onPressed: _isGoogleLoading ? null : _handleGoogleLogin,
@@ -211,7 +246,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Chưa có tài khoản? ',
+                        isVi ? 'Chưa có tài khoản? ' : "Don't have an account? ",
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           color: colors.smoke,
@@ -236,6 +271,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
             ),
           ),
+        ),
+          ],
         ),
       ),
     );

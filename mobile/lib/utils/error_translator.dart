@@ -7,16 +7,25 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ErrorTranslator {
   ErrorTranslator._();
 
-  /// Converts any [error] into a human-readable Vietnamese message.
+  /// Converts any [error] into a human-readable message in Vietnamese or English.
   /// If [prefix] is supplied, formats as "$prefix: $message".
-  static String translate(dynamic error, {String? prefix}) {
+  static String translate(
+    dynamic error, {
+    String? prefix,
+    String locale = 'vi',
+  }) {
+    final isEn = locale == 'en';
     if (error == null) {
-      final fallback = 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.';
+      final fallback = isEn
+          ? 'An unexpected error occurred. Please try again.'
+          : 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.';
       return prefix != null ? '$prefix: $fallback' : fallback;
     }
 
     final rawMessage = _extractRawMessage(error);
-    final translated = _mapToVietnamese(rawMessage);
+    final translated = isEn
+        ? _mapToEnglish(rawMessage)
+        : _mapToVietnamese(rawMessage);
 
     if (prefix != null && prefix.trim().isNotEmpty) {
       if (translated.toLowerCase().startsWith(prefix.trim().toLowerCase())) {
@@ -221,6 +230,99 @@ class ErrorTranslator {
     // If string still looks like JSON or code, strip it
     if (message.startsWith('{') && message.endsWith('}')) {
       return 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.';
+    }
+
+    return message;
+  }
+
+  static String _mapToEnglish(String message) {
+    final lower = message.toLowerCase().trim();
+
+    if (lower.isEmpty) {
+      return 'An unexpected error occurred. Please try again.';
+    }
+
+    // Network & connectivity errors
+    if (lower == 'network_error' ||
+        lower.contains('failed host lookup') ||
+        lower.contains('socketexception') ||
+        lower.contains('clientexception') ||
+        lower.contains('network is unreachable') ||
+        lower.contains('connection refused') ||
+        lower.contains('connection closed') ||
+        lower.contains('connection timed out') ||
+        lower.contains('software caused connection abort')) {
+      return 'Cannot connect to server. Please check your network connection.';
+    }
+
+    // Postgrest duplicate unique constraint
+    if (lower.contains('23505') ||
+        lower.contains('duplicate key value') ||
+        lower.contains('already exists')) {
+      return 'Data already exists in the system.';
+    }
+
+    // Wrong credentials
+    if (lower.contains('invalid login credentials') ||
+        lower.contains('invalid credentials') ||
+        lower.contains('invalid_credentials') ||
+        lower.contains('invalid_grant') ||
+        lower.contains('wrong password') ||
+        lower.contains('invalid email or password')) {
+      return 'Incorrect email or password.';
+    }
+
+    // Already registered
+    if (lower.contains('user already registered') ||
+        lower.contains('already registered') ||
+        lower.contains('already in use') ||
+        lower.contains('user_already_exists')) {
+      return 'This email is already registered. Please sign in.';
+    }
+
+    // Email not confirmed
+    if (lower.contains('email not confirmed')) {
+      return 'Email not confirmed. Please check your inbox to activate your account.';
+    }
+
+    // Password short / invalid
+    if (lower.contains('password should be at least') ||
+        lower.contains('password is too short')) {
+      return 'Password must be at least 6 characters.';
+    }
+    if (lower.contains('signup requires a valid password')) {
+      return 'Please enter a valid password.';
+    }
+
+    // Rate limits
+    if (lower.contains('rate limit') ||
+        lower.contains('too many requests') ||
+        lower.contains('over_email_send_rate_limit') ||
+        lower.contains('email rate limit exceeded')) {
+      return 'Too many requests. Please try again later.';
+    }
+
+    // Database / Server
+    if (lower.contains('database error saving new user')) {
+      return 'Database error creating account. Please try again later.';
+    }
+
+    // Invalid email
+    if (lower.contains('invalid email') ||
+        lower.contains('unable to validate email')) {
+      return 'Invalid email address.';
+    }
+
+    // Session expired
+    if (lower.contains('jwt expired') ||
+        lower.contains('token is expired') ||
+        lower.contains('session expired')) {
+      return 'Session expired. Please sign in again.';
+    }
+
+    // If string still looks like JSON or code, strip it
+    if (message.startsWith('{') && message.endsWith('}')) {
+      return 'An unexpected error occurred. Please try again.';
     }
 
     return message;

@@ -30,8 +30,13 @@ class MewToast {
     dynamic error, {
     String? prefix,
     Duration duration = const Duration(seconds: 4),
+    String? locale,
   }) {
-    final friendlyMessage = ErrorTranslator.translate(error, prefix: prefix);
+    final friendlyMessage = ErrorTranslator.translate(
+      error,
+      prefix: prefix,
+      locale: locale ?? 'vi',
+    );
     _show(
       context: context,
       message: friendlyMessage,

@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
 import '../utils/mew_toast.dart';
 import '../utils/validators.dart';
+import '../widgets/common/language_switcher.dart';
 import '../widgets/common/mew_button.dart';
 import '../widgets/common/mew_text_field.dart';
 
@@ -41,6 +42,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Future<void> _handleRegister() async {
+    final l10n = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -59,7 +61,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         if (response.session != null) {
           final user = response.user;
           if (user != null) {
-            setState(() => _syncMessage = 'Đang đồng bộ dữ liệu...');
+            setState(() => _syncMessage = l10n?.syncingData ?? 'Đang đồng bộ dữ liệu...');
             try {
               await ref.read(syncServiceProvider).fullSync(user.id);
             } catch (_) {}
@@ -71,7 +73,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           // Confirmation email required
           MewToast.showSuccess(
             context,
-            'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
+            l10n?.signUpSuccessNotice ??
+                'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
             duration: const Duration(seconds: 4),
           );
           context.go('/login');
@@ -79,7 +82,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       }
     } catch (e) {
       if (mounted) {
-        MewToast.showError(context, e, prefix: 'Đăng ký thất bại');
+        final isVi = (l10n?.localeName ?? 'vi') == 'vi';
+        MewToast.showError(
+          context,
+          e,
+          prefix: l10n?.signUpFailed ?? 'Đăng ký thất bại',
+          locale: isVi ? 'vi' : 'en',
+        );
       }
     } finally {
       if (mounted) {
@@ -92,20 +101,28 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Widget build(BuildContext context) {
     final colors = context.mewColors;
     final l10n = AppLocalizations.of(context);
+    final isVi = (l10n?.localeName ?? 'vi') == 'vi';
 
     return Scaffold(
       backgroundColor: colors.eggshell,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 16),
+        child: Stack(
+          children: [
+            Positioned(
+              top: 12,
+              right: 16,
+              child: const LanguageSwitcher(),
+            ),
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 36),
                   Text(
                     l10n?.registerTitle ?? 'Tạo tài khoản',
                     style: GoogleFonts.inter(
@@ -131,14 +148,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   // Name Field (Required)
                   MewTextField(
                     controller: _nameController,
-                    label: l10n?.displayName ?? 'Họ và tên',
-                    hintText: 'Nguyễn Văn A',
+                    label: l10n?.fullName ?? 'Họ và tên',
+                    hintText: l10n?.fullNameHint ?? 'Nguyễn Văn A',
                     textInputAction: TextInputAction.next,
                     prefixIcon: Icon(Icons.person_outline, size: 20, color: colors.ash),
                     validator: (v) {
-                      final req = Validators.required(v, 'Họ và tên');
-                      if (req != null) return req;
-                      return Validators.minLength(v, 2, 'Họ và tên');
+                      if (v == null || v.trim().isEmpty) {
+                        return l10n?.fullNameRequired ?? 'Vui lòng nhập họ và tên';
+                      }
+                      if (v.trim().length < 2) {
+                        return l10n?.fullNameMinLength ?? 'Họ và tên phải có ít nhất 2 ký tự';
+                      }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),
@@ -151,7 +172,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     prefixIcon: Icon(Icons.mail_outline, size: 20, color: colors.ash),
-                    validator: Validators.email,
+                    validator: (v) => Validators.email(
+                      v,
+                      emptyMessage: l10n?.requiredField,
+                      invalidMessage: l10n?.invalidEmail,
+                    ),
                   ),
                   const SizedBox(height: 16),
 
@@ -159,7 +184,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   MewTextField(
                     controller: _passwordController,
                     label: l10n?.password ?? 'Mật khẩu',
-                    hintText: 'Tối thiểu 6 ký tự',
+                    hintText: l10n?.passwordHint ?? 'Tối thiểu 6 ký tự',
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.next,
                     prefixIcon: Icon(Icons.lock_outline, size: 20, color: colors.ash),
@@ -173,15 +198,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         setState(() => _obscurePassword = !_obscurePassword);
                       },
                     ),
-                    validator: Validators.password,
+                    validator: (v) => Validators.password(
+                      v,
+                      emptyMessage: l10n?.requiredField,
+                      minLengthMessage: l10n?.passwordMinLength,
+                    ),
                   ),
                   const SizedBox(height: 16),
 
                   // Confirm Password Field
                   MewTextField(
                     controller: _confirmPasswordController,
-                    label: 'Xác nhận mật khẩu',
-                    hintText: 'Nhập lại mật khẩu',
+                    label: l10n?.confirmPassword ?? 'Xác nhận mật khẩu',
+                    hintText: l10n?.confirmPasswordHint ?? 'Nhập lại mật khẩu',
                     obscureText: _obscureConfirmPassword,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => _handleRegister(),
@@ -197,8 +226,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       },
                     ),
                     validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return l10n?.confirmPasswordRequired ?? 'Vui lòng xác nhận mật khẩu';
+                      }
                       if (value != _passwordController.text) {
-                        return 'Mật khẩu xác nhận không khớp';
+                        return l10n?.passwordMismatch ?? 'Mật khẩu xác nhận không khớp';
                       }
                       return null;
                     },
@@ -218,7 +250,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Đã có tài khoản? ',
+                        isVi ? 'Đã có tài khoản? ' : 'Already have an account? ',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           color: colors.smoke,
@@ -243,6 +275,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               ),
             ),
           ),
+        ),
+          ],
         ),
       ),
     );

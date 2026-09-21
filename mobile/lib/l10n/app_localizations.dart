@@ -614,6 +614,108 @@ abstract class AppLocalizations {
   /// **'Bắt đầu ghi nhớ từ vựng thông minh'**
   String get registerSubtitle;
 
+  /// No description provided for @orDivider.
+  ///
+  /// In vi, this message translates to:
+  /// **'hoặc'**
+  String get orDivider;
+
+  /// No description provided for @signInWithGoogle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập với Google'**
+  String get signInWithGoogle;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xác nhận mật khẩu'**
+  String get confirmPassword;
+
+  /// No description provided for @confirmPasswordHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập lại mật khẩu'**
+  String get confirmPasswordHint;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mật khẩu xác nhận không khớp'**
+  String get passwordMismatch;
+
+  /// No description provided for @confirmPasswordRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng xác nhận mật khẩu'**
+  String get confirmPasswordRequired;
+
+  /// No description provided for @fullName.
+  ///
+  /// In vi, this message translates to:
+  /// **'Họ và tên'**
+  String get fullName;
+
+  /// No description provided for @fullNameHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nguyễn Văn A'**
+  String get fullNameHint;
+
+  /// No description provided for @passwordHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tối thiểu 6 ký tự'**
+  String get passwordHint;
+
+  /// No description provided for @fullNameRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vui lòng nhập họ và tên'**
+  String get fullNameRequired;
+
+  /// No description provided for @fullNameMinLength.
+  ///
+  /// In vi, this message translates to:
+  /// **'Họ và tên phải có ít nhất 2 ký tự'**
+  String get fullNameMinLength;
+
+  /// No description provided for @signUpSuccessNotice.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.'**
+  String get signUpSuccessNotice;
+
+  /// No description provided for @signInFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập thất bại'**
+  String get signInFailed;
+
+  /// No description provided for @signUpFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng ký thất bại'**
+  String get signUpFailed;
+
+  /// No description provided for @googleSignInFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đăng nhập Google thất bại'**
+  String get googleSignInFailed;
+
+  /// No description provided for @googleSignInUnavailable.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thể mở đăng nhập Google.'**
+  String get googleSignInUnavailable;
+
+  /// No description provided for @syncingData.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang đồng bộ dữ liệu...'**
+  String get syncingData;
+
   /// No description provided for @settingsTitle.
   ///
   /// In vi, this message translates to:

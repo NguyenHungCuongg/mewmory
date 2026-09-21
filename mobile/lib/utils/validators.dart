@@ -3,24 +3,33 @@ class Validators {
     r'^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
   );
 
-  /// Validates email format
-  static String? email(String? value) {
+  /// Validates email format with optional custom messages
+  static String? email(
+    String? value, {
+    String? emptyMessage,
+    String? invalidMessage,
+  }) {
     if (value == null || value.trim().isEmpty) {
-      return 'Vui lòng nhập email';
+      return emptyMessage ?? 'Vui lòng nhập email';
     }
     if (!_emailRegExp.hasMatch(value.trim())) {
-      return 'Email không hợp lệ';
+      return invalidMessage ?? 'Email không hợp lệ';
     }
     return null;
   }
 
-  /// Validates password with optional minLength (default 6)
-  static String? password(String? value, {int minLength = 6}) {
+  /// Validates password with optional minLength (default 6) and custom messages
+  static String? password(
+    String? value, {
+    int minLength = 6,
+    String? emptyMessage,
+    String? minLengthMessage,
+  }) {
     if (value == null || value.isEmpty) {
-      return 'Vui lòng nhập mật khẩu';
+      return emptyMessage ?? 'Vui lòng nhập mật khẩu';
     }
     if (value.length < minLength) {
-      return 'Mật khẩu phải chứa ít nhất $minLength ký tự';
+      return minLengthMessage ?? 'Mật khẩu phải chứa ít nhất $minLength ký tự';
     }
     return null;
   }

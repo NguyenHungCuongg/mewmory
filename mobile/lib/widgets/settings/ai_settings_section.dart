@@ -6,6 +6,7 @@ import '../../config/theme.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/user_settings.dart';
 import '../../providers/settings_provider.dart';
+import '../../utils/mew_toast.dart';
 import '../common/mew_button.dart';
 import '../common/mew_card.dart';
 import '../common/mew_text_field.dart';
@@ -55,7 +56,6 @@ class _AiSettingsSectionState extends ConsumerState<AiSettingsSection> {
 
   Future<void> _handleSave() async {
     setState(() => _isSaving = true);
-    final colors = context.mewColors;
     try {
       final modelText = _modelController.text.trim();
       await ref
@@ -66,23 +66,11 @@ class _AiSettingsSectionState extends ConsumerState<AiSettingsSection> {
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Đã lưu cấu hình AI thành công'),
-            backgroundColor: colors.ink,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        MewToast.showSuccess(context, 'Đã lưu cấu hình AI thành công');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Không thể lưu cấu hình: $e'),
-            backgroundColor: colors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Không thể lưu cấu hình');
       }
     } finally {
       if (mounted) {

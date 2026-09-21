@@ -37,14 +37,27 @@ class AuthService {
   }
 
   Future<UserResponse> updateDisplayName(String displayName) async {
-    return await _client.auth.updateUser(
+    final trimmed = displayName.trim();
+    final res = await _client.auth.updateUser(
       UserAttributes(
         data: {
-          'display_name': displayName.trim(),
-          'full_name': displayName.trim(),
+          'display_name': trimmed,
+          'full_name': trimmed,
         },
       ),
     );
+
+    try {
+      final uid = res.user?.id ?? _client.auth.currentUser?.id;
+      if (uid != null) {
+        await _client.from('profiles').update({
+          'display_name': trimmed,
+          'updated_at': DateTime.now().toIso8601String(),
+        }).eq('id', uid);
+      }
+    } catch (_) {}
+
+    return res;
   }
 
   Future<void> signOut() async {

@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../config/theme.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/mew_toast.dart';
 import '../common/mew_button.dart';
 import '../common/mew_card.dart';
 import '../common/mew_text_field.dart';
@@ -42,27 +43,15 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
     if (newName.isEmpty) return;
 
     setState(() => _isUpdatingName = true);
-    final colors = context.mewColors;
     try {
       await ref.read(authServiceProvider).updateDisplayName(newName);
+      ref.invalidate(currentUserProvider);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Đã cập nhật tên hiển thị'),
-            backgroundColor: colors.ink,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        MewToast.showSuccess(context, 'Đã cập nhật tên hiển thị');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi khi cập nhật: $e'),
-            backgroundColor: colors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Lỗi khi cập nhật');
       }
     } finally {
       if (mounted) {
@@ -117,13 +106,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Lỗi khi đăng xuất: $e'),
-              backgroundColor: colors.error,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          MewToast.showError(context, e, prefix: 'Lỗi khi đăng xuất');
         }
       }
     }

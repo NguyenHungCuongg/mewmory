@@ -6,9 +6,11 @@ import 'package:mewmory/db/daos/vocabulary_dao.dart';
 import 'package:mewmory/db/database.dart' as db;
 import 'package:mewmory/l10n/app_localizations.dart';
 import 'package:mewmory/pages/dashboard_page.dart';
+import 'package:mewmory/providers/auth_provider.dart';
 import 'package:mewmory/providers/stats_provider.dart';
 import 'package:mewmory/widgets/dashboard/daily_review_card.dart';
 import 'package:mewmory/widgets/dashboard/stats_summary_card.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   final testVocab = db.Vocabulary(
@@ -207,6 +209,96 @@ void main() {
       await tester.tap(find.text('Flashcard'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('DashboardPage displays display_name in greeting when updated to Cường',
+        (tester) async {
+      final testUser = User(
+        id: 'user-cuong',
+        appMetadata: const {},
+        userMetadata: const {'display_name': 'Cường'},
+        aud: 'authenticated',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        email: 'cuong@example.com',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProvider.overrideWithValue(testUser),
+            totalWordCountProvider('user-cuong').overrideWith((ref) => Future.value(10)),
+            wordsLearnedThisWeekProvider('user-cuong').overrideWith((ref) => Future.value(3)),
+            levelDistributionProvider('user-cuong').overrideWith((ref) => Future.value({})),
+            dailyReviewWordProvider.overrideWith(() => _MockDailyReviewNotifier(null)),
+          ],
+          child: const MaterialApp(
+            home: DashboardPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Xin chào, Cường! 👋'), findsOneWidget);
+    });
+
+    testWidgets('DashboardPage displays full_name in greeting when display_name is absent',
+        (tester) async {
+      final testUser = User(
+        id: 'user-cuong',
+        appMetadata: const {},
+        userMetadata: const {'full_name': 'Cường'},
+        aud: 'authenticated',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        email: 'cuong@example.com',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProvider.overrideWithValue(testUser),
+            totalWordCountProvider('user-cuong').overrideWith((ref) => Future.value(10)),
+            wordsLearnedThisWeekProvider('user-cuong').overrideWith((ref) => Future.value(3)),
+            levelDistributionProvider('user-cuong').overrideWith((ref) => Future.value({})),
+            dailyReviewWordProvider.overrideWith(() => _MockDailyReviewNotifier(null)),
+          ],
+          child: const MaterialApp(
+            home: DashboardPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Xin chào, Cường! 👋'), findsOneWidget);
+    });
+
+    testWidgets('DashboardPage falls back to email prefix in greeting when metadata absent',
+        (tester) async {
+      final testUser = User(
+        id: 'user-cuong',
+        appMetadata: const {},
+        userMetadata: const {},
+        aud: 'authenticated',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        email: 'cuong@example.com',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProvider.overrideWithValue(testUser),
+            totalWordCountProvider('user-cuong').overrideWith((ref) => Future.value(10)),
+            wordsLearnedThisWeekProvider('user-cuong').overrideWith((ref) => Future.value(3)),
+            levelDistributionProvider('user-cuong').overrideWith((ref) => Future.value({})),
+            dailyReviewWordProvider.overrideWith(() => _MockDailyReviewNotifier(null)),
+          ],
+          child: const MaterialApp(
+            home: DashboardPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Xin chào, cuong! 👋'), findsOneWidget);
     });
   });
 }

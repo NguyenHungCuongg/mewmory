@@ -9,6 +9,7 @@ import '../models/collection.dart' as model;
 import '../providers/auth_provider.dart';
 import '../providers/collection_provider.dart';
 import '../providers/services_provider.dart';
+import '../utils/mew_toast.dart';
 import '../widgets/collection/collection_form_sheet.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/loading_indicator.dart';
@@ -60,22 +61,11 @@ class CollectionDetailPage extends ConsumerWidget {
         await ref.read(collectionServiceProvider).delete(collection.id);
         if (context.mounted) {
           context.pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Đã xóa bộ sưu tập "${collection.name}"'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          MewToast.showSuccess(context, 'Đã xóa bộ sưu tập "${collection.name}"');
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Không thể xóa: $e'),
-              backgroundColor: colors.error,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          MewToast.showError(context, e, prefix: 'Không thể xóa');
         }
       }
     }
@@ -117,22 +107,11 @@ class CollectionDetailPage extends ConsumerWidget {
       try {
         await ref.read(vocabularyServiceProvider).delete(vocabId);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Đã xóa từ "$word"'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          MewToast.showSuccess(context, 'Đã xóa từ "$word"');
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Không thể xóa: $e'),
-              backgroundColor: colors.error,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          MewToast.showError(context, e, prefix: 'Không thể xóa');
         }
       }
     }

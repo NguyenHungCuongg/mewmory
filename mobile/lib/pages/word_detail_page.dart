@@ -13,6 +13,7 @@ import '../models/definition.dart' as models;
 import '../models/vocabulary.dart' as models;
 import '../providers/services_provider.dart';
 import '../providers/vocabulary_provider.dart';
+import '../utils/mew_toast.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/loading_indicator.dart';
 import '../widgets/common/mew_button.dart';
@@ -164,9 +165,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
   Future<void> _handleSave(db.VocabularyWithDefinitions item) async {
     final word = _wordController.text.trim();
     if (word.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập từ vựng')),
-      );
+      MewToast.showError(context, 'Vui lòng nhập từ vựng');
       return;
     }
 
@@ -175,9 +174,7 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
         .toList();
 
     if (validDefs.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập ít nhất một nghĩa tiếng Việt')),
-      );
+      MewToast.showError(context, 'Vui lòng nhập ít nhất một nghĩa tiếng Việt');
       return;
     }
 
@@ -227,18 +224,11 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
 
       if (mounted) {
         _cancelEditMode();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã cập nhật từ vựng thành công')),
-        );
+        MewToast.showSuccess(context, 'Đã cập nhật từ vựng thành công');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi khi cập nhật: ${e.toString()}'),
-            backgroundColor: MewColors.error,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Lỗi khi cập nhật');
       }
     } finally {
       if (mounted) {
@@ -297,19 +287,12 @@ class _WordDetailPageState extends ConsumerState<WordDetailPage> {
       await vocabService.delete(item.vocabulary.id);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đã xóa từ "${item.vocabulary.word}"')),
-        );
+        MewToast.showSuccess(context, 'Đã xóa từ "${item.vocabulary.word}"');
         context.pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi khi xóa: ${e.toString()}'),
-            backgroundColor: colors.error,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Lỗi khi xóa');
       }
     } finally {
       if (mounted) {

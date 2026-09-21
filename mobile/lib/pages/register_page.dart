@@ -7,6 +7,7 @@ import '../config/theme.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
+import '../utils/mew_toast.dart';
 import '../utils/validators.dart';
 import '../widgets/common/mew_button.dart';
 import '../widgets/common/mew_text_field.dart';
@@ -68,24 +69,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           }
         } else {
           // Confirmation email required
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.'),
-              backgroundColor: MewColors.success,
-              duration: Duration(seconds: 4),
-            ),
+          MewToast.showSuccess(
+            context,
+            'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
+            duration: const Duration(seconds: 4),
           );
           context.go('/login');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Đăng ký thất bại: ${e.toString().replaceAll('Exception: ', '')}'),
-            backgroundColor: MewColors.error,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Đăng ký thất bại');
       }
     } finally {
       if (mounted) {

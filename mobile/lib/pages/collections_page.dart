@@ -9,6 +9,7 @@ import '../models/collection.dart' as model;
 import '../providers/auth_provider.dart';
 import '../providers/collection_provider.dart';
 import '../providers/services_provider.dart';
+import '../utils/mew_toast.dart';
 import '../widgets/collection/collection_card.dart';
 import '../widgets/collection/collection_form_sheet.dart';
 import '../widgets/common/empty_state.dart';
@@ -54,22 +55,11 @@ class CollectionsPage extends ConsumerWidget {
       try {
         await ref.read(collectionServiceProvider).delete(collection.id);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Đã xóa bộ sưu tập "${collection.name}"'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          MewToast.showSuccess(context, 'Đã xóa bộ sưu tập "${collection.name}"');
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Không thể xóa: $e'),
-              backgroundColor: MewColors.error,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          MewToast.showError(context, e, prefix: 'Không thể xóa');
         }
       }
     }

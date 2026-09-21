@@ -11,6 +11,7 @@ import '../providers/auth_provider.dart';
 import '../providers/connectivity_provider.dart';
 import '../providers/lookup_provider.dart';
 import '../providers/services_provider.dart';
+import '../utils/mew_toast.dart';
 import '../widgets/common/loading_indicator.dart';
 import '../widgets/common/mew_button.dart';
 import '../widgets/common/mew_text_field.dart';
@@ -58,13 +59,9 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
 
     final isOnline = ref.read(connectivityProvider).value ?? true;
     if (!isOnline) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Không có kết nối mạng. Bạn có thể nhập từ theo cách thủ công.',
-          ),
-          backgroundColor: MewColors.warning,
-        ),
+      MewToast.showInfo(
+        context,
+        'Không có kết nối mạng. Bạn có thể nhập từ theo cách thủ công.',
       );
       setState(() => _manualMode = true);
       return;
@@ -91,23 +88,16 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
 
     final isOnline = ref.read(connectivityProvider).value ?? true;
     if (!isOnline) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Không có kết nối mạng. Bạn chỉ có thể lưu từ khi trực tuyến.'),
-          backgroundColor: MewColors.error,
-        ),
+      MewToast.showError(
+        context,
+        'Không có kết nối mạng. Bạn chỉ có thể lưu từ khi trực tuyến.',
       );
       return;
     }
 
     final word = _wordController.text.trim();
     if (word.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập từ tiếng Anh.'),
-          backgroundColor: MewColors.error,
-        ),
-      );
+      MewToast.showError(context, 'Vui lòng nhập từ tiếng Anh.');
       return;
     }
 
@@ -121,12 +111,7 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
       if (_manualMode) {
         // Save manual input
         if (_manualDefViController.text.trim().isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Vui lòng nhập nghĩa tiếng Việt.'),
-              backgroundColor: MewColors.error,
-            ),
-          );
+          MewToast.showError(context, 'Vui lòng nhập nghĩa tiếng Việt.');
           setState(() => _isSaving = false);
           return;
         }
@@ -160,12 +145,7 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
         // Save AI Lookup results
         final lookupState = ref.read(lookupProvider);
         if (lookupState.selectedDefinitionsCount == 0) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Vui lòng chọn ít nhất một nghĩa để lưu.'),
-              backgroundColor: MewColors.error,
-            ),
-          );
+          MewToast.showError(context, 'Vui lòng chọn ít nhất một nghĩa để lưu.');
           setState(() => _isSaving = false);
           return;
         }
@@ -235,22 +215,12 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
 
       if (mounted) {
         ref.read(lookupProvider.notifier).reset();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Đã lưu từ "$word" thành công!'),
-            backgroundColor: MewColors.success,
-          ),
-        );
+        MewToast.showSuccess(context, 'Đã lưu từ "$word" thành công!');
         context.pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Không thể lưu từ vựng: $e'),
-            backgroundColor: MewColors.error,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Không thể lưu từ vựng');
       }
     } finally {
       if (mounted) {

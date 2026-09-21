@@ -701,7 +701,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountTitle.
   ///
   /// In vi, this message translates to:
-  /// **'Tài khoản'**
+  /// **'Tài khoản người dùng'**
   String get accountTitle;
 
   /// No description provided for @appVersion.

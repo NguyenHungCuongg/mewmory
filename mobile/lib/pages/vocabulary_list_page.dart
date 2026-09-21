@@ -11,6 +11,7 @@ import '../providers/auth_provider.dart';
 import '../providers/connectivity_provider.dart';
 import '../providers/services_provider.dart';
 import '../providers/vocabulary_provider.dart';
+import '../utils/mew_toast.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/loading_indicator.dart';
 import '../widgets/common/mew_chip.dart';
@@ -58,11 +59,10 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
     final isOnline = ref.read(connectivityProvider).value ?? false;
     if (!isOnline) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Không có kết nối mạng để đồng bộ.'),
-            duration: Duration(seconds: 2),
-          ),
+        MewToast.showInfo(
+          context,
+          'Không có kết nối mạng để đồng bộ.',
+          duration: const Duration(seconds: 2),
         );
       }
       return;
@@ -78,13 +78,7 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
       }
     } catch (e) {
       if (mounted) {
-        final colors = context.mewColors;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi đồng bộ: $e'),
-            backgroundColor: colors.error,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Lỗi đồng bộ');
       }
     }
   }
@@ -136,12 +130,7 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Lỗi khi xóa từ: $e'),
-              backgroundColor: colors.error,
-            ),
-          );
+          MewToast.showError(context, e, prefix: 'Lỗi khi xóa từ');
         }
       }
     }

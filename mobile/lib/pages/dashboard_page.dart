@@ -66,7 +66,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final user = ref.watch(currentUserProvider);
     if (user == null) return 'bạn';
 
-    final metaName = user.userMetadata?['display_name'] as String?;
+    final metaName = (user.userMetadata?['display_name'] ??
+            user.userMetadata?['full_name'] ??
+            user.userMetadata?['name']) as String?;
     if (metaName != null && metaName.trim().isNotEmpty) {
       return metaName.trim();
     }

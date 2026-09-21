@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../config/theme.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/user_settings.dart';
 import '../../providers/settings_provider.dart';
+import '../../utils/mew_toast.dart';
 import '../common/mew_button.dart';
 import '../common/mew_card.dart';
 import '../common/mew_text_field.dart';
@@ -64,22 +66,11 @@ class _AiSettingsSectionState extends ConsumerState<AiSettingsSection> {
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã lưu cấu hình AI thành công'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        MewToast.showSuccess(context, 'Đã lưu cấu hình AI thành công');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Không thể lưu cấu hình: $e'),
-            backgroundColor: MewColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Không thể lưu cấu hình');
       }
     } finally {
       if (mounted) {
@@ -90,8 +81,11 @@ class _AiSettingsSectionState extends ConsumerState<AiSettingsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+
     return MewCard(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -101,23 +95,23 @@ class _AiSettingsSectionState extends ConsumerState<AiSettingsSection> {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: MewColors.eggshell,
+                  color: colors.eggshell,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: MewColors.stone),
+                  border: Border.all(color: colors.stone),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.psychology_outlined,
                   size: 20,
-                  color: MewColors.violetSpark,
+                  color: colors.violetSpark,
                 ),
               ),
               const SizedBox(width: 10),
               Text(
-                'Cấu hình AI',
+                l10n?.aiConfigTitle ?? 'Cấu hình AI',
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
               ),
             ],
@@ -128,7 +122,7 @@ class _AiSettingsSectionState extends ConsumerState<AiSettingsSection> {
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w400,
-              color: MewColors.smoke,
+              color: colors.smoke,
               height: 1.4,
             ),
           ),
@@ -136,34 +130,46 @@ class _AiSettingsSectionState extends ConsumerState<AiSettingsSection> {
 
           // Provider selector
           Text(
-            'Nhà cung cấp (AI Provider)',
+            l10n?.aiProvider ?? 'Nhà cung cấp (AI Provider)',
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: MewColors.graphite,
+              color: colors.ink,
             ),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: MewColors.eggshell,
+              color: colors.eggshell,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: MewColors.stone),
+              border: Border.all(color: colors.stone),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _selectedProvider,
                 isExpanded: true,
-                dropdownColor: MewColors.eggshell,
-                items: const [
+                dropdownColor: colors.warmTaupe,
+                icon: Icon(Icons.arrow_drop_down, color: colors.smoke),
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: colors.ink,
+                ),
+                items: [
                   DropdownMenuItem(
                     value: 'gemini',
-                    child: Text('Google Gemini (Mặc định)'),
+                    child: Text(
+                      'Google Gemini (Mặc định)',
+                      style: GoogleFonts.inter(color: colors.ink),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 'openrouter',
-                    child: Text('OpenRouter'),
+                    child: Text(
+                      'OpenRouter',
+                      style: GoogleFonts.inter(color: colors.ink),
+                    ),
                   ),
                 ],
                 onChanged: (val) {
@@ -179,7 +185,7 @@ class _AiSettingsSectionState extends ConsumerState<AiSettingsSection> {
           // AI Model Field
           MewTextField(
             controller: _modelController,
-            label: 'Mô hình AI (Tùy chọn)',
+            label: l10n?.aiModel ?? 'Mô hình AI (Tùy chọn)',
             hintText: _selectedProvider == 'gemini'
                 ? 'gemini-1.5-flash (mặc định)'
                 : 'meta-llama/llama-3.1-8b-instruct',

@@ -6,10 +6,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../config/constants.dart';
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/connectivity_provider.dart';
 import '../providers/services_provider.dart';
 import '../providers/vocabulary_provider.dart';
+import '../utils/mew_toast.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/loading_indicator.dart';
 import '../widgets/common/mew_chip.dart';
@@ -57,11 +59,10 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
     final isOnline = ref.read(connectivityProvider).value ?? false;
     if (!isOnline) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Không có kết nối mạng để đồng bộ.'),
-            duration: Duration(seconds: 2),
-          ),
+        MewToast.showInfo(
+          context,
+          'Không có kết nối mạng để đồng bộ.',
+          duration: const Duration(seconds: 2),
         );
       }
       return;
@@ -77,36 +78,60 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi đồng bộ: $e'),
-            backgroundColor: MewColors.error,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Lỗi đồng bộ');
       }
     }
   }
 
   Future<void> _handleDeleteWord(String id, String word) async {
-    try {
-      await ref.read(vocabularyServiceProvider).delete(id);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Đã xóa từ "$word"'),
-            backgroundColor: MewColors.graphite,
-            duration: const Duration(seconds: 2),
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.eggshell,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          l10n?.deleteWordConfirm ?? 'Xóa từ vựng',
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: colors.ink),
+        ),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa từ "$word"?',
+          style: GoogleFonts.inter(color: colors.smoke),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              l10n?.cancel ?? 'Hủy',
+              style: GoogleFonts.inter(color: colors.smoke),
+            ),
           ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Không thể xóa từ vựng: $e'),
-            backgroundColor: MewColors.error,
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              l10n?.delete ?? 'Xóa',
+              style: GoogleFonts.inter(
+                color: colors.error,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-        );
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        final user = ref.read(currentUserProvider);
+        if (user != null) {
+          final vocabService = ref.read(vocabularyServiceProvider);
+          await vocabService.delete(id);
+        }
+      } catch (e) {
+        if (mounted) {
+          MewToast.showError(context, e, prefix: 'Lỗi khi xóa từ');
+        }
       }
     }
   }
@@ -116,23 +141,29 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
     final vocabListAsync = ref.watch(vocabularyListProvider);
     final filters = ref.watch(vocabularyFilterProvider);
     final isOnline = ref.watch(connectivityProvider).value ?? true;
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: MewColors.eggshell,
+      backgroundColor: colors.eggshell,
       appBar: AppBar(
+        backgroundColor: colors.eggshell,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Text(
-          'Từ vựng',
+          l10n?.tabVocabulary ?? 'Từ vựng',
           style: GoogleFonts.inter(
-            fontSize: 22,
-            fontWeight: FontWeight.w600,
-            color: MewColors.ink,
+            fontSize: 24,
+            fontWeight: FontWeight.w300,
+            letterSpacing: -0.48,
+            color: colors.ink,
           ),
         ),
         actions: [
           Stack(
             children: [
               IconButton(
-                icon: const Icon(Icons.filter_list_rounded, color: MewColors.ink),
+                icon: Icon(Icons.filter_list_rounded, color: colors.ink),
                 onPressed: () => FilterSheet.show(context),
               ),
               if (filters.hasActiveFilters)
@@ -142,8 +173,8 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
                   child: Container(
                     width: 8,
                     height: 8,
-                    decoration: const BoxDecoration(
-                      color: MewColors.emberOrange,
+                    decoration: BoxDecoration(
+                      color: colors.emberOrange,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -163,9 +194,9 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Container(
               decoration: BoxDecoration(
-                color: MewColors.warmTaupe,
+                color: colors.warmTaupe,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: MewColors.stone, width: 1.0),
+                border: Border.all(color: colors.stone, width: 1.0),
               ),
               child: TextField(
                 controller: _searchController,
@@ -173,24 +204,24 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: MewColors.ink,
+                  color: colors.ink,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Tìm kiếm từ hoặc nghĩa tiếng Việt...',
+                  hintText: l10n?.searchPlaceholder ?? 'Tìm kiếm từ hoặc nghĩa tiếng Việt...',
                   hintStyle: GoogleFonts.inter(
                     fontSize: 14,
-                    color: MewColors.ash,
+                    color: colors.ash,
                   ),
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.search_rounded,
-                    color: MewColors.smoke,
+                    color: colors.smoke,
                     size: 20,
                   ),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.close_rounded,
-                            color: MewColors.smoke,
+                            color: colors.smoke,
                             size: 18,
                           ),
                           onPressed: _clearSearch,
@@ -248,12 +279,12 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
                       'Xóa tất cả',
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: MewColors.smoke,
+                        color: colors.smoke,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     backgroundColor: Colors.transparent,
-                    side: const BorderSide(color: MewColors.stone),
+                    side: BorderSide(color: colors.stone),
                     shape: const StadiumBorder(),
                     onPressed: () => ref
                         .read(vocabularyFilterProvider.notifier)
@@ -274,7 +305,7 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
 
                   return RefreshIndicator(
                     onRefresh: _handleRefresh,
-                    color: MewColors.ink,
+                    color: colors.ink,
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: [
@@ -285,12 +316,12 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
                                 ? Icons.search_off_rounded
                                 : Icons.menu_book_outlined,
                             title: isFiltered
-                                ? 'Không tìm thấy từ vựng'
-                                : 'Chưa có từ vựng nào',
+                                ? (l10n?.noWordsFound ?? 'Không tìm thấy từ vựng')
+                                : (l10n?.emptyVocabulary ?? 'Chưa có từ vựng nào'),
                             message: isFiltered
                                 ? 'Thử thay đổi từ khóa hoặc điều kiện bộ lọc.'
                                 : 'Bắt đầu hành trình bằng cách thêm từ vựng mới với gợi ý thông minh từ AI.',
-                            actionLabel: isFiltered ? null : 'Thêm từ đầu tiên',
+                            actionLabel: isFiltered ? null : (l10n?.addFirstWord ?? 'Thêm từ đầu tiên'),
                             onAction: isFiltered
                                 ? null
                                 : () => context.push('/vocabulary/add'),
@@ -303,7 +334,7 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
 
                 return RefreshIndicator(
                   onRefresh: _handleRefresh,
-                  color: MewColors.ink,
+                  color: colors.ink,
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16.0,
@@ -334,7 +365,7 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
                     'Đã xảy ra lỗi khi tải từ vựng: $err',
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: MewColors.error,
+                      color: colors.error,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -346,8 +377,8 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/vocabulary/add'),
-        backgroundColor: MewColors.ink,
-        foregroundColor: MewColors.eggshell,
+        backgroundColor: colors.ink,
+        foregroundColor: colors.eggshell,
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add_rounded, size: 28),

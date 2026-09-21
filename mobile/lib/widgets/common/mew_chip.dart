@@ -22,10 +22,11 @@ class MewChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
     final bgColor = customBgColor ??
-        (isSelected ? MewColors.ink : MewColors.stone);
+        (isSelected ? colors.ink : colors.stone);
     final textColor = customTextColor ??
-        (isSelected ? MewColors.eggshell : MewColors.graphite);
+        (isSelected ? colors.eggshell : colors.graphite);
 
     return Material(
       color: Colors.transparent,
@@ -39,7 +40,7 @@ class MewChip extends StatelessWidget {
             color: bgColor,
             borderRadius: BorderRadius.circular(9999),
             border: Border.all(
-              color: isSelected ? MewColors.ink : MewColors.stone,
+              color: isSelected ? colors.ink : colors.stone,
               width: 1.0,
             ),
           ),

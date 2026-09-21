@@ -15,6 +15,10 @@ final authStateProvider = StreamProvider<AuthState>((ref) {
 });
 
 final currentUserProvider = Provider<User?>((ref) {
+  final authState = ref.watch(authStateProvider).asData?.value;
+  if (authState?.session?.user != null) {
+    return authState!.session!.user;
+  }
   try {
     return Supabase.instance.client.auth.currentUser;
   } catch (_) {

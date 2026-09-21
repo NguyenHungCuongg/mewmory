@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
+import '../utils/mew_toast.dart';
 import '../utils/validators.dart';
 import '../widgets/common/mew_button.dart';
 import '../widgets/common/mew_text_field.dart';
@@ -61,12 +63,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Đăng nhập thất bại: ${e.toString().replaceAll('Exception: ', '')}'),
-            backgroundColor: MewColors.error,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Đăng nhập thất bại');
       }
     } finally {
       if (mounted) {
@@ -84,21 +81,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final authService = ref.read(authServiceProvider);
       final success = await authService.signInWithGoogle();
       if (!success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Không thể mở đăng nhập Google.'),
-            backgroundColor: MewColors.error,
-          ),
-        );
+        MewToast.showError(context, 'Không thể mở đăng nhập Google.');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Đăng nhập Google thất bại: $e'),
-            backgroundColor: MewColors.error,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Đăng nhập Google thất bại');
       }
     } finally {
       if (mounted) {
@@ -109,8 +96,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
-      backgroundColor: MewColors.eggshell,
+      backgroundColor: colors.eggshell,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -129,17 +119,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       fontSize: 36,
                       fontWeight: FontWeight.w300,
                       letterSpacing: -0.72,
-                      color: MewColors.ink,
+                      color: colors.ink,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sổ tay từ vựng tiếng Anh thông minh',
+                    l10n?.loginSubtitle ?? 'Sổ tay từ vựng tiếng Anh thông minh',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: MewColors.smoke,
+                      color: colors.smoke,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -148,11 +138,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   // Email Field
                   MewTextField(
                     controller: _emailController,
-                    label: 'Email',
+                    label: l10n?.email ?? 'Email',
                     hintText: 'name@example.com',
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    prefixIcon: const Icon(Icons.mail_outline, size: 20, color: MewColors.ash),
+                    prefixIcon: Icon(Icons.mail_outline, size: 20, color: colors.ash),
                     validator: Validators.email,
                   ),
                   const SizedBox(height: 16),
@@ -160,17 +150,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   // Password Field
                   MewTextField(
                     controller: _passwordController,
-                    label: 'Mật khẩu',
+                    label: l10n?.password ?? 'Mật khẩu',
                     hintText: '••••••••',
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => _handleEmailLogin(),
-                    prefixIcon: const Icon(Icons.lock_outline, size: 20, color: MewColors.ash),
+                    prefixIcon: Icon(Icons.lock_outline, size: 20, color: colors.ash),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                         size: 20,
-                        color: MewColors.ash,
+                        color: colors.ash,
                       ),
                       onPressed: () {
                         setState(() => _obscurePassword = !_obscurePassword);
@@ -182,7 +172,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                   // Sign In Button
                   MewButton.filled(
-                    label: _syncMessage ?? 'Đăng nhập',
+                    label: _syncMessage ?? (l10n?.signIn ?? 'Đăng nhập'),
                     isLoading: _isLoading,
                     onPressed: _isLoading ? null : _handleEmailLogin,
                   ),
@@ -191,18 +181,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   // Divider with "hoặc"
                   Row(
                     children: [
-                      const Expanded(child: Divider(color: MewColors.stone)),
+                      Expanded(child: Divider(color: colors.stone)),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           'hoặc',
                           style: GoogleFonts.inter(
                             fontSize: 12,
-                            color: MewColors.ash,
+                            color: colors.ash,
                           ),
                         ),
                       ),
-                      const Expanded(child: Divider(color: MewColors.stone)),
+                      Expanded(child: Divider(color: colors.stone)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -211,7 +201,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   MewButton.outlined(
                     label: 'Đăng nhập với Google',
                     isLoading: _isGoogleLoading,
-                    icon: const Icon(Icons.g_mobiledata, size: 24, color: MewColors.ink),
+                    icon: Icon(Icons.g_mobiledata, size: 24, color: colors.ink),
                     onPressed: _isGoogleLoading ? null : _handleGoogleLogin,
                   ),
                   const SizedBox(height: 32),
@@ -224,17 +214,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         'Chưa có tài khoản? ',
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: MewColors.smoke,
+                          color: colors.smoke,
                         ),
                       ),
                       GestureDetector(
                         onTap: () => context.go('/register'),
                         child: Text(
-                          'Đăng ký',
+                          l10n?.signUp ?? 'Đăng ký',
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: MewColors.ink,
+                            color: colors.ink,
                             decoration: TextDecoration.underline,
                           ),
                         ),

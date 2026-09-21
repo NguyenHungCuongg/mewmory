@@ -4,6 +4,7 @@ import { useAuthStore } from "../../stores/auth.store";
 import { authService } from "../../services/auth.service";
 import { useUIStore } from "../../stores/ui.store";
 import { useThemeStore } from "../../stores/theme.store";
+import UserAvatar from "../common/UserAvatar";
 import {
   IconDashboard,
   IconVocabulary,
@@ -105,16 +106,31 @@ export default function Sidebar() {
 
       {/* User section */}
       <div className="p-4 border-t border-stone">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-stone flex items-center justify-center text-caption text-graphite">
-            {user?.email?.[0]?.toUpperCase() || "?"}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-body-sm text-ink truncate">
-              {user?.email || t("user.defaultName")}
-            </p>
-          </div>
-        </div>
+        {(() => {
+          const displayName =
+            user?.user_metadata?.display_name ||
+            user?.user_metadata?.full_name ||
+            user?.user_metadata?.name ||
+            "";
+          return (
+            <div className="flex items-center gap-3 mb-3">
+              <UserAvatar
+                name={displayName}
+                email={user?.email}
+                avatarUrl={user?.user_metadata?.avatar_url}
+                size="sm"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-body-sm font-medium text-ink truncate">
+                  {displayName || user?.email || t("user.defaultName")}
+                </p>
+                {displayName && user?.email && (
+                  <p className="text-caption text-ash truncate">{user.email}</p>
+                )}
+              </div>
+            </div>
+          );
+        })()}
         <button
           onClick={handleSignOut}
           className="w-full text-left px-3 py-2 text-body-sm text-smoke hover:text-ink transition-colors rounded-lg hover:bg-eggshell/60 cursor-pointer"

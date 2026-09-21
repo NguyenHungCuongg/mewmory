@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/theme.dart';
+import 'l10n/app_localizations.dart';
+import 'providers/locale_provider.dart';
+import 'providers/theme_provider.dart';
 import 'pages/add_word_page.dart';
 import 'pages/collection_detail_page.dart';
 import 'pages/collections_page.dart';
@@ -147,16 +151,24 @@ GoRouter createRouter({
 
 final GoRouter appRouter = createRouter();
 
-class MewmoryApp extends StatelessWidget {
+class MewmoryApp extends ConsumerWidget {
   final GoRouter? router;
 
   const MewmoryApp({super.key, this.router});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
+
     return MaterialApp.router(
       title: 'Mewmory',
       theme: MewTheme.light,
+      darkTheme: MewTheme.dark,
+      themeMode: themeMode,
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       routerConfig: router ?? appRouter,
       debugShowCheckedModeBanner: false,
     );
@@ -170,6 +182,9 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       body: Column(
         children: [
@@ -178,10 +193,10 @@ class AppShell extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: MewColors.stone,
+              color: colors.stone,
               width: 1.0,
             ),
           ),
@@ -194,26 +209,26 @@ class AppShell extends StatelessWidget {
               initialLocation: index == navigationShell.currentIndex,
             );
           },
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Trang chủ',
+              icon: const Icon(Icons.home_outlined),
+              activeIcon: const Icon(Icons.home),
+              label: l10n?.tabHome ?? 'Trang chủ',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book_outlined),
-              activeIcon: Icon(Icons.menu_book),
-              label: 'Từ vựng',
+              icon: const Icon(Icons.menu_book_outlined),
+              activeIcon: const Icon(Icons.menu_book),
+              label: l10n?.tabVocabulary ?? 'Từ vựng',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.folder_outlined),
-              activeIcon: Icon(Icons.folder),
-              label: 'Bộ sưu tập',
+              icon: const Icon(Icons.folder_outlined),
+              activeIcon: const Icon(Icons.folder),
+              label: l10n?.tabCollections ?? 'Bộ sưu tập',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined),
-              activeIcon: Icon(Icons.settings),
-              label: 'Cài đặt',
+              icon: const Icon(Icons.settings_outlined),
+              activeIcon: const Icon(Icons.settings),
+              label: l10n?.tabSettings ?? 'Cài đặt',
             ),
           ],
         ),

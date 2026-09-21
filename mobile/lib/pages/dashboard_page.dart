@@ -4,9 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
 import '../providers/stats_provider.dart';
+import '../widgets/common/language_switcher.dart';
+import '../widgets/common/user_avatar.dart';
 import '../widgets/dashboard/daily_review_card.dart';
 import '../widgets/dashboard/stats_summary_card.dart';
 
@@ -64,7 +67,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final user = ref.watch(currentUserProvider);
     if (user == null) return 'bạn';
 
-    final metaName = user.userMetadata?['display_name'] as String?;
+    final metaName = (user.userMetadata?['display_name'] ??
+            user.userMetadata?['full_name'] ??
+            user.userMetadata?['name']) as String?;
     if (metaName != null && metaName.trim().isNotEmpty) {
       return metaName.trim();
     }
@@ -87,10 +92,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final weekCountAsync = ref.watch(wordsLearnedThisWeekProvider(userId));
     final distributionAsync = ref.watch(levelDistributionProvider(userId));
 
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
-      backgroundColor: MewColors.eggshell,
+      backgroundColor: colors.eggshell,
       appBar: AppBar(
-        backgroundColor: MewColors.eggshell,
+        backgroundColor: colors.eggshell,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
@@ -99,13 +107,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             fontSize: 24,
             fontWeight: FontWeight.w300,
             letterSpacing: -0.48,
-            color: MewColors.ink,
+            color: colors.ink,
           ),
         ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: LanguageSwitcher(),
+          ),
+        ],
       ),
       body: RefreshIndicator(
-        color: MewColors.ink,
-        backgroundColor: MewColors.eggshell,
+        color: colors.ink,
+        backgroundColor: colors.eggshell,
         onRefresh: () => _handleRefresh(userId),
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -114,23 +128,46 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // Greeting
-                  Text(
-                    'Xin chào, $displayName! 👋',
-                    style: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: MewColors.ink,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Hãy duy trì thói quen học từ vựng mỗi ngày cùng Mewmory nhé.',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      color: MewColors.smoke,
-                    ),
+                  // Greeting & Avatar Header
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${l10n?.greeting ?? 'Xin chào'}, $displayName! 👋',
+                              style: GoogleFonts.inter(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: colors.ink,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n?.dailyReviewSubtitle ??
+                                  'Hãy duy trì thói quen học từ vựng mỗi ngày cùng Mewmory nhé.',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400,
+                                color: colors.smoke,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: () => context.go('/settings'),
+                        child: UserAvatar(
+                          name: displayName,
+                          email: user?.email ?? '',
+                          photoUrl: user?.userMetadata?['avatar_url'] as String?,
+                          size: 46,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
 

@@ -32,6 +32,11 @@
   },
   "account": {
     "title": "Tài khoản & Bảo mật",
+    "displayName": "Tên hiển thị",
+    "displayNamePlaceholder": "Nhập tên hiển thị mới",
+    "updateName": "Cập nhật tên",
+    "updateNameSuccess": "Đã cập nhật tên hiển thị thành công!",
+    "updateNameError": "Lỗi khi cập nhật tên",
     "email": "Email đăng nhập:",
     "userId": "User ID:",
     "signOut": "Đăng xuất tài khoản",

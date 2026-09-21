@@ -12,24 +12,25 @@ class DuplicateWarning extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
-        color: MewColors.warning.withValues(alpha: 0.1),
+        color: colors.warning.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: MewColors.warning.withValues(alpha: 0.35),
+          color: colors.warning.withValues(alpha: 0.35),
           width: 1.0,
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.info_outline_rounded,
             size: 20,
-            color: MewColors.warning,
+            color: colors.warning,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -41,7 +42,7 @@ class DuplicateWarning extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: MewColors.ink,
+                    color: colors.ink,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -50,7 +51,7 @@ class DuplicateWarning extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    color: MewColors.graphite,
+                    color: colors.ash,
                     height: 1.4,
                   ),
                 ),

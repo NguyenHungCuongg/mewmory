@@ -5,11 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../config/theme.dart';
 import '../../db/daos/vocabulary_dao.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/stats_provider.dart';
+import '../common/loading_indicator.dart';
 import '../common/mew_button.dart';
 import '../common/mew_card.dart';
 import '../common/mew_chip.dart';
-import '../common/loading_indicator.dart';
 
 enum ReviewMode { gentle, flashcard }
 
@@ -64,109 +65,78 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
   @override
   Widget build(BuildContext context) {
     final wordAsync = ref.watch(dailyReviewWordProvider);
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
 
-    return MewCard.elevated(
-      padding: const EdgeInsets.all(20.0),
+    final title = l10n?.dailyReviewTitle ?? 'Ôn tập hàng ngày';
+    final gentleLabel = l10n?.gentleMode ?? 'Nhẹ nhàng';
+    final flashcardLabel = l10n?.flashcardMode ?? 'Thẻ nhớ';
+
+    return MewCard(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Title + Mode Toggle
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
+          // Header: Icon + Title + Mode Switch (Responsive for narrow screens)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isVeryNarrow = constraints.maxWidth < 275;
+
+              final titleRow = Row(
                 children: [
                   Container(
-                    width: 32,
-                    height: 32,
+                    padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
-                      color: MewColors.warmTaupe,
-                      borderRadius: BorderRadius.circular(8),
+                      color: colors.violetSpark.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.auto_awesome,
-                      size: 18,
-                      color: MewColors.emberOrange,
+                    child: Icon(
+                      Icons.auto_awesome_rounded,
+                      size: 15,
+                      color: colors.violetSpark,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'Ôn tập hàng ngày',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: MewColors.ink,
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.2,
+                        color: colors.ink,
+                      ),
                     ),
                   ),
                 ],
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  color: MewColors.warmTaupe,
-                  borderRadius: BorderRadius.circular(9999),
-                  border: Border.all(color: MewColors.stone),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+              );
+
+              final toggle = _buildModeToggle(colors, gentleLabel, flashcardLabel);
+
+              if (isVeryNarrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    InkWell(
-                      onTap: () => setState(() {
-                        _mode = ReviewMode.gentle;
-                        _isCardFlipped = false;
-                      }),
-                      borderRadius: BorderRadius.circular(9999),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _mode == ReviewMode.gentle
-                              ? MewColors.ink
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(9999),
-                        ),
-                        child: Text(
-                          'Nhẹ nhàng',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: _mode == ReviewMode.gentle
-                                ? MewColors.eggshell
-                                : MewColors.smoke,
-                          ),
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () => setState(() {
-                        _mode = ReviewMode.flashcard;
-                        _isCardFlipped = false;
-                      }),
-                      borderRadius: BorderRadius.circular(9999),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _mode == ReviewMode.flashcard
-                              ? MewColors.ink
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(9999),
-                        ),
-                        child: Text(
-                          'Thẻ nhớ',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: _mode == ReviewMode.flashcard
-                                ? MewColors.eggshell
-                                : MewColors.smoke,
-                          ),
-                        ),
-                      ),
+                    titleRow,
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: toggle,
                     ),
                   ],
-                ),
-              ),
-            ],
+                );
+              }
+
+              return Row(
+                children: [
+                  Expanded(child: titleRow),
+                  const SizedBox(width: 8),
+                  toggle,
+                ],
+              );
+            },
           ),
           const SizedBox(height: 16),
 
@@ -181,7 +151,7 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
               child: Center(
                 child: Text(
                   'Không thể tải từ ôn tập: $err',
-                  style: GoogleFonts.inter(color: MewColors.error),
+                  style: GoogleFonts.inter(color: colors.error),
                 ),
               ),
             ),
@@ -192,18 +162,18 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                   child: Center(
                     child: Column(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.menu_book_outlined,
                           size: 40,
-                          color: MewColors.ash,
+                          color: colors.ash,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Chưa có từ vựng nào để ôn tập',
+                          l10n?.noWordsToReview ?? 'Chưa có từ vựng nào để ôn tập',
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: MewColors.graphite,
+                            color: colors.graphite,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -211,13 +181,13 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                           'Thêm từ mới để bắt đầu ôn luyện nhé!',
                           style: GoogleFonts.inter(
                             fontSize: 12,
-                            color: MewColors.smoke,
+                            color: colors.smoke,
                           ),
                         ),
                         if (widget.onAddWord != null) ...[
                           const SizedBox(height: 12),
                           MewButton.filled(
-                            label: 'Thêm từ mới',
+                            label: l10n?.addWordNow ?? 'Thêm từ mới ngay',
                             isFullWidth: false,
                             height: 36,
                             onPressed: widget.onAddWord,
@@ -229,7 +199,7 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                 );
               }
 
-              return _buildWordReview(item);
+              return _buildWordReview(item, colors, l10n);
             },
           ),
         ],
@@ -237,7 +207,11 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
     );
   }
 
-  Widget _buildWordReview(VocabularyWithDefinitions item) {
+  Widget _buildWordReview(
+    VocabularyWithDefinitions item,
+    MewThemeColors colors,
+    AppLocalizations? l10n,
+  ) {
     final vocab = item.vocabulary;
     final firstDef =
         item.definitions.isNotEmpty ? item.definitions.first : null;
@@ -258,7 +232,7 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                     style: GoogleFonts.inter(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      color: MewColors.ink,
+                      color: colors.ink,
                     ),
                   ),
                   if (vocab.phonetic != null && vocab.phonetic!.isNotEmpty) ...[
@@ -267,7 +241,7 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                       vocab.phonetic!,
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: MewColors.ash,
+                        color: colors.ash,
                       ),
                     ),
                   ],
@@ -279,7 +253,7 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                 onPressed: _isPlayingAudio ? null : () => _playAudio(vocab.audioUrl!),
                 icon: Icon(
                   _isPlayingAudio ? Icons.volume_up : Icons.volume_up_outlined,
-                  color: MewColors.violetSpark,
+                  color: colors.violetSpark,
                   size: 24,
                 ),
                 tooltip: 'Phát âm',
@@ -287,8 +261,8 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
             if (vocab.cefrLevel != null && vocab.cefrLevel!.isNotEmpty)
               MewChip(
                 label: vocab.cefrLevel!,
-                customBgColor: MewColors.ink,
-                customTextColor: MewColors.eggshell,
+                customBgColor: colors.ink,
+                customTextColor: colors.eggshell,
               ),
           ],
         ),
@@ -302,7 +276,7 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: MewColors.warmTaupe,
+                color: colors.warmTaupe,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -313,7 +287,7 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: MewColors.graphite,
+                      color: colors.graphite,
                       height: 1.4,
                     ),
                   ),
@@ -325,7 +299,7 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontStyle: FontStyle.italic,
-                        color: MewColors.smoke,
+                        color: colors.smoke,
                       ),
                     ),
                   ],
@@ -341,10 +315,10 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
               decoration: BoxDecoration(
-                color: MewColors.warmTaupe,
+                color: colors.warmTaupe,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: _isCardFlipped ? MewColors.violetSpark : MewColors.stone,
+                  color: _isCardFlipped ? colors.violetSpark : colors.stone,
                   width: 1.5,
                 ),
               ),
@@ -358,7 +332,7 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: MewColors.ink,
+                              color: colors.ink,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -370,7 +344,7 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontStyle: FontStyle.italic,
-                                color: MewColors.smoke,
+                                color: colors.smoke,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -380,18 +354,22 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
                     : Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.touch_app_outlined,
                             size: 18,
-                            color: MewColors.smoke,
+                            color: colors.smoke,
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            'Chạm để lật thẻ xem nghĩa',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: MewColors.smoke,
+                          Flexible(
+                            child: Text(
+                              l10n?.flipCard ?? 'Chạm để lật thẻ xem nghĩa',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: colors.smoke,
+                              ),
                             ),
                           ),
                         ],
@@ -403,21 +381,27 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
         const SizedBox(height: 16),
 
         // Action Buttons: Next Word
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+        Wrap(
+          alignment: WrapAlignment.end,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             if (_mode == ReviewMode.flashcard && !_isCardFlipped)
               TextButton.icon(
                 onPressed: () => setState(() => _isCardFlipped = true),
                 icon: const Icon(Icons.visibility_outlined, size: 16),
-                label: const Text('Lật thẻ'),
+                label: Text(l10n?.flipCardAction ?? 'Lật thẻ'),
                 style: TextButton.styleFrom(
-                  foregroundColor: MewColors.ink,
+                  foregroundColor: colors.ink,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ),
-            const SizedBox(width: 8),
             MewButton.outlined(
-              label: 'Từ khác',
+              label: l10n?.nextWord ?? 'Từ khác',
               icon: const Icon(Icons.refresh_rounded, size: 16),
               isFullWidth: false,
               height: 38,
@@ -426,6 +410,67 @@ class _DailyReviewCardState extends ConsumerState<DailyReviewCard> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildModeToggle(
+    MewThemeColors colors,
+    String gentleLabel,
+    String flashcardLabel,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.warmTaupe,
+        borderRadius: BorderRadius.circular(9999),
+        border: Border.all(color: colors.stone),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildToggleItem(
+            mode: ReviewMode.gentle,
+            label: gentleLabel,
+            colors: colors,
+          ),
+          _buildToggleItem(
+            mode: ReviewMode.flashcard,
+            label: flashcardLabel,
+            colors: colors,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleItem({
+    required ReviewMode mode,
+    required String label,
+    required MewThemeColors colors,
+  }) {
+    final isSelected = _mode == mode;
+    return InkWell(
+      onTap: () => setState(() {
+        _mode = mode;
+        _isCardFlipped = false;
+      }),
+      borderRadius: BorderRadius.circular(9999),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.ink : Colors.transparent,
+          borderRadius: BorderRadius.circular(9999),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.1,
+            color: isSelected ? colors.eggshell : colors.smoke,
+          ),
+        ),
+      ),
     );
   }
 }

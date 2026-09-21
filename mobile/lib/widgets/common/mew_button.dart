@@ -35,8 +35,13 @@ class MewButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
     final isFilled = variant == MewButtonVariant.filled;
     final isEnabled = onPressed != null && !isLoading;
+    final isCompact = height < 44;
+    final verticalPadding = isCompact ? 0.0 : (height <= 46 ? 8.0 : 14.0);
+    final horizontalPadding = isCompact ? 16.0 : 24.0;
+    final fontSize = isCompact ? 13.0 : 14.0;
 
     final child = isLoading
         ? SizedBox(
@@ -45,7 +50,7 @@ class MewButton extends StatelessWidget {
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(
-                isFilled ? MewColors.eggshell : MewColors.ink,
+                isFilled ? colors.eggshell : colors.ink,
               ),
             ),
           )
@@ -60,9 +65,9 @@ class MewButton extends StatelessWidget {
               Text(
                 label,
                 style: GoogleFonts.inter(
-                  fontSize: 14,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w500,
-                  color: isFilled ? MewColors.eggshell : MewColors.ink,
+                  color: isFilled ? colors.eggshell : colors.ink,
                   letterSpacing: 0.14,
                 ),
               ),
@@ -72,24 +77,29 @@ class MewButton extends StatelessWidget {
     final buttonStyle = ButtonStyle(
       elevation: const WidgetStatePropertyAll(0),
       shape: const WidgetStatePropertyAll(StadiumBorder()),
-      padding: const WidgetStatePropertyAll(
-        EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      minimumSize: const WidgetStatePropertyAll(Size.zero),
+      tapTargetSize: isCompact ? MaterialTapTargetSize.shrinkWrap : null,
+      padding: WidgetStatePropertyAll(
+        EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: verticalPadding,
+        ),
       ),
       backgroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
-          return isFilled ? MewColors.ash.withValues(alpha: 0.4) : Colors.transparent;
+          return isFilled ? colors.ash.withValues(alpha: 0.4) : Colors.transparent;
         }
-        return isFilled ? MewColors.ink : MewColors.eggshell;
+        return isFilled ? colors.ink : colors.eggshell;
       }),
       foregroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
-          return MewColors.smoke;
+          return colors.smoke;
         }
-        return isFilled ? MewColors.eggshell : MewColors.ink;
+        return isFilled ? colors.eggshell : colors.ink;
       }),
       side: WidgetStateProperty.resolveWith((states) {
         if (isFilled) return BorderSide.none;
-        return const BorderSide(color: MewColors.stone, width: 1);
+        return BorderSide(color: colors.stone, width: 1);
       }),
     );
 

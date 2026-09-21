@@ -97,6 +97,9 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Đăng ký" }));
 
     // Fill form
+    fireEvent.change(screen.getByLabelText("Tên hiển thị"), {
+      target: { value: "Existing User" },
+    });
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "existing@example.com" },
     });
@@ -113,6 +116,7 @@ describe("LoginPage", () => {
       expect(authService.signUp).toHaveBeenCalledWith(
         "existing@example.com",
         "newpassword123",
+        { displayName: "Existing User" },
       );
     });
 
@@ -140,6 +144,9 @@ describe("LoginPage", () => {
     renderComponent();
     fireEvent.click(screen.getByRole("button", { name: "Đăng ký" }));
 
+    fireEvent.change(screen.getByLabelText("Tên hiển thị"), {
+      target: { value: "New User" },
+    });
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "newuser@example.com" },
     });
@@ -163,6 +170,26 @@ describe("LoginPage", () => {
     expect(screen.getByRole("heading", { name: "Đăng nhập" })).toBeInTheDocument();
   });
 
+  it("validates that displayName is required on signup", async () => {
+    renderComponent();
+    fireEvent.click(screen.getByRole("button", { name: "Đăng ký" }));
+
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "valid@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Mật khẩu"), {
+      target: { value: "password123" },
+    });
+    fireEvent.change(screen.getByLabelText("Nhập lại mật khẩu"), {
+      target: { value: "password123" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Tạo tài khoản" }));
+
+    expect(authService.signUp).not.toHaveBeenCalled();
+    expect(screen.getByText("Vui lòng nhập tên hiển thị của bạn")).toBeInTheDocument();
+  });
+
   it("navigates to / when sign up returns an active session", async () => {
     authService.signUp.mockResolvedValue({
       user: { id: "new-user-id" },
@@ -173,6 +200,9 @@ describe("LoginPage", () => {
     renderComponent();
     fireEvent.click(screen.getByRole("button", { name: "Đăng ký" }));
 
+    fireEvent.change(screen.getByLabelText("Tên hiển thị"), {
+      target: { value: "Cường" },
+    });
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "newuser@example.com" },
     });

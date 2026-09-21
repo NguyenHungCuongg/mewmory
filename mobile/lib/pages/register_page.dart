@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
+import '../utils/mew_toast.dart';
 import '../utils/validators.dart';
 import '../widgets/common/mew_button.dart';
 import '../widgets/common/mew_text_field.dart';
@@ -67,24 +69,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           }
         } else {
           // Confirmation email required
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.'),
-              backgroundColor: MewColors.success,
-              duration: Duration(seconds: 4),
-            ),
+          MewToast.showSuccess(
+            context,
+            'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
+            duration: const Duration(seconds: 4),
           );
           context.go('/login');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Đăng ký thất bại: ${e.toString().replaceAll('Exception: ', '')}'),
-            backgroundColor: MewColors.error,
-          ),
-        );
+        MewToast.showError(context, e, prefix: 'Đăng ký thất bại');
       }
     } finally {
       if (mounted) {
@@ -95,8 +90,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.mewColors;
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
-      backgroundColor: MewColors.eggshell,
+      backgroundColor: colors.eggshell,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -109,45 +107,50 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 children: [
                   const SizedBox(height: 16),
                   Text(
-                    'Tạo tài khoản',
+                    l10n?.registerTitle ?? 'Tạo tài khoản',
                     style: GoogleFonts.inter(
                       fontSize: 32,
                       fontWeight: FontWeight.w300,
                       letterSpacing: -0.64,
-                      color: MewColors.ink,
+                      color: colors.ink,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Bắt đầu hành trình nâng cao vốn từ của bạn',
+                    l10n?.registerSubtitle ?? 'Bắt đầu hành trình nâng cao vốn từ của bạn',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: MewColors.smoke,
+                      color: colors.smoke,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
 
-                  // Name Field (optional)
+                  // Name Field (Required)
                   MewTextField(
                     controller: _nameController,
-                    label: 'Họ và tên',
+                    label: l10n?.displayName ?? 'Họ và tên',
                     hintText: 'Nguyễn Văn A',
                     textInputAction: TextInputAction.next,
-                    prefixIcon: const Icon(Icons.person_outline, size: 20, color: MewColors.ash),
+                    prefixIcon: Icon(Icons.person_outline, size: 20, color: colors.ash),
+                    validator: (v) {
+                      final req = Validators.required(v, 'Họ và tên');
+                      if (req != null) return req;
+                      return Validators.minLength(v, 2, 'Họ và tên');
+                    },
                   ),
                   const SizedBox(height: 16),
 
                   // Email Field
                   MewTextField(
                     controller: _emailController,
-                    label: 'Email',
+                    label: l10n?.email ?? 'Email',
                     hintText: 'name@example.com',
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    prefixIcon: const Icon(Icons.mail_outline, size: 20, color: MewColors.ash),
+                    prefixIcon: Icon(Icons.mail_outline, size: 20, color: colors.ash),
                     validator: Validators.email,
                   ),
                   const SizedBox(height: 16),
@@ -155,16 +158,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   // Password Field
                   MewTextField(
                     controller: _passwordController,
-                    label: 'Mật khẩu',
+                    label: l10n?.password ?? 'Mật khẩu',
                     hintText: 'Tối thiểu 6 ký tự',
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.next,
-                    prefixIcon: const Icon(Icons.lock_outline, size: 20, color: MewColors.ash),
+                    prefixIcon: Icon(Icons.lock_outline, size: 20, color: colors.ash),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                         size: 20,
-                        color: MewColors.ash,
+                        color: colors.ash,
                       ),
                       onPressed: () {
                         setState(() => _obscurePassword = !_obscurePassword);
@@ -182,12 +185,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     obscureText: _obscureConfirmPassword,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => _handleRegister(),
-                    prefixIcon: const Icon(Icons.lock_outline, size: 20, color: MewColors.ash),
+                    prefixIcon: Icon(Icons.lock_outline, size: 20, color: colors.ash),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                         size: 20,
-                        color: MewColors.ash,
+                        color: colors.ash,
                       ),
                       onPressed: () {
                         setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
@@ -204,7 +207,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                   // Register Button
                   MewButton.filled(
-                    label: _syncMessage ?? 'Tạo tài khoản',
+                    label: _syncMessage ?? (l10n?.signUp ?? 'Tạo tài khoản'),
                     isLoading: _isLoading,
                     onPressed: _isLoading ? null : _handleRegister,
                   ),
@@ -218,17 +221,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         'Đã có tài khoản? ',
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: MewColors.smoke,
+                          color: colors.smoke,
                         ),
                       ),
                       GestureDetector(
                         onTap: () => context.go('/login'),
                         child: Text(
-                          'Đăng nhập',
+                          l10n?.signIn ?? 'Đăng nhập',
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: MewColors.ink,
+                            color: colors.ink,
                             decoration: TextDecoration.underline,
                           ),
                         ),

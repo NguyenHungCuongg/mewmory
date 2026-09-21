@@ -11,15 +11,52 @@ import Button from "../components/common/Button";
 import Input from "../components/common/Input";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import ConfirmDialog from "../components/common/ConfirmDialog";
+import UserAvatar from "../components/common/UserAvatar";
 import { IconSun, IconMoon, IconMonitor } from "../components/common/Icons";
 
 export default function SettingsPage() {
   const { t } = useTranslation("settings");
-  const { user, signOut } = useAuthStore();
+  const { user, signOut, setUser } = useAuthStore();
   const { settings, isLoading, fetchSettings, updateSettings } = useSettingsStore();
   const { items: collections, fetchCollections } = useCollectionStore();
   const addToast = useUIStore((s) => s.addToast);
   const { theme, setTheme } = useThemeStore();
+
+  const [displayName, setDisplayName] = useState("");
+  const [isUpdatingName, setIsUpdatingName] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setDisplayName(
+        user.user_metadata?.display_name ||
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        ""
+      );
+    }
+  }, [user]);
+
+  const handleUpdateDisplayName = async (e) => {
+    e?.preventDefault();
+    const trimmed = displayName.trim();
+    if (!trimmed) {
+      addToast(t("account.updateNameError") + ": Tên không được để trống", "error");
+      return;
+    }
+    setIsUpdatingName(true);
+    try {
+      const { user: updatedUser, error } = await authService.updateDisplayName(trimmed);
+      if (error) throw error;
+      if (updatedUser) {
+        setUser(updatedUser);
+      }
+      addToast(t("account.updateNameSuccess"), "success");
+    } catch (err) {
+      addToast(err.message || t("account.updateNameError"), "error");
+    } finally {
+      setIsUpdatingName(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     ai_provider: "gemini",
@@ -330,14 +367,48 @@ export default function SettingsPage() {
           </div>
 
           {/* Account Management */}
-          <div className="card-taupe flex flex-col gap-4">
+          <div className="card-taupe flex flex-col gap-5">
             <div>
               <h3 className="text-subheading font-display font-light text-ink">
                 {t("account.title")}
               </h3>
             </div>
 
-            <div className="flex flex-col gap-2 text-body-sm">
+            <div className="flex items-center gap-4 py-2 border-b border-stone">
+              <UserAvatar
+                name={displayName || user?.email}
+                photoUrl={user?.user_metadata?.avatar_url}
+                size="lg"
+              />
+              <div className="flex flex-col min-w-0">
+                <span className="font-display font-medium text-ink text-body truncate">
+                  {displayName || user?.email?.split("@")[0] || "User"}
+                </span>
+                <span className="text-caption text-smoke truncate">{user?.email}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+              <div className="flex-1 w-full">
+                <Input
+                  label={t("account.displayName")}
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder={t("account.displayNamePlaceholder")}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={isUpdatingName}
+                onClick={handleUpdateDisplayName}
+                className="shrink-0 h-[46px] self-end"
+              >
+                {isUpdatingName ? <LoadingSpinner size="sm" /> : t("account.updateName")}
+              </Button>
+            </div>
+
+            <div className="flex flex-col gap-2 text-body-sm pt-2">
               <div className="flex justify-between py-2 border-b border-stone">
                 <span className="text-smoke">{t("account.email")}</span>
                 <span className="font-medium text-ink">{user?.email}</span>

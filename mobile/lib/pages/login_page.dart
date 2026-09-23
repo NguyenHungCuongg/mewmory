@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
 import '../utils/mew_toast.dart';
 import '../utils/validators.dart';
+import '../widgets/common/app_logo.dart';
 import '../widgets/common/language_switcher.dart';
 import '../widgets/common/mew_button.dart';
 import '../widgets/common/mew_text_field.dart';
@@ -138,29 +139,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      const SizedBox(height: 20),
+                      const AppLogo(
+                        size: 64,
+                        showWordmark: true,
+                        borderRadius: 16,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n?.loginSubtitle ?? 'Sổ tay từ vựng tiếng Anh thông minh',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: colors.smoke,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                       const SizedBox(height: 36),
-                  // App Title & Tagline
-                  Text(
-                    'Mewmory',
-                    style: GoogleFonts.inter(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w300,
-                      letterSpacing: -0.72,
-                      color: colors.ink,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n?.loginSubtitle ?? 'Sổ tay từ vựng tiếng Anh thông minh',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: colors.smoke,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 40),
 
                   // Email Field
                   MewTextField(

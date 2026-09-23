@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/services_provider.dart';
 import '../utils/mew_toast.dart';
 import '../utils/validators.dart';
+import '../widgets/common/app_logo.dart';
 import '../widgets/common/language_switcher.dart';
 import '../widgets/common/mew_button.dart';
 import '../widgets/common/mew_text_field.dart';
@@ -115,35 +116,37 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             ),
             Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
+                padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const SizedBox(height: 36),
-                  Text(
-                    l10n?.registerTitle ?? 'Tạo tài khoản',
-                    style: GoogleFonts.inter(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w300,
-                      letterSpacing: -0.64,
-                      color: colors.ink,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
+                      const SizedBox(height: 8),
+                      const Center(child: AppLogo(size: 44, borderRadius: 11)),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n?.registerTitle ?? 'Tạo tài khoản',
+                        style: GoogleFonts.inter(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w300,
+                          letterSpacing: -0.52,
+                          color: colors.ink,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                  const SizedBox(height: 4),
                   Text(
                     l10n?.registerSubtitle ?? 'Bắt đầu hành trình nâng cao vốn từ của bạn',
                     style: GoogleFonts.inter(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w400,
                       color: colors.smoke,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
 
                   // Name Field (Required)
                   MewTextField(

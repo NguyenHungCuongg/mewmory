@@ -1,27 +1,49 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { adminService } from "../services/admin.service";
-import { supabase } from "../config/supabase";
-import { useAuthStore } from "../stores/auth.store";
+import AdminLayout from "../components/AdminLayout";
 import { BarUsageChart } from "../components/UsageChart";
 import BanModal from "../components/BanModal";
+import { ArrowLeftIcon, ShieldAlertIcon, CheckCircleIcon } from "../components/Icons";
 
 const ACTION_LABELS = {
-  lookup_word: "Tra từ",
+  lookup_word: "Tra từ điển",
   ai_classify: "AI phân loại",
-  translate_definition: "Dịch nghĩa",
+  translate_definition: "Dịch nghĩa AI",
 };
-const STATUS_STYLES = {
-  success: "text-green-400",
-  error: "text-red-400",
-  rate_limited: "text-yellow-400",
-  banned: "text-red-500",
-};
+
+function LogStatusBadge({ status }) {
+  if (status === "success") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+        success
+      </span>
+    );
+  }
+  if (status === "banned") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium text-rose-400 bg-rose-500/10 border border-rose-500/20">
+        banned
+      </span>
+    );
+  }
+  if (status === "rate_limited") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20">
+        rate_limited
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium text-rose-400 bg-rose-500/10 border border-rose-500/20">
+      error
+    </span>
+  );
+}
 
 export default function UserDetailPage() {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { signOut } = useAuthStore();
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -37,19 +59,12 @@ export default function UserDetailPage() {
       .finally(() => setLoading(false));
   }, [userId]);
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    signOut();
-    navigate("/login");
-  }
-
   async function handleBan(reason) {
     setActionLoading(true);
     try {
       await adminService.banUser(userId, reason);
       setShowBanModal(false);
-      setActionSuccess("User đã bị suspend thành công.");
-      // Refresh
+      setActionSuccess("Người dùng đã bị khóa quyền gọi API thành công.");
       const updated = await adminService.getUserDetail(userId);
       setDetail(updated);
     } catch (err) {
@@ -63,7 +78,7 @@ export default function UserDetailPage() {
     setActionLoading(true);
     try {
       await adminService.unbanUser(userId);
-      setActionSuccess("User đã được unban.");
+      setActionSuccess("Đã gỡ khóa tài khoản người dùng.");
       const updated = await adminService.getUserDetail(userId);
       setDetail(updated);
     } catch (err) {
@@ -77,7 +92,7 @@ export default function UserDetailPage() {
     setActionLoading(true);
     try {
       await adminService.unflagUser(userId);
-      setActionSuccess("Đã bỏ flag user.");
+      setActionSuccess("Đã gỡ cờ cảnh báo spam cho người dùng.");
       const updated = await adminService.getUserDetail(userId);
       setDetail(updated);
     } catch (err) {
@@ -88,164 +103,223 @@ export default function UserDetailPage() {
   }
 
   const profile = detail?.profile;
+  const initial = (profile?.display_name?.[0] || profile?.email?.[0] || "U").toUpperCase();
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-xl">🐱</span>
-          <span className="font-semibold">Mewmory Admin</span>
+    <AdminLayout
+      title="Hồ sơ chi tiết người dùng"
+      subtitle={profile?.email || "Chi tiết tài khoản & Lịch sử sử dụng"}
+    >
+      <div className="space-y-6 max-w-6xl">
+        {/* Navigation Bar */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => navigate("/users")}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-700/80 bg-[#0f1523] text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition-all"
+          >
+            <ArrowLeftIcon className="w-3.5 h-3.5" />
+            <span>Quay lại danh sách</span>
+          </button>
         </div>
-        <nav className="flex items-center gap-4">
-          <button onClick={() => navigate("/dashboard")} className="text-sm text-gray-400 hover:text-white">Dashboard</button>
-          <button onClick={() => navigate("/users")} className="text-sm text-gray-400 hover:text-white">Users</button>
-          <button onClick={handleSignOut} className="text-sm text-gray-500 hover:text-red-400 transition-colors">Đăng xuất</button>
-        </nav>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-6 py-8">
-        <button
-          onClick={() => navigate("/users")}
-          className="text-sm text-gray-400 hover:text-white mb-6 inline-flex items-center gap-1"
-        >
-          ← Quay lại danh sách
-        </button>
 
         {loading && (
-          <div className="flex justify-center py-16">
-            <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs text-slate-400">Đang truy xuất dữ liệu chi tiết...</span>
           </div>
         )}
 
         {error && (
-          <div className="mb-4 p-4 rounded-xl bg-red-950/30 border border-red-500/20 text-red-400 text-sm">{error}</div>
+          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
+            {error}
+          </div>
         )}
 
         {actionSuccess && (
-          <div className="mb-4 p-4 rounded-xl bg-green-950/30 border border-green-500/20 text-green-400 text-sm">{actionSuccess}</div>
+          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-center justify-between">
+            <span>{actionSuccess}</span>
+            <button
+              onClick={() => setActionSuccess("")}
+              className="text-xs text-emerald-400 hover:underline"
+            >
+              Đóng
+            </button>
+          </div>
         )}
 
         {detail && profile && (
           <>
-            {/* Profile Header */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6 flex items-start justify-between flex-wrap gap-4">
+            {/* Header Profile Card */}
+            <div className="bg-[#0f1523] border border-slate-800/80 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-center gap-4">
                 {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt="avatar" className="w-14 h-14 rounded-full object-cover" />
+                  <img
+                    src={profile.avatar_url}
+                    alt="avatar"
+                    className="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-700"
+                  />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-indigo-900/40 flex items-center justify-center text-2xl">
-                    {(profile.display_name || profile.email)?.[0]?.toUpperCase()}
+                  <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center text-xl font-bold font-mono">
+                    {initial}
                   </div>
                 )}
                 <div>
-                  <h1 className="text-lg font-semibold text-white">{profile.display_name || "—"}</h1>
-                  <p className="text-sm text-gray-400">{profile.email}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Joined {new Date(profile.created_at).toLocaleDateString("vi-VN")} ·{" "}
-                    Last active:{" "}
-                    {profile.last_active_at
-                      ? new Date(profile.last_active_at).toLocaleString("vi-VN")
-                      : "Chưa từng active"}
+                  <div className="flex items-center gap-2.5">
+                    <h2 className="text-lg font-semibold text-white tracking-tight">
+                      {profile.display_name || "Chưa đặt tên"}
+                    </h2>
+                    {profile.is_banned ? (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                        Đã khóa
+                      </span>
+                    ) : profile.is_flagged ? (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                        Cần rà soát
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        Hoạt động
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-400 font-mono mt-0.5">{profile.email}</p>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Đăng ký ngày:{" "}
+                    <span className="text-slate-300 font-mono">
+                      {new Date(profile.created_at).toLocaleDateString("vi-VN")}
+                    </span>{" "}
+                    · Hoạt động gần nhất:{" "}
+                    <span className="text-slate-300 font-mono">
+                      {profile.last_active_at
+                        ? new Date(profile.last_active_at).toLocaleString("vi-VN")
+                        : "Chưa có"}
+                    </span>
                   </p>
                 </div>
               </div>
-              {/* Actions */}
-              <div className="flex flex-col items-end gap-2">
+
+              {/* Action Controls */}
+              <div className="flex items-center gap-2.5 flex-wrap">
                 {profile.is_flagged && !profile.is_banned && (
                   <button
                     id="unflag-btn"
                     onClick={handleUnflag}
                     disabled={actionLoading}
-                    className="px-4 py-1.5 rounded-xl border border-yellow-500/30 text-yellow-400 text-sm hover:bg-yellow-900/20 transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 disabled:opacity-50 transition-all"
                   >
-                    Bỏ flag
+                    <CheckCircleIcon className="w-4 h-4" />
+                    <span>Gỡ cảnh báo</span>
                   </button>
                 )}
+
                 {!profile.is_banned ? (
                   <button
                     id="suspend-btn"
                     onClick={() => setShowBanModal(true)}
                     disabled={actionLoading}
-                    className="px-4 py-1.5 rounded-xl bg-red-600/20 border border-red-500/30 text-red-400 text-sm hover:bg-red-600/30 transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium bg-rose-600/15 border border-rose-500/30 text-rose-400 hover:bg-rose-600/25 disabled:opacity-50 transition-all shadow-sm"
                   >
-                    🔴 Suspend User
+                    <ShieldAlertIcon className="w-4 h-4" />
+                    <span>Khóa tài khoản</span>
                   </button>
                 ) : (
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500 mb-1">
-                      Banned {new Date(profile.banned_at).toLocaleString("vi-VN")}
-                    </div>
-                    <div className="text-xs text-gray-400 mb-2 max-w-[200px] text-right">
-                      Lý do: {profile.ban_reason}
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-[11px] text-rose-400 font-medium">
+                        Lý do: {profile.ban_reason || "Vi phạm điều khoản"}
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-mono">
+                        {profile.banned_at ? new Date(profile.banned_at).toLocaleString("vi-VN") : ""}
+                      </p>
                     </div>
                     <button
                       id="unban-btn"
                       onClick={handleUnban}
                       disabled={actionLoading}
-                      className="px-4 py-1.5 rounded-xl bg-green-600/20 border border-green-500/30 text-green-400 text-sm hover:bg-green-600/30 transition-colors disabled:opacity-50"
+                      className="px-3.5 py-2 rounded-xl text-xs font-medium bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/25 disabled:opacity-50 transition-all shadow-sm"
                     >
-                      ✅ Unban
+                      Mở khóa tài khoản
                     </button>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Stats Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "Từ vựng", value: profile.vocab_count },
-                { label: "Calls hôm nay", value: profile.api_calls_today },
-                { label: "Calls 7 ngày", value: profile.api_calls_7d },
-                { label: "Tổng calls", value: profile.api_calls_total },
-              ].map(({ label, value }) => (
-                <div key={label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
-                  <div className="text-xs text-gray-400 mb-1">{label}</div>
-                  <div className="text-xl font-semibold text-white">{value?.toLocaleString() ?? "—"}</div>
+                { label: "Tổng từ vựng", val: profile.vocab_count, unit: "từ" },
+                { label: "Calls hôm nay", val: profile.api_calls_today, unit: "calls" },
+                { label: "Calls 7 ngày", val: profile.api_calls_7d, unit: "calls" },
+                { label: "Tổng lưu lượng calls", val: profile.api_calls_total, unit: "calls" },
+              ].map((m) => (
+                <div key={m.label} className="bg-[#0f1523] border border-slate-800/80 rounded-2xl p-4 shadow-sm">
+                  <span className="text-xs font-medium uppercase tracking-wider text-slate-400">{m.label}</span>
+                  <div className="mt-2 flex items-baseline gap-1.5">
+                    <span className="text-2xl font-semibold font-mono tabular-nums text-white">
+                      {m.val?.toLocaleString() ?? 0}
+                    </span>
+                    <span className="text-xs text-slate-400 font-mono">{m.unit}</span>
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Charts */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                <h3 className="text-sm text-gray-400 mb-3">Calls theo ngày (7 ngày)</h3>
+            {/* Charts Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-[#0f1523] border border-slate-800/80 rounded-2xl p-5 shadow-sm">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
+                  Lưu lượng theo ngày (7 ngày qua)
+                </h3>
+                <p className="text-[11px] text-slate-400 mb-4">Mật độ sử dụng trong tuần</p>
                 <BarUsageChart data={detail.daily_calls} xKey="date" yKey="count" label="Calls" />
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                <h3 className="text-sm text-gray-400 mb-3">Calls theo giờ (24h qua)</h3>
+
+              <div className="bg-[#0f1523] border border-slate-800/80 rounded-2xl p-5 shadow-sm">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
+                  Lưu lượng theo giờ (24 giờ qua)
+                </h3>
+                <p className="text-[11px] text-slate-400 mb-4">Các khung giờ gọi API trong ngày</p>
                 <BarUsageChart data={detail.hourly_calls} xKey="hour" yKey="count" label="Calls" />
               </div>
             </div>
 
-            {/* Activity Log */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-white/10">
-                <h3 className="text-sm font-medium text-gray-300">50 hoạt động gần nhất</h3>
+            {/* Activity Logs Table */}
+            <div className="bg-[#0f1523] border border-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
+              <div className="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-200">50 hoạt động API gần nhất</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Nhật ký chi tiết các lệnh gọi Edge Functions</p>
+                </div>
+                <span className="px-2 py-0.5 rounded text-xs font-mono bg-slate-800 text-slate-400 border border-slate-700/60">
+                  {detail.recent_logs?.length || 0} bản ghi
+                </span>
               </div>
+
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-xs text-left">
                   <thead>
-                    <tr className="border-b border-white/10">
-                      {["Thời gian", "Action", "Từ", "Kết quả"].map((h) => (
-                        <th key={h} className="text-left py-2.5 px-4 text-gray-400 font-medium text-xs">{h}</th>
-                      ))}
+                    <tr className="border-b border-slate-800 text-[11px] font-semibold tracking-wider uppercase text-slate-400 bg-slate-900/30">
+                      <th className="py-2.5 px-5">Thời gian</th>
+                      <th className="py-2.5 px-4">Thao tác</th>
+                      <th className="py-2.5 px-4">Từ khóa</th>
+                      <th className="py-2.5 px-4">Kết quả</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {detail.recent_logs.map((log) => (
-                      <tr key={log.id} className="border-b border-white/5">
-                        <td className="py-2.5 px-4 text-gray-500 text-xs whitespace-nowrap">
+                  <tbody className="divide-y divide-slate-800/60">
+                    {detail.recent_logs?.map((log) => (
+                      <tr key={log.id} className="hover:bg-slate-800/30 transition-colors">
+                        <td className="py-2.5 px-5 text-slate-400 font-mono whitespace-nowrap">
                           {new Date(log.created_at).toLocaleString("vi-VN")}
                         </td>
-                        <td className="py-2.5 px-4 text-gray-300 text-xs">
+                        <td className="py-2.5 px-4 font-medium text-slate-200">
                           {ACTION_LABELS[log.action] || log.action}
                         </td>
-                        <td className="py-2.5 px-4 text-gray-400 text-xs font-mono">
+                        <td className="py-2.5 px-4 font-mono text-slate-300">
                           {log.word || "—"}
                         </td>
-                        <td className={`py-2.5 px-4 text-xs ${STATUS_STYLES[log.status] || "text-gray-400"}`}>
-                          {log.status}
+                        <td className="py-2.5 px-4">
+                          <LogStatusBadge status={log.status} />
                         </td>
                       </tr>
                     ))}
@@ -255,7 +329,7 @@ export default function UserDetailPage() {
             </div>
           </>
         )}
-      </main>
+      </div>
 
       {showBanModal && (
         <BanModal
@@ -264,6 +338,6 @@ export default function UserDetailPage() {
           isLoading={actionLoading}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { adminService } from "../services/admin.service";
-import { supabase } from "../config/supabase";
-import { useAuthStore } from "../stores/auth.store";
+import AdminLayout from "../components/AdminLayout";
 import StatCard from "../components/StatCard";
 import { LineUsageChart } from "../components/UsageChart";
 import UserTable from "../components/UserTable";
+import { UsersIcon, ActivityIcon, AlertIcon, BookOpenIcon } from "../components/Icons";
 
 export default function DashboardPage() {
-  const navigate = useNavigate();
-  const { signOut } = useAuthStore();
   const [stats, setStats] = useState(null);
   const [flaggedUsers, setFlaggedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,75 +22,115 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    signOut();
-    navigate("/login");
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Header */}
-      <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-xl">🐱</span>
-          <span className="font-semibold">Mewmory Admin</span>
+    <AdminLayout
+      title="Tổng quan hệ thống"
+      subtitle="Giám sát thời gian thực người dùng và lưu lượng gọi API"
+    >
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-24 gap-3">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs text-slate-400">Đang đồng bộ dữ liệu hệ thống...</span>
         </div>
-        <nav className="flex items-center gap-4">
-          <button onClick={() => navigate("/dashboard")} className="text-sm text-indigo-400">Dashboard</button>
-          <button onClick={() => navigate("/users")} className="text-sm text-gray-400 hover:text-white">Users</button>
-          <button onClick={handleSignOut} className="text-sm text-gray-500 hover:text-red-400 transition-colors">Đăng xuất</button>
-        </nav>
-      </header>
+      ) : (
+        <div className="space-y-8 max-w-7xl">
+          {error && (
+            <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex items-center justify-between">
+              <span>{error}</span>
+              <button
+                onClick={() => window.location.reload()}
+                className="underline text-xs hover:text-rose-300"
+              >
+                Thử lại
+              </button>
+            </div>
+          )}
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <h1 className="text-2xl font-semibold mb-6">Tổng quan hệ thống</h1>
+          {stats && (
+            <>
+              {/* Stat Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard
+                  label="Tổng số người dùng"
+                  value={stats.total_users}
+                  icon={<UsersIcon className="w-5 h-5" />}
+                  description="Toàn bộ tài khoản đã đăng ký"
+                />
+                <StatCard
+                  label="Hoạt động hôm nay"
+                  value={stats.active_today}
+                  icon={<ActivityIcon className="w-5 h-5 text-emerald-400" />}
+                  description="Có lượt gọi API từ 00:00"
+                />
+                <StatCard
+                  label="Tài khoản cần rà soát"
+                  value={stats.flagged_users}
+                  icon={<AlertIcon className="w-5 h-5" />}
+                  alert
+                  description="Vượt ngưỡng >50 calls/giờ"
+                />
+                <StatCard
+                  label="Lưu lượng API (24h)"
+                  value={stats.api_calls_24h}
+                  icon={<BookOpenIcon className="w-5 h-5 text-blue-400" />}
+                  description="Tổng lượt tra từ & AI phân loại"
+                />
+              </div>
 
-        {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-950/30 border border-red-500/20 text-red-400 text-sm">{error}</div>
-        )}
+              {/* Chart Card */}
+              <div className="bg-[#0f1523] border border-slate-800/80 rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-sm font-semibold text-slate-200">
+                      Biểu đồ lưu lượng API theo giờ
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Thống kê 24 mốc thời gian gần nhất trong ngày
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700/60">
+                    24 giờ qua
+                  </span>
+                </div>
 
-        {stats && (
-          <>
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <StatCard icon="👥" label="Tổng Users" value={stats.total_users} />
-              <StatCard icon="🟢" label="Active hôm nay" value={stats.active_today} />
-              <StatCard icon="🚨" label="Cần review" value={stats.flagged_users} alert />
-              <StatCard icon="📡" label="API Calls (24h)" value={stats.api_calls_24h} />
+                <LineUsageChart
+                  data={stats.calls_by_hour}
+                  xKey="hour"
+                  yKey="count"
+                  label="Calls"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Flagged Users Section */}
+          <div className="bg-[#0f1523] border border-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                  <span>Tài khoản có dấu hiệu spam</span>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-mono font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    {flaggedUsers.length}
+                  </span>
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Các tài khoản được hệ thống tự động gắn cờ để Admin kiểm tra
+                </p>
+              </div>
             </div>
 
-            {/* Chart */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
-              <h2 className="text-sm font-medium text-gray-400 mb-4">API calls theo giờ (24h qua)</h2>
-              <LineUsageChart
-                data={stats.calls_by_hour}
-                xKey="hour"
-                yKey="count"
-                label="Calls"
-              />
-            </div>
-          </>
-        )}
-
-        {/* Flagged Users */}
-        {flaggedUsers.length > 0 && (
-          <div className="bg-yellow-950/10 border border-yellow-500/20 rounded-2xl p-6">
-            <h2 className="text-sm font-medium text-yellow-400 mb-4">
-              🟡 Users cần review ({flaggedUsers.length})
-            </h2>
-            <UserTable users={flaggedUsers} />
+            {flaggedUsers.length > 0 ? (
+              <UserTable users={flaggedUsers} />
+            ) : (
+              <div className="py-12 text-center">
+                <p className="text-sm text-slate-400">
+                  Không có tài khoản nào bị gắn cờ cảnh báo. Hệ thống an toàn.
+                </p>
+              </div>
+            )}
           </div>
-        )}
-      </main>
-    </div>
+        </div>
+      )}
+    </AdminLayout>
   );
 }

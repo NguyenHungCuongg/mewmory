@@ -3,7 +3,9 @@ import { supabase } from "../config/supabase";
 const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
 
 async function callAdminApi(action, options = {}) {
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
 
   const { method = "GET", body, params = {} } = options;
@@ -17,6 +19,7 @@ async function callAdminApi(action, options = {}) {
   const res = await fetch(url.toString(), {
     method,
     headers: {
+      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
       Authorization: `Bearer ${session.access_token}`,
       "Content-Type": "application/json",
     },

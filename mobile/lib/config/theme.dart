@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 class MewColors {
   // Surfaces
   static const eggshell = Color(0xFFFDFCFC);
-  static const warmTaupe = Color(0xFFF5F3F1);
+  static const warmTaupe = Color(0xFFFDFDFB);
   static const stone = Color(0xFFEBE8E4);
 
   // Text
@@ -262,7 +262,8 @@ class MewTheme {
           foregroundColor: MewColors.eggshell,
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -271,13 +272,15 @@ class MewTheme {
           side: const BorderSide(color: MewColors.stone),
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: MewColors.eggshell,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: MewColors.stone),
@@ -420,7 +423,8 @@ class MewTheme {
           foregroundColor: MewColorsDark.eggshell,
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -429,13 +433,15 @@ class MewTheme {
           side: const BorderSide(color: MewColorsDark.stone),
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: MewColorsDark.eggshell,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: MewColorsDark.stone),
@@ -457,7 +463,8 @@ class MewTheme {
       chipTheme: ChipThemeData(
         backgroundColor: MewColorsDark.stone,
         selectedColor: MewColorsDark.ink,
-        labelStyle: GoogleFonts.inter(fontSize: 12, color: MewColorsDark.graphite),
+        labelStyle:
+            GoogleFonts.inter(fontSize: 12, color: MewColorsDark.graphite),
         shape: const StadiumBorder(),
         side: BorderSide.none,
       ),

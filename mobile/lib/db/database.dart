@@ -41,6 +41,17 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 1;
 
+  /// Clears all cached tables for security when logging out.
+  Future<void> clearAllLocalData() async {
+    await transaction(() async {
+      await delete(vocabularyCollections).go();
+      await delete(definitions).go();
+      await delete(vocabularies).go();
+      await delete(collections).go();
+      await delete(userSettingsTable).go();
+    });
+  }
+
   static QueryExecutor _openConnection() {
     return LazyDatabase(() async {
       final dbFolder = await getApplicationDocumentsDirectory();

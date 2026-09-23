@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../config/theme.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/database_provider.dart';
 import '../../utils/mew_toast.dart';
 import '../common/mew_button.dart';
 import '../common/mew_card.dart';
@@ -105,6 +106,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
 
     if (confirmed == true) {
       try {
+        await ref.read(databaseProvider).clearAllLocalData();
         await ref.read(authServiceProvider).signOut();
         if (mounted) {
           context.go('/login');

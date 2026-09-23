@@ -13,7 +13,9 @@ import '../utils/mew_toast.dart';
 import '../widgets/collection/collection_card.dart';
 import '../widgets/collection/collection_form_sheet.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/common/error_state.dart';
 import '../widgets/common/loading_indicator.dart';
+import '../widgets/common/skeleton_loader.dart';
 
 class CollectionsPage extends ConsumerWidget {
   const CollectionsPage({super.key});
@@ -113,16 +115,12 @@ class CollectionsPage extends ConsumerWidget {
           }
         },
         child: collectionsAsync.when(
-          loading: () => const Center(child: LoadingIndicator()),
-          error: (err, stack) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Text(
-                'Lỗi khi tải bộ sưu tập: $err',
-                style: GoogleFonts.inter(color: colors.error),
-                textAlign: TextAlign.center,
-              ),
-            ),
+          loading: () => const CollectionListSkeleton(),
+          error: (err, stack) => ErrorState(
+            title: l10n?.error ?? 'Lỗi khi tải bộ sưu tập',
+            message: err.toString(),
+            actionLabel: l10n?.retry ?? 'Thử lại',
+            onRetry: () => ref.invalidate(myCollectionsProvider),
           ),
           data: (items) {
             if (items.isEmpty) {

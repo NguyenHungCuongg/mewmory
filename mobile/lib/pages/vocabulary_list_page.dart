@@ -13,9 +13,11 @@ import '../providers/services_provider.dart';
 import '../providers/vocabulary_provider.dart';
 import '../utils/mew_toast.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/common/error_state.dart';
 import '../widgets/common/loading_indicator.dart';
 import '../widgets/common/mew_chip.dart';
 import '../widgets/common/offline_banner.dart';
+import '../widgets/common/skeleton_loader.dart';
 import '../widgets/vocabulary/filter_sheet.dart';
 import '../widgets/vocabulary/word_card.dart';
 
@@ -357,19 +359,12 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
                   ),
                 );
               },
-              loading: () => const LoadingIndicator(),
-              error: (err, stack) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Text(
-                    'Đã xảy ra lỗi khi tải từ vựng: $err',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: colors.error,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+              loading: () => const WordListSkeleton(),
+              error: (err, stack) => ErrorState(
+                title: l10n?.error ?? 'Đã xảy ra lỗi khi tải từ vựng',
+                message: err.toString(),
+                actionLabel: l10n?.retry ?? 'Thử lại',
+                onRetry: () => ref.invalidate(vocabularyListProvider),
               ),
             ),
           ),

@@ -6,6 +6,7 @@ import '../config/theme.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import '../widgets/common/error_state.dart';
 import '../widgets/common/loading_indicator.dart';
 import '../widgets/settings/account_section.dart';
 import '../widgets/settings/ai_settings_section.dart';
@@ -43,14 +44,11 @@ class SettingsPage extends ConsumerWidget {
       ),
       body: settingsAsync.when(
         loading: () => const Center(child: LoadingIndicator()),
-        error: (err, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Text(
-              'Lỗi khi tải cài đặt: $err',
-              style: GoogleFonts.inter(color: colors.error),
-            ),
-          ),
+        error: (err, _) => ErrorState(
+          title: l10n?.error ?? 'Lỗi khi tải cài đặt',
+          message: err.toString(),
+          actionLabel: l10n?.retry ?? 'Thử lại',
+          onRetry: () => ref.invalidate(userSettingsNotifierProvider),
         ),
         data: (settings) => SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),

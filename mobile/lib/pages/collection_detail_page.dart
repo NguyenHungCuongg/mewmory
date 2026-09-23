@@ -12,7 +12,9 @@ import '../providers/services_provider.dart';
 import '../utils/mew_toast.dart';
 import '../widgets/collection/collection_form_sheet.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/common/error_state.dart';
 import '../widgets/common/loading_indicator.dart';
+import '../widgets/common/skeleton_loader.dart';
 import '../widgets/vocabulary/word_card.dart';
 
 class CollectionDetailPage extends ConsumerWidget {
@@ -128,19 +130,31 @@ class CollectionDetailPage extends ConsumerWidget {
     return collectionAsync.when(
       loading: () => Scaffold(
         backgroundColor: colors.eggshell,
-        body: const Center(child: LoadingIndicator()),
+        appBar: AppBar(backgroundColor: colors.eggshell),
+        body: const WordListSkeleton(),
       ),
       error: (err, _) => Scaffold(
         backgroundColor: colors.eggshell,
         appBar: AppBar(backgroundColor: colors.eggshell),
-        body: Center(child: Text('Lỗi: $err')),
+        body: ErrorState(
+          title: l10n?.error ?? 'Lỗi khi tải bộ sưu tập',
+          message: err.toString(),
+          actionLabel: l10n?.retry ?? 'Thử lại',
+          onRetry: () => ref.invalidate(collectionDetailProvider(id)),
+        ),
       ),
       data: (col) {
         if (col == null) {
           return Scaffold(
             backgroundColor: colors.eggshell,
             appBar: AppBar(backgroundColor: colors.eggshell),
-            body: const Center(child: Text('Bộ sưu tập không tồn tại hoặc đã bị xóa')),
+            body: EmptyState(
+              icon: Icons.folder_off_outlined,
+              title: 'Bộ sưu tập không tồn tại',
+              message: 'Bộ sưu tập này có thể đã bị xóa hoặc không tìm thấy trong bộ nhớ.',
+              actionLabel: 'Quay lại',
+              onAction: () => context.pop(),
+            ),
           );
         }
 

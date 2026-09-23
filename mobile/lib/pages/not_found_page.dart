@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../config/theme.dart';
-import '../l10n/app_localizations.dart';
 import '../widgets/common/mew_button.dart';
 
 class NotFoundPage extends StatelessWidget {
@@ -14,7 +13,6 @@ class NotFoundPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.mewColors;
-    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: colors.eggshell,

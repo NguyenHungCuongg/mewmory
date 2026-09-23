@@ -14,7 +14,6 @@ import '../providers/vocabulary_provider.dart';
 import '../utils/mew_toast.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/error_state.dart';
-import '../widgets/common/loading_indicator.dart';
 import '../widgets/common/mew_chip.dart';
 import '../widgets/common/offline_banner.dart';
 import '../widgets/common/skeleton_loader.dart';

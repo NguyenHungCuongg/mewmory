@@ -14,7 +14,6 @@ import '../widgets/collection/collection_card.dart';
 import '../widgets/collection/collection_form_sheet.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/error_state.dart';
-import '../widgets/common/loading_indicator.dart';
 import '../widgets/common/skeleton_loader.dart';
 
 class CollectionsPage extends ConsumerWidget {

@@ -28,3 +28,34 @@ jobs:
       - name: Run tests
         working-directory: ./web
         run: npm run test
+
+  mobile-test:
+    name: Flutter Analyze & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        working-directory: ./mobile
+        run: flutter pub get
+
+      - name: Analyze code
+        working-directory: ./mobile
+        run: flutter analyze
+
+      - name: Run tests
+        working-directory: ./mobile
+        run: flutter test

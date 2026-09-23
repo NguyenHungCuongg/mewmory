@@ -1,4 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import {
+  getUserIdFromJWT,
+  checkBanned,
+  logUsage,
+  updateLastActive,
+  checkAndFlagSpam,
+  createAdminClient,
+} from "../_shared/admin-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +19,10 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  let currentUserId: string | null = null;
+  let currentAdminClient: any = null;
+  let currentWord: string | null = null;
+
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -20,6 +32,30 @@ serve(async (req) => {
       });
     }
 
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const userId = await getUserIdFromJWT(authHeader, supabaseUrl, supabaseAnonKey);
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const adminClient = createAdminClient();
+    currentUserId = userId;
+    currentAdminClient = adminClient;
+
+    const banned = await checkBanned(userId, adminClient);
+    if (banned) {
+      await logUsage(userId, "ai_classify", null, "banned", adminClient);
+      return new Response(
+        JSON.stringify({ error: "Tài khoản của bạn đã bị khóa." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    await updateLastActive(userId, adminClient);
+
     const {
       word,
       definitions_vi,
@@ -28,7 +64,10 @@ serve(async (req) => {
       model,
     } = await req.json();
 
+    currentWord = word ?? null;
+
     if (!word) {
+      await logUsage(userId, "ai_classify", null, "error", adminClient);
       return new Response(JSON.stringify({ error: "Word is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -57,12 +96,18 @@ Rules:
       result = await callOpenRouter(prompt, model);
     }
 
+    await logUsage(userId, "ai_classify", word ?? null, "success", adminClient);
+    await checkAndFlagSpam(userId, adminClient);
+
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
     console.error("ai-classify error:", error);
+    if (currentUserId && currentAdminClient) {
+      await logUsage(currentUserId, "ai_classify", currentWord, "error", currentAdminClient);
+    }
     return new Response(
       JSON.stringify({ error: error.message || "Internal server error" }),
       {

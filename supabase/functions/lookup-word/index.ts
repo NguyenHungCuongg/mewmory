@@ -1,5 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  getUserIdFromJWT,
+  checkBanned,
+  logUsage,
+  updateLastActive,
+  checkAndFlagSpam,
+  createAdminClient,
+} from "../_shared/admin-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,6 +36,34 @@ serve(async (req) => {
       });
     }
 
+    // Resolve user_id from JWT
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const userId = await getUserIdFromJWT(authHeader, supabaseUrl, supabaseAnonKey);
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const adminClient = createAdminClient();
+
+    // Ban check — must happen before reading body to avoid wasted work
+    const banned = await checkBanned(userId, adminClient);
+    if (banned) {
+      await logUsage(userId, "lookup_word", null, "banned", adminClient);
+      return new Response(
+        JSON.stringify({ error: "Tài khoản của bạn đã bị khóa." }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    await updateLastActive(userId, adminClient);
+
     const {
       word,
       provider = "gemini",
@@ -35,6 +71,7 @@ serve(async (req) => {
     }: LookupRequest = await req.json();
 
     if (!word || typeof word !== "string" || word.trim().length === 0) {
+      await logUsage(userId, "lookup_word", null, "error", adminClient);
       return new Response(JSON.stringify({ error: "Word is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -53,6 +90,9 @@ serve(async (req) => {
     const aiData = aiResult.status === "fulfilled" ? aiResult.value : null;
 
     if (!dictData && !aiData) {
+      await logUsage(userId, "lookup_word", trimmedWord, "error", adminClient);
+      await checkAndFlagSpam(userId, adminClient);
+
       const dictErr =
         dictResult.status === "rejected"
           ? String(dictResult.reason?.message || dictResult.reason)
@@ -74,12 +114,15 @@ serve(async (req) => {
         {
           status: 503,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        }
       );
     }
 
     // Merge results
     const result = mergeResults(trimmedWord, dictData, aiData);
+
+    await logUsage(userId, "lookup_word", trimmedWord, "success", adminClient);
+    await checkAndFlagSpam(userId, adminClient);
 
     return new Response(JSON.stringify(result), {
       status: 200,

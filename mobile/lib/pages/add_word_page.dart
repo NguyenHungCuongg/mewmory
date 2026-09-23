@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -40,15 +41,44 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
   bool _isSaving = false;
   bool _isDuplicate = false;
   bool _manualMode = false;
+  Timer? _duplicateDebounceTimer;
 
   @override
   void dispose() {
+    _duplicateDebounceTimer?.cancel();
     _wordController.dispose();
     _manualPhoneticController.dispose();
     _manualDefViController.dispose();
     _manualDefEnController.dispose();
     _manualExampleController.dispose();
     super.dispose();
+  }
+
+  void _checkDuplicateDebounced(String query) {
+    _duplicateDebounceTimer?.cancel();
+    final word = query.trim();
+    if (word.isEmpty) {
+      if (_isDuplicate) setState(() => _isDuplicate = false);
+      return;
+    }
+
+    _duplicateDebounceTimer = Timer(
+      const Duration(milliseconds: AppConstants.searchDebounceMs),
+      () async {
+        final user = ref.read(currentUserProvider);
+        if (user != null && mounted) {
+          final existing = await ref
+              .read(vocabularyServiceProvider)
+              .getAll(user.id, searchQuery: word);
+          if (mounted) {
+            setState(() {
+              _isDuplicate = existing.any((item) =>
+                  item.vocabulary.word.toLowerCase() == word.toLowerCase());
+            });
+          }
+        }
+      },
+    );
   }
 
   Future<void> _handleLookup() async {
@@ -285,6 +315,7 @@ class _AddWordPageState extends ConsumerState<AddWordPage> {
                           controller: _wordController,
                           hintText: l10n?.wordInputPlaceholder ?? 'Nhập từ tiếng Anh (ví dụ: resilient)',
                           textInputAction: TextInputAction.search,
+                          onChanged: _checkDuplicateDebounced,
                           onSubmitted: (_) => _handleLookup(),
                         ),
                       ),

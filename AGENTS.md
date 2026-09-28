@@ -159,11 +159,11 @@ mewmory/
 **File tham chiếu:** [`DESIGN.md`](file:///f:/Side%20Projects/mewmory/DESIGN.md)
 
 **Quick reference:**
-- Canvas: `#fdfcfc` (eggshell) — KHÔNG dùng pure white `#ffffff`
-- Card surface: `#f5f3f1` (warm taupe)
-- Border: `#ebe8e4` (stone) — hairline 1px
-- Text: `#000000` (ink), `#777169` (smoke/body), `#a59f97` (ash/caption)
-- Accent: `#0447ff` (violet) + `#ff4704` (orange) — chỉ dùng trong product visuals
+- Canvas: `#ffffff` (eggshell) — nguồn màu chuẩn: `web/src/index.css`
+- Card surface: `#fdfdfb` (warm taupe)
+- Border: `#e6e6e3` (stone) — hairline 1px
+- Text: `#0b0b0b` (ink), `#60605c` (smoke/body), `#8c8c87` (ash/caption)
+- Accent: `#1646ff` (violet) + `#ff501c` (orange) — chỉ dùng trong product visuals
 - Buttons: pill shape `border-radius: 9999px`
 - Cards: `border-radius: 20px`
 - Display font: Waldenburg/Inter weight 300

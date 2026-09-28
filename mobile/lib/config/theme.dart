@@ -3,19 +3,19 @@ import 'package:google_fonts/google_fonts.dart';
 
 class MewColors {
   // Surfaces
-  static const eggshell = Color(0xFFFDFCFC);
+  static const eggshell = Color(0xFFFFFFFF);
   static const warmTaupe = Color(0xFFFDFDFB);
-  static const stone = Color(0xFFEBE8E4);
+  static const stone = Color(0xFFE6E6E3);
 
   // Text
-  static const ink = Color(0xFF000000);
-  static const graphite = Color(0xFF44403B);
-  static const smoke = Color(0xFF777169);
-  static const ash = Color(0xFFA59F97);
+  static const ink = Color(0xFF0B0B0B);
+  static const graphite = Color(0xFF30302E);
+  static const smoke = Color(0xFF60605C);
+  static const ash = Color(0xFF8C8C87);
 
   // Accents
-  static const violetSpark = Color(0xFF0447FF);
-  static const emberOrange = Color(0xFFFF4704);
+  static const violetSpark = Color(0xFF1646FF);
+  static const emberOrange = Color(0xFFFF501C);
 
   // Semantic
   static const success = Color(0xFF2D7D46);

@@ -1,24 +1,44 @@
 # ElevenLabs — Style Reference
 
-> Warm cream editorial with whispered headlines. A Bauhaus studio notebook — eggshell paper, black ink, a single violet and orange spark for product moments.
+> Clean white editorial with whispered headlines. A Bauhaus studio notebook — white paper, near-black ink, a single violet and orange spark for product moments.
 
-**Theme:** light
+**Theme:** light + dark (see [Dark Mode](#tokens--colors-dark-mode))
 
-ElevenLabs runs on a warm-white minimalism: an off-white eggshell canvas (#fdfcfc) holding black type and a single layer of warm taupe surfaces (#f5f3f1). The brand voice is quiet and confident — whisper-weight Waldenburg at 300 carves display headlines with extreme tightness (-0.02em), while Inter at 400/500 carries everything else with calm neutrality. Two accent sparks — vivid violet #0447ff and vivid orange #ff4704 — only ignite inside product visuals (audio spheres, product icons), never as UI chrome. Components stay flat or barely elevated with hairline 1px borders, generous 20px radii on cards, and fully-pilled 9999px buttons. The system feels like a Bauhaus studio on cream paper: restrained, editorial, and technically precise.
+> **Source of truth:** `web/src/index.css` (`@theme` + `[data-theme="dark"]`). Mobile mirrors it in `mobile/lib/config/theme.dart`. If these disagree with this file, the code wins — update this file.
+
+ElevenLabs runs on a near-neutral white minimalism: a pure white canvas (#ffffff) holding near-black type and a barely-tinted surface layer (#fdfdfb). The brand voice is quiet and confident — whisper-weight Waldenburg at 300 carves display headlines with extreme tightness (-0.02em), while Inter at 400/500 carries everything else with calm neutrality. Two accent sparks — vivid violet #1646ff and vivid orange #ff501c — only ignite inside product visuals (audio spheres, product icons), never as UI chrome. Components stay flat or barely elevated with hairline 1px borders, generous 20px radii on cards, and fully-pilled 9999px buttons. The system feels like a Bauhaus studio on cream paper: restrained, editorial, and technically precise.
 
 ## Tokens — Colors
 
 | Name         | Value     | Token                  | Role                                                                                                                                              |
 | ------------ | --------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Eggshell     | `#fdfcfc` | `--color-eggshell`     | Page canvas, button surfaces, card surfaces — warm off-white rather than clinical white avoids digital glare and gives the site a paper-like calm |
-| Warm Taupe   | `#f5f3f1` | `--color-warm-taupe`   | Section bands, feature cards, and secondary surface level — one step deeper than eggshell, creates quiet separation without borders               |
-| Stone        | `#ebe8e4` | `--color-stone`        | Hairline borders, dividers, icon plate backgrounds — warm gray that sits between taupe and mid-gray without feeling cold                          |
-| Ink          | `#000000` | `--color-ink`          | Primary text, filled buttons, nav, links — pure black anchors the otherwise warm palette and creates the system's only hard contrast              |
-| Graphite     | `#44403b` | `--color-graphite`     | Strong secondary text, section labels — barely-warm dark gray for text that needs weight without true-black harshness                             |
-| Smoke        | `#777169` | `--color-smoke`        | Body text, muted descriptions, caption labels — mid warm-gray; the dominant readable-but-quiet voice across cards and feature copy                |
-| Ash          | `#a59f97` | `--color-ash`          | Faintest helper text, tertiary descriptions — the softest gray, used when text should feel like a footnote                                        |
-| Violet Spark | `#0447ff` | `--color-violet-spark` | Product visual accent — appears inside audio sphere illustrations and decorative product icons only; never used for UI chrome                     |
-| Ember Orange | `#ff4704` | `--color-ember-orange` | Product visual accent — second sphere color and product icon highlight; paired with Violet Spark inside artwork, never in buttons or links        |
+| Eggshell     | `#ffffff` | `--color-eggshell`     | Page canvas, button surfaces, card surfaces — pure white; token name kept for compatibility                                                    |
+| Warm Taupe   | `#fdfdfb` | `--color-warm-taupe`   | Section bands, feature cards, and secondary surface level — a hair off white; cards rely on a stone border for separation                           |
+| Stone        | `#e6e6e3` | `--color-stone`        | Hairline borders, dividers, icon plate backgrounds — light neutral gray                                                                           |
+| Ink          | `#0b0b0b` | `--color-ink`          | Primary text, filled buttons, nav, links — near-black, the system's only hard contrast                                                            |
+| Graphite     | `#30302e` | `--color-graphite`     | Strong secondary text, section labels — dark neutral gray for text that needs weight without true-black harshness                                 |
+| Smoke        | `#60605c` | `--color-smoke`        | Body text, muted descriptions, caption labels — mid neutral gray; the dominant readable-but-quiet voice across cards and feature copy                |
+| Ash          | `#8c8c87` | `--color-ash`          | Faintest helper text, tertiary descriptions — the softest gray, used when text should feel like a footnote                                        |
+| Violet Spark | `#1646ff` | `--color-violet-spark` | Product visual accent — appears inside audio sphere illustrations and decorative product icons only; never used for UI chrome                     |
+| Ember Orange | `#ff501c` | `--color-ember-orange` | Product visual accent — second sphere color and product icon highlight; paired with Violet Spark inside artwork, never in buttons or links        |
+
+## Tokens — Colors (Dark Mode)
+
+Applied via `[data-theme="dark"]` on web and `MewColorsDark` on mobile. Same token names, inverted values.
+
+| Name         | Value     |
+| ------------ | --------- |
+| Eggshell     | `#141413` |
+| Warm Taupe   | `#1c1c1a` |
+| Stone        | `#2e2e2b` |
+| Ink          | `#f0f0ee` |
+| Graphite     | `#c8c8c4` |
+| Smoke        | `#8c8c87` |
+| Ash          | `#60605c` |
+| Violet Spark | `#4a72ff` |
+| Ember Orange | `#ff7a52` |
+
+Shadows in dark mode: `--shadow-subtle: none`; `--shadow-subtle-inset: rgba(255, 255, 255, 0.04) 0px 0px 0px 0.5px inset`.
 
 ## Tokens — Typography
 
@@ -110,7 +130,7 @@ ElevenLabs runs on a warm-white minimalism: an off-white eggshell canvas (#fdfcf
 | subtle-4 | `rgba(0, 0, 0, 0.1) 0px 0px 0px 1px inset`                     | `--shadow-subtle-4` |
 | subtle-5 | `rgba(0, 0, 0, 0.4) 0px 0px 1px 0px, rgba(0, 0, 0, 0.04) 0...` | `--shadow-subtle-5` |
 | subtle-6 | `rgba(255, 255, 255, 0.6) 0px 0px 0px 1px inset`               | `--shadow-subtle-6` |
-| subtle-7 | `rgb(235, 232, 228) 0px 0px 0px 0.5px inset`                   | `--shadow-subtle-7` |
+| subtle-7 | `rgb(230, 230, 227) 0px 0px 0px 0.5px inset`                   | `--shadow-subtle-7` |
 
 ### Layout
 
@@ -125,13 +145,13 @@ ElevenLabs runs on a warm-white minimalism: an off-white eggshell canvas (#fdfcf
 
 **Role:** Primary action
 
-Black (#000000) fill, white text, 9999px radius, 16px horizontal padding, Inter 14px/500. 1px solid #e5e5e5 border (legacy support). Used for 'Sign up', 'Create an AI agent', 'Learn more'. The pill shape is the system's most recognizable component.
+Black (#0b0b0b) fill, white text, 9999px radius, 16px horizontal padding, Inter 14px/500. 1px solid #e5e5e5 border (legacy support). Used for 'Sign up', 'Create an AI agent', 'Learn more'. The pill shape is the system's most recognizable component.
 
 ### Outline Pill Button
 
 **Role:** Secondary action
 
-White (#fdfcfc) fill, black text, 9999px radius, 14px horizontal padding, Inter 14px/500. 1px solid #e5e5e5 border. Used for 'Contact sales', 'Log in'. Lower visual weight than the filled variant — pairs beside it without competing.
+White (#ffffff) fill, black text, 9999px radius, 14px horizontal padding, Inter 14px/500. 1px solid #e5e5e5 border. Used for 'Contact sales', 'Log in'. Lower visual weight than the filled variant — pairs beside it without competing.
 
 ### Ghost Link Button
 
@@ -143,19 +163,19 @@ Transparent fill, black text, 9999px radius, Inter 14px/500. 1px solid #e5e5e5 b
 
 **Role:** Feature showcase panel
 
-#f5f3f1 warm taupe fill, 20px radius, 32px horizontal padding, no shadow, no border. The dominant card pattern (22 occurrences). Flat, quiet, sits on the canvas without elevation.
+#fdfdfb warm taupe fill, 1px #e6e6e3 stone border, 20px radius, 24px padding, no shadow (`.card-taupe`). The dominant card pattern (22 occurrences). Flat, quiet, sits on the canvas without elevation.
 
 ### White Card with Whisper Shadow
 
 **Role:** Elevated content card
 
-White (#fdfcfc) fill, 20px radius, 16px all-side padding, three-layer whisper shadow (1px hard edge + 1px blur + 4px blur at 4% opacity). Used sparingly — only when a card needs to sit above other content with subtle separation.
+White (#ffffff) fill, 20px radius, 16px all-side padding, three-layer whisper shadow (1px hard edge + 1px blur + 4px blur at 4% opacity). Used sparingly — only when a card needs to sit above other content with subtle separation.
 
 ### Large Feature Card
 
 **Role:** Hero feature block
 
-#f5f3f1 fill, 24px radius (slightly larger than standard 20px), generous internal padding. Used for flagship feature showcases that need more visual breathing room.
+#fdfdfb fill, 24px radius (slightly larger than standard 20px), generous internal padding. Used for flagship feature showcases that need more visual breathing room.
 
 ### Tab Pill
 
@@ -167,13 +187,13 @@ White fill, black text, 9999px radius, 1px border. Active state marked by a smal
 
 **Role:** Section separation
 
-1px solid #ebe8e4 stone-colored line. Preferred over whitespace when sections need explicit separation. Used 54 times across the page — the most common border pattern.
+1px solid #e6e6e3 stone-colored line. Preferred over whitespace when sections need explicit separation. Used 54 times across the page — the most common border pattern.
 
 ### Audio Sphere Visual
 
 **Role:** Product showcase graphic
 
-Large circular gradient sphere (roughly 200px diameter) with soft radial gradients blending violet #0447ff, orange #ff4704, pink, and warm tones. Centered play-button overlay. No hard edges — these are the system's signature visual and appear 3x in a carousel row.
+Large circular gradient sphere (roughly 200px diameter) with soft radial gradients blending violet #1646ff, orange #ff501c, pink, and warm tones. Centered play-button overlay. No hard edges — these are the system's signature visual and appear 3x in a carousel row.
 
 ### Logo Wordmark
 
@@ -199,29 +219,29 @@ Transparent on eggshell canvas, 50px height. Logo left, nav links center-left (I
 
 - Use Waldenburg at weight 300 for all display headlines 32px+; never apply bold or semibold weights to it — the whisper-weight is the brand's signature restraint.
 - Set all buttons, tags, and tab pills to 9999px radius; the pill shape is non-negotiable and defines the system's most recognizable component.
-- Use #000000 filled buttons paired with #fdfcfc outline buttons as the only button hierarchy — do not introduce colored CTA fills.
-- Reserve #0447ff violet and #ff4704 orange exclusively for product visuals (audio spheres, product icons, illustration accents); never apply them to UI text, borders, or interactive elements.
-- Use 1px solid #ebe8e4 hairline borders for section separation; prefer borders over drop shadows for the flat editorial feel.
+- Use #0b0b0b filled buttons paired with #ffffff outline buttons as the only button hierarchy — do not introduce colored CTA fills.
+- Reserve #1646ff violet and #ff501c orange exclusively for product visuals (audio spheres, product icons, illustration accents); never apply them to UI text, borders, or interactive elements.
+- Use 1px solid #e6e6e3 hairline borders for section separation; prefer borders over drop shadows for the flat editorial feel.
 - Apply -0.02em letter-spacing on all Waldenburg headlines at 32px+ and +0.01em tracking on Inter body at 14–16px — the opposite tracking directions create a deliberate contrast between display and body.
-- Stack surfaces as eggshell → taupe → stone; never use pure white or pure gray — warmth is the system's defining tonal quality.
+- Stack surfaces as eggshell → taupe → stone, always via the tokens — never hardcode hex values in components.
 
 ### Don't
 
 - Do not bold or semibold Waldenburg — the weight-300 whisper is the brand's most distinctive choice and bolding destroys it.
-- Do not use violet #0447ff or orange #ff4704 for buttons, links, badges, or any interactive UI element; these colors are decoration-only.
+- Do not use violet #1646ff or orange #ff501c for buttons, links, badges, or any interactive UI element; these colors are decoration-only.
 - Do not add heavy drop shadows; the system uses near-invisible 1px shadows only — no blurred elevation effects.
 - Do not introduce new accent colors beyond the two product-visual sparks; the palette is intentionally 97% achromatic.
 - Do not use sharp corners (<8px) on cards or feature panels; the 20–24px radii are a signature.
-- Do not use pure white #ffffff for backgrounds; always use #fdfcfc eggshell to maintain the warm paper-like canvas.
+- Do not hardcode #ffffff or #000000; use `--color-eggshell` / `--color-ink` so dark mode inverts correctly.
 - Do not use display-weight fonts (anything heavier than Waldenburg 300) for body copy; Inter 400/500 owns everything below 24px.
 
 ## Surfaces
 
 | Level | Name            | Value     | Purpose                                                                                           |
 | ----- | --------------- | --------- | ------------------------------------------------------------------------------------------------- |
-| 1     | Eggshell Canvas | `#fdfcfc` | Base page background — warm off-white that reads as paper, not screen                             |
-| 2     | Warm Taupe      | `#f5f3f1` | Section bands and card surfaces that need to sit one step above the canvas without a border       |
-| 3     | Stone Plate     | `#ebe8e4` | Icon plates, subtle elevated backgrounds — slightly deeper than taupe for small isolated elements |
+| 1     | Eggshell Canvas | `#ffffff` | Base page background — pure white                                                                 |
+| 2     | Warm Taupe      | `#fdfdfb` | Section bands and card surfaces that need to sit one step above the canvas without a border       |
+| 3     | Stone Plate     | `#e6e6e3` | Icon plates, subtle elevated backgrounds — slightly deeper than taupe for small isolated elements |
 
 ## Elevation
 
@@ -240,24 +260,24 @@ Full-width sections flow vertically in a single max-width 1280px centered column
 
 **Quick Color Reference**
 
-- text: #000000 (primary), #777169 (body), #a59f97 (caption)
-- background: #fdfcfc (canvas), #f5f3f1 (card surface)
-- border: #ebe8e4 (hairline), #e5e5e5 (button border)
-- accent: #0447ff (violet spark — product visuals only)
-- accent: #ff4704 (ember orange — product visuals only)
-- primary action: #000000 (filled action)
+- text: #0b0b0b (primary), #60605c (body), #8c8c87 (caption)
+- background: #ffffff (canvas), #fdfdfb (card surface)
+- border: #e6e6e3 (hairline), #e5e5e5 (button border)
+- accent: #1646ff (violet spark — product visuals only)
+- accent: #ff501c (ember orange — product visuals only)
+- primary action: #0b0b0b (filled action)
 
 **3-5 Example Component Prompts**
 
-1. Create a hero headline: 'Bringing technology to life' at 48px Waldenburg weight 300, color #000000, letter-spacing -0.96px, line-height 1.08. Left-aligned on #fdfcfc canvas.
+1. Create a hero headline: 'Bringing technology to life' at 48px Waldenburg weight 300, color #0b0b0b, letter-spacing -0.96px, line-height 1.08. Left-aligned on #ffffff canvas.
 
-2. Create a primary button: 'Sign up' — 9999px radius, #000000 fill, white text, Inter 14px/500, 16px horizontal padding, 1px solid #e5e5e5 border.
+2. Create a primary button: 'Sign up' — 9999px radius, #0b0b0b fill, white text, Inter 14px/500, 16px horizontal padding, 1px solid #e5e5e5 border.
 
-3. Create a secondary button: 'Contact sales' — 9999px radius, #fdfcfc fill, #000000 text, Inter 14px/500, 14px horizontal padding, 1px solid #e5e5e5 border.
+3. Create a secondary button: 'Contact sales' — 9999px radius, #ffffff fill, #0b0b0b text, Inter 14px/500, 14px horizontal padding, 1px solid #e5e5e5 border.
 
-4. Create a feature card: #f5f3f1 fill, 20px radius, 32px horizontal padding, no shadow. Title at 36px Waldenburg 300, description at 16px Inter 400 in #777169.
+4. Create a feature card: #fdfdfb fill, 20px radius, 32px horizontal padding, no shadow. Title at 36px Waldenburg 300, description at 16px Inter 400 in #60605c.
 
-5. Create an audio sphere visual: 200px circle with radial-gradient blending #0447ff, #ff4704, and pink, no hard edge. Center play icon in white circle 48px diameter.
+5. Create an audio sphere visual: 200px circle with radial-gradient blending #1646ff, #ff501c, and pink, no hard edge. Center play icon in white circle 48px diameter.
 
 ## Similar Brands
 
@@ -274,15 +294,15 @@ Full-width sections flow vertically in a single max-width 1280px centered column
 ```css
 :root {
   /* Colors */
-  --color-eggshell: #fdfcfc;
-  --color-warm-taupe: #f5f3f1;
-  --color-stone: #ebe8e4;
-  --color-ink: #000000;
-  --color-graphite: #44403b;
-  --color-smoke: #777169;
-  --color-ash: #a59f97;
-  --color-violet-spark: #0447ff;
-  --color-ember-orange: #ff4704;
+  --color-eggshell: #ffffff;
+  --color-warm-taupe: #fdfdfb;
+  --color-stone: #e6e6e3;
+  --color-ink: #0b0b0b;
+  --color-graphite: #30302e;
+  --color-smoke: #60605c;
+  --color-ash: #8c8c87;
+  --color-violet-spark: #1646ff;
+  --color-ember-orange: #ff501c;
 
   /* Typography — Font Families */
   --font-waldenburg:
@@ -375,12 +395,12 @@ Full-width sections flow vertically in a single max-width 1280px centered column
   --shadow-subtle-5:
     rgba(0, 0, 0, 0.4) 0px 0px 1px 0px, rgba(0, 0, 0, 0.04) 0px 2px 4px 0px;
   --shadow-subtle-6: rgba(255, 255, 255, 0.6) 0px 0px 0px 1px inset;
-  --shadow-subtle-7: rgb(235, 232, 228) 0px 0px 0px 0.5px inset;
+  --shadow-subtle-7: rgb(230, 230, 227) 0px 0px 0px 0.5px inset;
 
   /* Surfaces */
-  --surface-eggshell-canvas: #fdfcfc;
-  --surface-warm-taupe: #f5f3f1;
-  --surface-stone-plate: #ebe8e4;
+  --surface-eggshell-canvas: #ffffff;
+  --surface-warm-taupe: #fdfdfb;
+  --surface-stone-plate: #e6e6e3;
 }
 ```
 
@@ -389,15 +409,15 @@ Full-width sections flow vertically in a single max-width 1280px centered column
 ```css
 @theme {
   /* Colors */
-  --color-eggshell: #fdfcfc;
-  --color-warm-taupe: #f5f3f1;
-  --color-stone: #ebe8e4;
-  --color-ink: #000000;
-  --color-graphite: #44403b;
-  --color-smoke: #777169;
-  --color-ash: #a59f97;
-  --color-violet-spark: #0447ff;
-  --color-ember-orange: #ff4704;
+  --color-eggshell: #ffffff;
+  --color-warm-taupe: #fdfdfb;
+  --color-stone: #e6e6e3;
+  --color-ink: #0b0b0b;
+  --color-graphite: #30302e;
+  --color-smoke: #60605c;
+  --color-ash: #8c8c87;
+  --color-violet-spark: #1646ff;
+  --color-ember-orange: #ff501c;
 
   /* Typography */
   --font-waldenburg:
@@ -470,6 +490,6 @@ Full-width sections flow vertically in a single max-width 1280px centered column
   --shadow-subtle-5:
     rgba(0, 0, 0, 0.4) 0px 0px 1px 0px, rgba(0, 0, 0, 0.04) 0px 2px 4px 0px;
   --shadow-subtle-6: rgba(255, 255, 255, 0.6) 0px 0px 0px 1px inset;
-  --shadow-subtle-7: rgb(235, 232, 228) 0px 0px 0px 0.5px inset;
+  --shadow-subtle-7: rgb(230, 230, 227) 0px 0px 0px 0.5px inset;
 }
 ```

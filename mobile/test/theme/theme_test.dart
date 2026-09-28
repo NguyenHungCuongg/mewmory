@@ -11,10 +11,10 @@ void main() {
 
       final colors = light.extension<MewThemeColors>();
       expect(colors, isNotNull);
-      expect(colors!.eggshell, const Color(0xFFFDFCFC));
-      expect(colors.ink, const Color(0xFF000000));
-      expect(colors.warmTaupe, const Color(0xFFF5F3F1));
-      expect(colors.stone, const Color(0xFFEBE8E4));
+      expect(colors!.eggshell, const Color(0xFFFFFFFF));
+      expect(colors.ink, const Color(0xFF0B0B0B));
+      expect(colors.warmTaupe, const Color(0xFFFDFDFB));
+      expect(colors.stone, const Color(0xFFE6E6E3));
     });
 
     test('MewTheme.dark provides valid dark theme with inverted warm palette', () {

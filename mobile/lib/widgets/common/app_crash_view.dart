@@ -15,12 +15,12 @@ class AppCrashView extends StatelessWidget {
     // When called from ErrorWidget.builder, context might not have theme extension,
     // so provide graceful fallbacks.
     final mewColors = Theme.of(context).extension<MewThemeColors>();
-    final eggshell = mewColors?.eggshell ?? const Color(0xFFFDFCFC);
-    final ink = mewColors?.ink ?? const Color(0xFF000000);
-    final smoke = mewColors?.smoke ?? const Color(0xFF777169);
+    final eggshell = mewColors?.eggshell ?? const Color(0xFFFFFFFF);
+    final ink = mewColors?.ink ?? const Color(0xFF0B0B0B);
+    final smoke = mewColors?.smoke ?? const Color(0xFF60605C);
     final errorColor = mewColors?.error ?? const Color(0xFFD32F2F);
-    final warmTaupe = mewColors?.warmTaupe ?? const Color(0xFFF5F3F1);
-    final stone = mewColors?.stone ?? const Color(0xFFEBE8E4);
+    final warmTaupe = mewColors?.warmTaupe ?? const Color(0xFFFDFDFB);
+    final stone = mewColors?.stone ?? const Color(0xFFE6E6E3);
 
     return Scaffold(
       backgroundColor: eggshell,

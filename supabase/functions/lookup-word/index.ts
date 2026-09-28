@@ -8,6 +8,12 @@ import {
   checkAndFlagSpam,
   createAdminClient,
 } from "../_shared/admin-utils.ts";
+import {
+  isRateLimited,
+  MAX_WORD_LENGTH,
+  RATE_LIMIT_PER_HOUR,
+  sanitizeModel,
+} from "../_shared/ai-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -62,20 +68,42 @@ serve(async (req) => {
       );
     }
 
+    if (await isRateLimited(userId, adminClient)) {
+      await logUsage(userId, "lookup_word", null, "rate_limited", adminClient);
+      return new Response(
+        JSON.stringify({
+          error: `Bạn đã dùng hết ${RATE_LIMIT_PER_HOUR} lượt AI trong 1 giờ. Vui lòng thử lại sau.`,
+        }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     await updateLastActive(userId, adminClient);
 
     const {
       word,
       provider = "gemini",
-      model,
+      model: requestedModel,
     }: LookupRequest = await req.json();
+    const model = sanitizeModel(provider, requestedModel);
 
-    if (!word || typeof word !== "string" || word.trim().length === 0) {
+    if (
+      !word ||
+      typeof word !== "string" ||
+      word.trim().length === 0 ||
+      word.trim().length > MAX_WORD_LENGTH
+    ) {
       await logUsage(userId, "lookup_word", null, "error", adminClient);
-      return new Response(JSON.stringify({ error: "Word is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: `Word is required (max ${MAX_WORD_LENGTH} characters)` }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     const trimmedWord = word.trim().toLowerCase();

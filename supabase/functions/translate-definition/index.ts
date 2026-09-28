@@ -7,6 +7,13 @@ import {
   checkAndFlagSpam,
   createAdminClient,
 } from "../_shared/admin-utils.ts";
+import {
+  isRateLimited,
+  MAX_TEXT_LENGTH,
+  MAX_WORD_LENGTH,
+  RATE_LIMIT_PER_HOUR,
+  sanitizeModel,
+} from "../_shared/ai-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,6 +71,15 @@ serve(async (req) => {
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    if (await isRateLimited(userId, adminClient)) {
+      await logUsage(userId, "translate_definition", null, "rate_limited", adminClient);
+      return new Response(
+        JSON.stringify({
+          error: `Bạn đã dùng hết ${RATE_LIMIT_PER_HOUR} lượt AI trong 1 giờ. Vui lòng thử lại sau.`,
+        }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     await updateLastActive(userId, adminClient);
 
     const {
@@ -71,15 +87,30 @@ serve(async (req) => {
       text,
       part_of_speech = "",
       provider = "gemini",
-      model,
+      model: requestedModel,
     }: TranslateRequest = await req.json();
+    const model = sanitizeModel(provider, requestedModel);
 
-    currentWord = word || null;
+    // All of these end up in the AI prompt: bound their size.
+    const invalidExtras =
+      typeof word !== "string" ||
+      word.length > MAX_WORD_LENGTH ||
+      typeof part_of_speech !== "string" ||
+      part_of_speech.length > MAX_WORD_LENGTH;
+    currentWord = typeof word === "string" && word ? word.slice(0, MAX_WORD_LENGTH) : null;
 
-    if (!text || typeof text !== "string" || text.trim().length === 0) {
-      await logUsage(userId, "translate_definition", word || null, "error", adminClient);
+    if (
+      !text ||
+      typeof text !== "string" ||
+      text.trim().length === 0 ||
+      text.length > MAX_TEXT_LENGTH ||
+      invalidExtras
+    ) {
+      await logUsage(userId, "translate_definition", currentWord, "error", adminClient);
       return new Response(
-        JSON.stringify({ error: "Definition text is required" }),
+        JSON.stringify({
+          error: `Definition text is required (max ${MAX_TEXT_LENGTH} characters; word/part of speech max ${MAX_WORD_LENGTH})`,
+        }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },

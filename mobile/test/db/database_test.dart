@@ -124,4 +124,31 @@ void main() {
       expect(pos['noun'], 2);
     });
   });
+
+  group('VocabularyDao definition removal (D4)', () {
+    test('activeDefinitionIds skips deleted ones; softDeleteDefinitions hides them',
+        () async {
+      await db.vocabularyDao.upsertVocabulary(
+        VocabulariesCompanion.insert(id: 'v1', userId: 'u1', word: 'run'),
+      );
+      await db.vocabularyDao.upsertDefinitions([
+        DefinitionsCompanion.insert(id: 'd1', vocabularyId: 'v1'),
+        DefinitionsCompanion.insert(id: 'd2', vocabularyId: 'v1'),
+        DefinitionsCompanion.insert(
+          id: 'd3',
+          vocabularyId: 'v1',
+          isDeleted: const Value(true),
+        ),
+      ]);
+
+      expect(await db.vocabularyDao.activeDefinitionIds('v1'),
+          unorderedEquals(['d1', 'd2']));
+
+      await db.vocabularyDao.softDeleteDefinitions(['d2']);
+
+      expect(await db.vocabularyDao.activeDefinitionIds('v1'), ['d1']);
+      final item = await db.vocabularyDao.getById('v1');
+      expect(item!.definitions.map((d) => d.id), ['d1']);
+    });
+  });
 }

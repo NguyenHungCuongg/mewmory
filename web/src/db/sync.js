@@ -7,6 +7,10 @@ export const MAX_PUSH_ATTEMPTS = 5;
 const isRetryable = (item) =>
   !item.synced && (item.attempts ?? 0) < MAX_PUSH_ATTEMPTS;
 
+// Re-read this much before the cursor: a row stamped just before the newest one
+// we saw may commit after we read. Re-pulling a row is harmless (last-write-wins).
+export const SYNC_CURSOR_OVERLAP_MS = 60_000;
+
 // PostgREST errors carry a code ("23505", "PGRST116", ...); a failed fetch has none.
 const isNetworkError = (err) => !err?.code;
 
@@ -107,7 +111,9 @@ export const syncEngine = {
     ];
 
     let totalPulled = 0;
-    const now = new Date().toISOString();
+    // Cursor = newest server updated_at seen; the device clock may be skewed.
+    let cursorMs = lastSyncTimestamp ? Date.parse(lastSyncTimestamp) : null;
+    let failed = false;
 
     for (const tableName of tables) {
       try {
@@ -119,11 +125,19 @@ export const syncEngine = {
         }
 
         if (lastSyncTimestamp) {
-          query = query.gt("updated_at", lastSyncTimestamp);
+          const since = Date.parse(lastSyncTimestamp) - SYNC_CURSOR_OVERLAP_MS;
+          query = query.gt("updated_at", new Date(since).toISOString());
         }
 
         const { data, error } = await query;
         if (error) throw error;
+
+        for (const row of data ?? []) {
+          const rowMs = Date.parse(row.updated_at);
+          if (!Number.isNaN(rowMs) && (cursorMs === null || rowMs > cursorMs)) {
+            cursorMs = rowMs;
+          }
+        }
 
         if (data && data.length > 0) {
           // Last-write-wins conflict resolution
@@ -156,10 +170,17 @@ export const syncEngine = {
         }
       } catch (err) {
         console.error(`Sync pull error for table ${tableName}:`, err);
+        failed = true;
       }
     }
 
-    localStorage.setItem(`last_sync_${userId}`, now);
+    // A failed table must be re-read next time, so only advance when all succeeded.
+    if (!failed && cursorMs !== null) {
+      localStorage.setItem(
+        `last_sync_${userId}`,
+        new Date(cursorMs).toISOString(),
+      );
+    }
     return { pulled: totalPulled };
   },
 

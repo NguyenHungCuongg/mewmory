@@ -8,6 +8,24 @@ import '../models/definition.dart';
 import '../models/user_settings.dart';
 import '../models/vocabulary.dart';
 
+/// Re-read this much before the cursor: a row stamped just before the newest
+/// one we saw may commit after we read. Re-pulling a row is harmless (upsert).
+const syncCursorOverlap = Duration(seconds: 60);
+
+/// Newest server `updated_at` in [seen], or [previous] if none is newer.
+/// The cursor must come from server timestamps, not the device clock.
+DateTime? nextSyncCursor(DateTime? previous, Iterable<DateTime> seen) {
+  var cursor = previous;
+  for (final t in seen) {
+    if (cursor == null || t.isAfter(cursor)) cursor = t;
+  }
+  return cursor;
+}
+
+/// `updated_at` lower bound for an incremental pull from [cursor].
+String syncQueryStart(DateTime cursor) =>
+    cursor.subtract(syncCursorOverlap).toUtc().toIso8601String();
+
 class SyncService {
   final SupabaseClient? _client;
   final db.AppDatabase _db;
@@ -35,7 +53,7 @@ class SyncService {
 
   /// Full sync — pulls all non-deleted user data from Supabase into Drift
   Future<void> fullSync(String userId) async {
-    final syncStartTime = DateTime.now();
+    final seen = <DateTime>[];
 
     // 1. Pull vocabularies
     final vocabRows = await _supabase
@@ -47,6 +65,7 @@ class SyncService {
     final vocabs = (vocabRows as List)
         .map((r) => Vocabulary.fromJson(r as Map<String, dynamic>))
         .toList();
+    seen.addAll(vocabs.map((v) => v.updatedAt));
 
     // Bulk upsert vocabularies into Drift
     if (vocabs.isNotEmpty) {
@@ -74,6 +93,7 @@ class SyncService {
         final defs = (defRows as List)
             .map((r) => Definition.fromJson(r as Map<String, dynamic>))
             .toList();
+        seen.addAll(defs.map((d) => d.updatedAt));
 
         if (defs.isNotEmpty) {
           await _db.batch((b) {
@@ -96,6 +116,7 @@ class SyncService {
     final cols = (colRows as List)
         .map((r) => Collection.fromJson(r as Map<String, dynamic>))
         .toList();
+    seen.addAll(cols.map((c) => c.updatedAt));
 
     if (cols.isNotEmpty) {
       await _db.batch((b) {
@@ -113,6 +134,7 @@ class SyncService {
         .eq('is_deleted', false);
 
     final vcList = (vcRows as List).cast<Map<String, dynamic>>();
+    seen.addAll(vcList.map((m) => DateTime.parse(m['updated_at'] as String)));
     if (vcList.isNotEmpty) {
       final vcCompanions = vcList.map((m) {
         return db.VocabularyCollectionsCompanion(
@@ -139,19 +161,21 @@ class SyncService {
 
     if (settingsRow != null) {
       final settings = UserSettings.fromJson(settingsRow);
+      seen.add(settings.updatedAt);
       await _db.into(_db.userSettingsTable).insertOnConflictUpdate(
             settings.toDriftCompanion(),
           );
     }
 
-    // 6. Save lastSyncAt
-    await setLastSyncAt(userId, syncStartTime);
+    // 6. Save the cursor (newest server timestamp); no data -> next sync is full again
+    final cursor = nextSyncCursor(null, seen);
+    if (cursor != null) await setLastSyncAt(userId, cursor);
   }
 
   /// Incremental sync — pulls records with updated_at > lastSyncAt
   Future<DateTime> incrementalSync(String userId, DateTime lastSyncAt) async {
-    final syncStartTime = DateTime.now();
-    final iso = lastSyncAt.toIso8601String();
+    final seen = <DateTime>[];
+    final iso = syncQueryStart(lastSyncAt);
 
     // 1. Incremental Vocabularies
     final vocabRows = await _supabase
@@ -163,6 +187,7 @@ class SyncService {
     final vocabs = (vocabRows as List)
         .map((r) => Vocabulary.fromJson(r as Map<String, dynamic>))
         .toList();
+    seen.addAll(vocabs.map((v) => v.updatedAt));
 
     if (vocabs.isNotEmpty) {
       await _db.batch((b) {
@@ -182,6 +207,7 @@ class SyncService {
     final defs = (defRows as List)
         .map((r) => Definition.fromJson(r as Map<String, dynamic>))
         .toList();
+    seen.addAll(defs.map((d) => d.updatedAt));
 
     if (defs.isNotEmpty) {
       await _db.batch((b) {
@@ -202,6 +228,7 @@ class SyncService {
     final cols = (colRows as List)
         .map((r) => Collection.fromJson(r as Map<String, dynamic>))
         .toList();
+    seen.addAll(cols.map((c) => c.updatedAt));
 
     if (cols.isNotEmpty) {
       await _db.batch((b) {
@@ -219,6 +246,7 @@ class SyncService {
         .gt('updated_at', iso);
 
     final vcList = (vcRows as List).cast<Map<String, dynamic>>();
+    seen.addAll(vcList.map((m) => DateTime.parse(m['updated_at'] as String)));
     if (vcList.isNotEmpty) {
       final vcCompanions = vcList.map((m) {
         return db.VocabularyCollectionsCompanion(
@@ -246,12 +274,14 @@ class SyncService {
 
     if (settingsRow != null) {
       final settings = UserSettings.fromJson(settingsRow);
+      seen.add(settings.updatedAt);
       await _db.into(_db.userSettingsTable).insertOnConflictUpdate(
             settings.toDriftCompanion(),
           );
     }
 
-    await setLastSyncAt(userId, syncStartTime);
-    return syncStartTime;
+    final cursor = nextSyncCursor(lastSyncAt, seen)!;
+    await setLastSyncAt(userId, cursor);
+    return cursor;
   }
 }

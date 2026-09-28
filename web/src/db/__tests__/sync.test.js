@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import "fake-indexeddb/auto";
 import db from "../database";
-import { syncEngine } from "../sync";
+import { syncEngine, SYNC_CURSOR_OVERLAP_MS } from "../sync";
 import { supabase } from "../../config/supabase";
 
 vi.mock("../../config/supabase", () => ({
@@ -265,6 +265,75 @@ describe("syncEngine", () => {
     expect(upsertMock).toHaveBeenCalledTimes(1);
     const entries = await db.sync_queue.toArray();
     expect(entries.every((e) => !e.synced && !e.attempts)).toBe(true);
+  });
+
+  // Thenable stand-in for a PostgREST query: select().eq().gt() then await.
+  const tableQuery = (data, error = null, calls = []) => {
+    const q = {
+      eq: (...args) => (calls.push(["eq", ...args]), q),
+      gt: (...args) => (calls.push(["gt", ...args]), q),
+      then: (resolve, reject) =>
+        Promise.resolve({ data, error }).then(resolve, reject),
+    };
+    return { select: () => q };
+  };
+
+  it("pullChanges stores the newest server updated_at as the cursor, not the device clock", async () => {
+    supabase.from.mockImplementation((tableName) =>
+      tableQuery(
+        tableName === "vocabularies"
+          ? [
+              { id: "a", user_id: TEST_USER_ID, updated_at: "2026-09-28T10:00:00.000Z" },
+              { id: "b", user_id: TEST_USER_ID, updated_at: "2026-09-28T11:30:00.000Z" },
+            ]
+          : tableName === "definitions"
+            ? [{ id: "d", vocabulary_id: "a", updated_at: "2026-09-28T11:00:00.000Z" }]
+            : [],
+      ),
+    );
+
+    await syncEngine.pullChanges(TEST_USER_ID);
+
+    expect(localStorage.getItem(`last_sync_${TEST_USER_ID}`)).toBe(
+      "2026-09-28T11:30:00.000Z",
+    );
+  });
+
+  it("pullChanges queries from the cursor minus the overlap window", async () => {
+    const calls = [];
+    supabase.from.mockImplementation(() => tableQuery([], null, calls));
+
+    await syncEngine.pullChanges(TEST_USER_ID, "2026-09-28T11:30:00.000Z");
+
+    const gt = calls.find((c) => c[0] === "gt");
+    expect(gt[1]).toBe("updated_at");
+    expect(Date.parse("2026-09-28T11:30:00.000Z") - Date.parse(gt[2])).toBe(
+      SYNC_CURSOR_OVERLAP_MS,
+    );
+    // Nothing new: keep the previous cursor
+    expect(localStorage.getItem(`last_sync_${TEST_USER_ID}`)).toBe(
+      "2026-09-28T11:30:00.000Z",
+    );
+  });
+
+  it("pullChanges keeps the old cursor when a table fails, so its rows are retried", async () => {
+    supabase.from.mockImplementation((tableName) =>
+      tableName === "definitions"
+        ? tableQuery(null, { code: "500", message: "boom" })
+        : tableQuery(
+            tableName === "vocabularies"
+              ? [{ id: "a", user_id: TEST_USER_ID, updated_at: "2026-09-28T12:00:00.000Z" }]
+              : [],
+          ),
+    );
+
+    localStorage.setItem(`last_sync_${TEST_USER_ID}`, "2026-09-28T09:00:00.000Z");
+    await syncEngine.pullChanges(TEST_USER_ID, "2026-09-28T09:00:00.000Z");
+
+    expect(localStorage.getItem(`last_sync_${TEST_USER_ID}`)).toBe(
+      "2026-09-28T09:00:00.000Z",
+    );
+    expect(await db.vocabularies.get("a")).toBeDefined(); // still applied
   });
 
   it("pullChanges replaces other local user_settings rows of the same user", async () => {

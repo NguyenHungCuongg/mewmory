@@ -16,6 +16,7 @@
   "user": {
     "defaultName": "Người dùng",
     "signOut": "Đăng xuất",
-    "signOutError": "Lỗi đăng xuất"
+    "signOutError": "Lỗi đăng xuất",
+    "signOutUnsynced": "Còn {{count}} thay đổi chưa đồng bộ lên server. Đăng xuất bây giờ sẽ mất các thay đổi này. Vẫn đăng xuất?"
   }
 }

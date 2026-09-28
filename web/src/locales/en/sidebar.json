@@ -16,6 +16,7 @@
   "user": {
     "defaultName": "User",
     "signOut": "Sign out",
-    "signOutError": "Sign out error"
+    "signOutError": "Sign out error",
+    "signOutUnsynced": "{{count}} changes haven't synced yet. Signing out now will discard them. Sign out anyway?"
   }
 }

@@ -1,4 +1,6 @@
 import { supabase } from "../config/supabase";
+import db from "../db/database";
+import { syncEngine } from "../db/sync";
 
 export const authService = {
   async signUp(email, password, options = {}) {
@@ -87,9 +89,31 @@ export const authService = {
     return { data, error };
   },
 
-  async signOut() {
+  /**
+   * Pushes pending changes, then signs out and wipes local data so the next
+   * user of this browser can't see it. If changes still can't be pushed,
+   * returns `{ unsynced }` without signing out unless `discardUnsynced`.
+   */
+  async signOut({ discardUnsynced = false } = {}) {
+    if (navigator.onLine) {
+      try {
+        await syncEngine.pushChanges();
+      } catch (err) {
+        console.error("Push before sign out failed:", err);
+      }
+    }
+
+    const unsynced = await syncEngine.unsyncedCount();
+    if (unsynced > 0 && !discardUnsynced) return { unsynced };
+
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+
+    await Promise.all(db.tables.map((table) => table.clear()));
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith("last_sync_"))
+      .forEach((key) => localStorage.removeItem(key));
+    return { unsynced: 0 };
   },
 
   async getSession() {

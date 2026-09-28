@@ -39,7 +39,11 @@ export default function Sidebar() {
 
   const handleSignOut = async () => {
     try {
-      await authService.signOut();
+      const { unsynced } = await authService.signOut();
+      if (unsynced > 0) {
+        if (!window.confirm(t("user.signOutUnsynced", { count: unsynced }))) return;
+        await authService.signOut({ discardUnsynced: true });
+      }
       clearAuth();
     } catch (err) {
       addToast(t("user.signOutError"), "error");

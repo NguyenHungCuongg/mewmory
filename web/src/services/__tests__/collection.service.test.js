@@ -120,4 +120,43 @@ describe("collectionService", () => {
     const data = await collectionService.getById(col.id);
     expect(data.vocabularies).toHaveLength(0);
   });
+
+  it("assignWord after removeWord reuses the same link id", async () => {
+    const col = await collectionService.create({
+      user_id: TEST_USER_ID,
+      name: "Again",
+    });
+    const { vocabulary } = await vocabularyService.create(
+      { user_id: TEST_USER_ID, word: "again" },
+      [],
+    );
+
+    await collectionService.assignWord(vocabulary.id, col.id);
+    const [first] = await db.vocabulary_collections.toArray();
+    await collectionService.removeWord(vocabulary.id, col.id);
+    await collectionService.assignWord(vocabulary.id, col.id);
+
+    const links = await db.vocabulary_collections.toArray();
+    expect(links).toHaveLength(1);
+    expect(links[0].id).toBe(first.id);
+    expect(links[0].is_deleted).toBe(false);
+  });
+
+  it("create with the name of a deleted collection revives it", async () => {
+    const old = await collectionService.create({
+      user_id: TEST_USER_ID,
+      name: "Travel",
+    });
+    await collectionService.delete(old.id);
+
+    const revived = await collectionService.create({
+      user_id: TEST_USER_ID,
+      name: " Travel ",
+    });
+
+    expect(revived.id).toBe(old.id);
+    expect((await collectionService.getById(old.id)).collection.is_deleted).toBe(
+      false,
+    );
+  });
 });

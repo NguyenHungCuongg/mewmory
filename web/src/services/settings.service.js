@@ -19,26 +19,16 @@ export const settingsService = {
       .first();
 
     if (!settings) {
-      const now = new Date().toISOString();
-      const id = crypto.randomUUID();
+      // Local placeholder only: the server row already exists (created by a
+      // trigger) and arrives on the next pull. Queuing these defaults would
+      // overwrite the user's real settings.
       settings = {
-        id,
+        id: crypto.randomUUID(),
         user_id: userId,
         ...DEFAULT_SETTINGS,
-        updated_at: now,
+        updated_at: new Date().toISOString(),
       };
-
-      await db.transaction("rw", [db.user_settings, db.sync_queue], async () => {
-        await db.user_settings.put(settings);
-        await db.sync_queue.add({
-          table_name: "user_settings",
-          record_id: id,
-          operation: "CREATE",
-          payload: settings,
-          created_at: now,
-          synced: false,
-        });
-      });
+      await db.user_settings.put(settings);
     }
 
     return {

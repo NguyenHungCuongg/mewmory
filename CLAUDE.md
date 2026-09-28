@@ -62,6 +62,8 @@ Env: `web/` and `admin/` need `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` in 
 Mirrors the web service layer in Dart (`lib/services/*_service.dart`, incl. `sync_service.dart`) over a Drift DB (`lib/db/`, generated `database.g.dart`; `build.yaml` stores DateTimes as text).
 
 ## Rules
+@.agents/rules/karpathy-coding-discipline.md
+
 - Don't modify migrations, schema, or RLS unless explicitly asked. New schema changes = new numbered migration file.
 - UI follows `DESIGN.md` (pill buttons, 20px card radius). Colors: `web/src/index.css` is the source of truth; keep `DESIGN.md` and `mobile/lib/config/theme.dart` in sync with it. Use tokens, never hardcoded hex, so dark mode works.
 - Web tests live in `__tests__/` next to the code under test.

@@ -191,7 +191,8 @@ async function fetchDictionary(word: string) {
   try {
     const response = await fetch(
       `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`,
-      { signal: AbortSignal.timeout(10000) },
+      // dictionaryapi.dev often takes ~20s to answer; complete results get cached.
+      { signal: AbortSignal.timeout(25000) },
     );
     if (!response.ok) return null;
     return await response.json();

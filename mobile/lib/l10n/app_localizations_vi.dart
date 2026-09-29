@@ -277,6 +277,58 @@ class AppLocalizationsVi extends AppLocalizations {
   String get registerSubtitle => 'Bắt đầu ghi nhớ từ vựng thông minh';
 
   @override
+  String get orDivider => 'hoặc';
+
+  @override
+  String get signInWithGoogle => 'Đăng nhập với Google';
+
+  @override
+  String get confirmPassword => 'Xác nhận mật khẩu';
+
+  @override
+  String get confirmPasswordHint => 'Nhập lại mật khẩu';
+
+  @override
+  String get passwordMismatch => 'Mật khẩu xác nhận không khớp';
+
+  @override
+  String get confirmPasswordRequired => 'Vui lòng xác nhận mật khẩu';
+
+  @override
+  String get fullName => 'Họ và tên';
+
+  @override
+  String get fullNameHint => 'Nguyễn Văn A';
+
+  @override
+  String get passwordHint => 'Tối thiểu 6 ký tự';
+
+  @override
+  String get fullNameRequired => 'Vui lòng nhập họ và tên';
+
+  @override
+  String get fullNameMinLength => 'Họ và tên phải có ít nhất 2 ký tự';
+
+  @override
+  String get signUpSuccessNotice =>
+      'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.';
+
+  @override
+  String get signInFailed => 'Đăng nhập thất bại';
+
+  @override
+  String get signUpFailed => 'Đăng ký thất bại';
+
+  @override
+  String get googleSignInFailed => 'Đăng nhập Google thất bại';
+
+  @override
+  String get googleSignInUnavailable => 'Không thể mở đăng nhập Google.';
+
+  @override
+  String get syncingData => 'Đang đồng bộ dữ liệu...';
+
+  @override
   String get settingsTitle => 'Cài đặt';
 
   @override

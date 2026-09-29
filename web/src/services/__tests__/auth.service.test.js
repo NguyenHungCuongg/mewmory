@@ -20,8 +20,18 @@ vi.mock("../../config/supabase", () => ({
   },
 }));
 
+vi.mock("../../db/sync", () => ({
+  syncEngine: {
+    pushChanges: vi.fn().mockResolvedValue({ pushed: 0, errors: [] }),
+    unsyncedCount: vi.fn().mockResolvedValue(0),
+  },
+}));
+
+import "fake-indexeddb/auto";
 import { authService } from "../auth.service";
 import { supabase } from "../../config/supabase";
+import { syncEngine } from "../../db/sync";
+import db from "../../db/database";
 
 describe("authService", () => {
   it("signUp passes displayName to options.data when provided", async () => {
@@ -101,6 +111,37 @@ describe("authService", () => {
     supabase.auth.signOut.mockResolvedValue({ error: null });
     await authService.signOut();
     expect(supabase.auth.signOut).toHaveBeenCalled();
+  });
+
+  it("signOut pushes first and clears local data and sync markers", async () => {
+    supabase.auth.signOut.mockResolvedValue({ error: null });
+    await db.vocabularies.put({ id: "v1", user_id: "u1", word: "left behind" });
+    await db.sync_queue.add({ table_name: "vocabularies", synced: true });
+    localStorage.setItem("last_sync_u1", "2026-09-28T00:00:00Z");
+
+    const result = await authService.signOut();
+
+    expect(result).toEqual({ unsynced: 0 });
+    expect(syncEngine.pushChanges).toHaveBeenCalled();
+    expect(await db.vocabularies.count()).toBe(0);
+    expect(await db.sync_queue.count()).toBe(0);
+    expect(localStorage.getItem("last_sync_u1")).toBeNull();
+  });
+
+  it("signOut stops and reports unsynced changes unless told to discard them", async () => {
+    supabase.auth.signOut.mockClear();
+    syncEngine.unsyncedCount.mockResolvedValueOnce(3);
+    await db.vocabularies.put({ id: "v2", user_id: "u1", word: "keep me" });
+
+    expect(await authService.signOut()).toEqual({ unsynced: 3 });
+    expect(supabase.auth.signOut).not.toHaveBeenCalled();
+    expect(await db.vocabularies.count()).toBe(1);
+
+    syncEngine.unsyncedCount.mockResolvedValueOnce(3);
+    supabase.auth.signOut.mockResolvedValue({ error: null });
+    await authService.signOut({ discardUnsynced: true });
+    expect(supabase.auth.signOut).toHaveBeenCalled();
+    expect(await db.vocabularies.count()).toBe(0);
   });
 
   it("updateDisplayName updates auth user and profile table", async () => {

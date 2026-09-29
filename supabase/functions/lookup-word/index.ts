@@ -1,5 +1,26 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  getUserIdFromJWT,
+  checkBanned,
+  logUsage,
+  updateLastActive,
+  checkAndFlagSpam,
+  createAdminClient,
+} from "../_shared/admin-utils.ts";
+import {
+  getCachedLookup,
+  isCacheable,
+  normalizeWord,
+  putCachedLookup,
+} from "../_shared/lookup-cache.ts";
+import { geminiGenerate } from "../_shared/gemini.ts";
+import {
+  isRateLimited,
+  MAX_WORD_LENGTH,
+  RATE_LIMIT_PER_HOUR,
+  sanitizeModel,
+} from "../_shared/ai-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,20 +49,84 @@ serve(async (req) => {
       });
     }
 
-    const {
-      word,
-      provider = "gemini",
-      model,
-    }: LookupRequest = await req.json();
-
-    if (!word || typeof word !== "string" || word.trim().length === 0) {
-      return new Response(JSON.stringify({ error: "Word is required" }), {
-        status: 400,
+    // Resolve user_id from JWT
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const userId = await getUserIdFromJWT(authHeader, supabaseUrl, supabaseAnonKey);
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const trimmedWord = word.trim().toLowerCase();
+    const adminClient = createAdminClient();
+
+    // Ban check — must happen before reading body to avoid wasted work
+    const banned = await checkBanned(userId, adminClient);
+    if (banned) {
+      await logUsage(userId, "lookup_word", null, "banned", adminClient);
+      return new Response(
+        JSON.stringify({ error: "Tài khoản của bạn đã bị khóa." }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (await isRateLimited(userId, adminClient)) {
+      await logUsage(userId, "lookup_word", null, "rate_limited", adminClient);
+      return new Response(
+        JSON.stringify({
+          error: `Bạn đã dùng hết ${RATE_LIMIT_PER_HOUR} lượt AI trong 1 giờ. Vui lòng thử lại sau.`,
+        }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    await updateLastActive(userId, adminClient);
+
+    const {
+      word,
+      provider = "gemini",
+      model: requestedModel,
+    }: LookupRequest = await req.json();
+    const model = sanitizeModel(provider, requestedModel);
+
+    if (
+      !word ||
+      typeof word !== "string" ||
+      word.trim().length === 0 ||
+      word.trim().length > MAX_WORD_LENGTH
+    ) {
+      await logUsage(userId, "lookup_word", null, "error", adminClient);
+      return new Response(
+        JSON.stringify({ error: `Word is required (max ${MAX_WORD_LENGTH} characters)` }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const trimmedWord = normalizeWord(word);
+
+    const cached = await getCachedLookup(adminClient, trimmedWord);
+    if (cached) {
+      await logUsage(userId, "lookup_word", trimmedWord, "success", adminClient);
+      await checkAndFlagSpam(userId, adminClient);
+      return new Response(
+        JSON.stringify({ ...cached, source: { ...cached.source, cached: true } }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
 
     const [dictResult, aiResult] = await Promise.allSettled([
       fetchDictionary(trimmedWord),
@@ -53,6 +138,9 @@ serve(async (req) => {
     const aiData = aiResult.status === "fulfilled" ? aiResult.value : null;
 
     if (!dictData && !aiData) {
+      await logUsage(userId, "lookup_word", trimmedWord, "error", adminClient);
+      await checkAndFlagSpam(userId, adminClient);
+
       const dictErr =
         dictResult.status === "rejected"
           ? String(dictResult.reason?.message || dictResult.reason)
@@ -74,12 +162,18 @@ serve(async (req) => {
         {
           status: 503,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        }
       );
     }
 
     // Merge results
     const result = mergeResults(trimmedWord, dictData, aiData);
+    if (isCacheable(result)) {
+      await putCachedLookup(adminClient, trimmedWord, result);
+    }
+
+    await logUsage(userId, "lookup_word", trimmedWord, "success", adminClient);
+    await checkAndFlagSpam(userId, adminClient);
 
     return new Response(JSON.stringify(result), {
       status: 200,
@@ -97,6 +191,7 @@ async function fetchDictionary(word: string) {
   try {
     const response = await fetch(
       `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`,
+      // Optional extra (audio, synonyms): dictionaryapi.dev is often slower than AI.
       { signal: AbortSignal.timeout(10000) },
     );
     if (!response.ok) return null;
@@ -134,71 +229,21 @@ Rules:
 - definitions should provide 1 to 3 primary meanings (used as fallback if dictionary is unavailable).
 - Return ONLY valid JSON, no markdown formatting or extra text.`;
 
-  if (provider === "gemini") {
-    return callGemini(prompt, model);
-  } else {
-    return callOpenRouter(prompt, model);
+  // Primary provider first; if all its (free-tier) models fail, try the other one.
+  try {
+    return provider === "gemini"
+      ? await callGemini(prompt, model)
+      : await callOpenRouter(prompt, model);
+  } catch (err: any) {
+    console.warn(`[lookup-word] ${provider} failed, trying the other provider:`, err?.message || err);
+    return provider === "gemini" ? callOpenRouter(prompt) : callGemini(prompt);
   }
 }
 
 async function callGemini(prompt: string, model?: string) {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY not set");
-
-  const requestedModel = model || "gemini-3.5-flash-lite";
-  const candidateModels = [
-    requestedModel,
-    "gemini-3.5-flash-lite",
-    "gemini-3.1-flash-lite",
-    "gemini-3.6-flash",
-  ].filter((m, idx, arr) => arr.indexOf(m) === idx);
-
-  let lastError: any = null;
-  for (const modelName of candidateModels) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: "application/json" },
-          }),
-          signal: AbortSignal.timeout(15000),
-        },
-      );
-
-      if (!response.ok) {
-        const errText = await response.text().catch(() => "");
-        lastError = new Error(
-          `Gemini API error (${modelName}): ${response.status} - ${errText}`,
-        );
-        // If high demand (503), rate limit (429), or discontinued model (404), try fallback model
-        if (
-          response.status === 503 ||
-          response.status === 429 ||
-          response.status === 404
-        ) {
-          console.warn(
-            `Gemini model ${modelName} returned ${response.status}. Trying next fallback model...`,
-          );
-          continue;
-        }
-        throw lastError;
-      }
-
-      const data = await response.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      const parsed = extractJSON(text);
-      if (parsed) return parsed;
-    } catch (err: any) {
-      lastError = err;
-      console.warn(`Gemini model ${modelName} failed:`, err?.message || err);
-    }
-  }
-
-  throw lastError || new Error("All Gemini candidate models failed");
+  return geminiGenerate(apiKey, prompt, model, extractJSON);
 }
 
 function extractJSON(raw: string): any {

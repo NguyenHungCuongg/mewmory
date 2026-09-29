@@ -18,8 +18,10 @@ describe("settingsService", () => {
     expect(settings.ai_provider).toBe("gemini");
     expect(settings.notification_mode).toBe("gentle");
 
+    // The server row already exists (created by trigger); queuing local
+    // defaults would overwrite the user's real settings on a new device.
     const queue = await db.sync_queue.toArray();
-    expect(queue.some((q) => q.table_name === "user_settings")).toBe(true);
+    expect(queue.some((q) => q.table_name === "user_settings")).toBe(false);
   });
 
   it("update modifies existing settings and enqueues sync", async () => {

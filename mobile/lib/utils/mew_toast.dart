@@ -30,8 +30,13 @@ class MewToast {
     dynamic error, {
     String? prefix,
     Duration duration = const Duration(seconds: 4),
+    String? locale,
   }) {
-    final friendlyMessage = ErrorTranslator.translate(error, prefix: prefix);
+    final friendlyMessage = ErrorTranslator.translate(
+      error,
+      prefix: prefix,
+      locale: locale ?? 'vi',
+    );
     _show(
       context: context,
       message: friendlyMessage,
@@ -110,8 +115,8 @@ class MewToast {
           border = const BorderSide(color: Color(0xFF383834), width: 1);
         } else {
           bgColor = const Color(0xFF2A2825);
-          textColor = const Color(0xFFFDFCFC);
-          iconColor = const Color(0xFFFDFCFC);
+          textColor = const Color(0xFFFFFFFF);
+          iconColor = const Color(0xFFFFFFFF);
           border = null;
         }
         iconData = Icons.info_outline_rounded;

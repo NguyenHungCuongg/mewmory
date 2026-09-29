@@ -69,6 +69,37 @@ describe("vocabularyService", () => {
     expect(result.items[0].word).toBe("apple");
   });
 
+  it("getAll with search matches definition text", async () => {
+    await vocabularyService.create({ user_id: TEST_USER_ID, word: "apple" }, [
+      { definition_vi: "quả táo" },
+    ]);
+    await vocabularyService.create({ user_id: TEST_USER_ID, word: "banana" }, [
+      { definition_vi: "quả chuối" },
+    ]);
+
+    const result = await vocabularyService.getAll(TEST_USER_ID, {
+      search: "táo",
+    });
+    expect(result.items.map((v) => v.word)).toEqual(["apple"]);
+  });
+
+  it("updateWithDetails re-adding a removed collection reuses the old link", async () => {
+    const { vocabulary } = await vocabularyService.create(
+      { user_id: TEST_USER_ID, word: "trip" },
+      [],
+      ["col-1"],
+    );
+    const [oldLink] = await db.vocabulary_collections.toArray();
+
+    await vocabularyService.updateWithDetails(vocabulary.id, {}, [], []);
+    await vocabularyService.updateWithDetails(vocabulary.id, {}, [], ["col-1"]);
+
+    const links = await db.vocabulary_collections.toArray();
+    expect(links).toHaveLength(1);
+    expect(links[0].id).toBe(oldLink.id);
+    expect(links[0].is_deleted).toBe(false);
+  });
+
   it("getById returns vocabulary with definitions and collections", async () => {
     const { vocabulary } = await vocabularyService.create(
       { user_id: TEST_USER_ID, word: "test" },

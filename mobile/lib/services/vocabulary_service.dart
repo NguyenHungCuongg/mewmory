@@ -211,6 +211,19 @@ class VocabularyService {
           });
         }
       }
+
+      // Definitions removed in the edit must be deleted, or they come back.
+      final keep = definitions.map((d) => d.id).toSet();
+      final removed = (await _db.vocabularyDao.activeDefinitionIds(vocabulary.id))
+          .where((id) => !keep.contains(id))
+          .toList();
+      if (removed.isNotEmpty) {
+        await _supabase.from('definitions').update({
+          'is_deleted': true,
+          'updated_at': now.toIso8601String(),
+        }).inFilter('id', removed);
+        await _db.vocabularyDao.softDeleteDefinitions(removed);
+      }
     }
 
     // 3. Update collection links if provided

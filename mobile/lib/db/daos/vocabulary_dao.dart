@@ -223,6 +223,24 @@ class VocabularyDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
+  Future<List<String>> activeDefinitionIds(String vocabularyId) async {
+    final rows = await (select(definitions)
+          ..where((d) =>
+              d.vocabularyId.equals(vocabularyId) & d.isDeleted.equals(false)))
+        .get();
+    return rows.map((d) => d.id).toList();
+  }
+
+  Future<void> softDeleteDefinitions(List<String> ids) async {
+    if (ids.isEmpty) return;
+    await (update(definitions)..where((d) => d.id.isIn(ids))).write(
+      DefinitionsCompanion(
+        isDeleted: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<List<VocabularyWithDefinitions>> search(
     String userId,
     String query,

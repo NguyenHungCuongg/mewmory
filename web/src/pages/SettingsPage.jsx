@@ -122,7 +122,11 @@ export default function SettingsPage() {
 
   const handleSignOut = async () => {
     try {
-      await authService.signOut();
+      const { unsynced } = await authService.signOut();
+      if (unsynced > 0) {
+        if (!window.confirm(t("signOutUnsynced", { count: unsynced }))) return;
+        await authService.signOut({ discardUnsynced: true });
+      }
       signOut();
       addToast(t("signOutSuccess"), "info");
     } catch (err) {

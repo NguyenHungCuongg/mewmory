@@ -3,19 +3,19 @@ import 'package:google_fonts/google_fonts.dart';
 
 class MewColors {
   // Surfaces
-  static const eggshell = Color(0xFFFDFCFC);
-  static const warmTaupe = Color(0xFFF5F3F1);
-  static const stone = Color(0xFFEBE8E4);
+  static const eggshell = Color(0xFFFFFFFF);
+  static const warmTaupe = Color(0xFFFDFDFB);
+  static const stone = Color(0xFFE6E6E3);
 
   // Text
-  static const ink = Color(0xFF000000);
-  static const graphite = Color(0xFF44403B);
-  static const smoke = Color(0xFF777169);
-  static const ash = Color(0xFFA59F97);
+  static const ink = Color(0xFF0B0B0B);
+  static const graphite = Color(0xFF30302E);
+  static const smoke = Color(0xFF60605C);
+  static const ash = Color(0xFF8C8C87);
 
   // Accents
-  static const violetSpark = Color(0xFF0447FF);
-  static const emberOrange = Color(0xFFFF4704);
+  static const violetSpark = Color(0xFF1646FF);
+  static const emberOrange = Color(0xFFFF501C);
 
   // Semantic
   static const success = Color(0xFF2D7D46);
@@ -262,7 +262,8 @@ class MewTheme {
           foregroundColor: MewColors.eggshell,
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -271,13 +272,15 @@ class MewTheme {
           side: const BorderSide(color: MewColors.stone),
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: MewColors.eggshell,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: MewColors.stone),
@@ -420,7 +423,8 @@ class MewTheme {
           foregroundColor: MewColorsDark.eggshell,
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -429,13 +433,15 @@ class MewTheme {
           side: const BorderSide(color: MewColorsDark.stone),
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: MewColorsDark.eggshell,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: MewColorsDark.stone),
@@ -457,7 +463,8 @@ class MewTheme {
       chipTheme: ChipThemeData(
         backgroundColor: MewColorsDark.stone,
         selectedColor: MewColorsDark.ink,
-        labelStyle: GoogleFonts.inter(fontSize: 12, color: MewColorsDark.graphite),
+        labelStyle:
+            GoogleFonts.inter(fontSize: 12, color: MewColorsDark.graphite),
         shape: const StadiumBorder(),
         side: BorderSide.none,
       ),

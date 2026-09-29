@@ -28,49 +28,127 @@ class WordCard extends StatelessWidget {
     final firstDef =
         item.definitions.isNotEmpty ? item.definitions.first : null;
 
+    final wordStyle = GoogleFonts.inter(
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      color: colors.ink,
+    );
+    final phoneticStyle = GoogleFonts.inter(
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      color: colors.ash,
+    );
+
     final cardContent = MewCard(
       onTap: onTap,
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Row 1: Word + Phonetic + Badges
           Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                vocab.word,
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: colors.ink,
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final availableWidth = constraints.maxWidth;
+                    final hasPhonetic = vocab.phonetic != null &&
+                        vocab.phonetic!.trim().isNotEmpty;
+
+                    bool fitsOnSingleLine = false;
+                    if (hasPhonetic) {
+                      final tp = TextPainter(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(text: vocab.word, style: wordStyle),
+                            const TextSpan(text: '   '),
+                            TextSpan(
+                                text: vocab.phonetic!, style: phoneticStyle),
+                          ],
+                        ),
+                        textDirection: TextDirection.ltr,
+                        maxLines: 1,
+                      )..layout();
+                      fitsOnSingleLine = tp.width <= availableWidth;
+                    }
+
+                    if (hasPhonetic && !fitsOnSingleLine) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            vocab.word,
+                            style: wordStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            vocab.phonetic!,
+                            style: phoneticStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      );
+                    }
+
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            vocab.word,
+                            style: wordStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (hasPhonetic) ...[
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              vocab.phonetic!,
+                              style: phoneticStyle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ),
-              if (vocab.phonetic != null && vocab.phonetic!.isNotEmpty) ...[
+              if ((vocab.cefrLevel != null && vocab.cefrLevel!.isNotEmpty) ||
+                  (vocab.partOfSpeech != null &&
+                      vocab.partOfSpeech!.isNotEmpty)) ...[
                 const SizedBox(width: 8),
-                Text(
-                  vocab.phonetic!,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: colors.ash,
-                  ),
-                ),
-              ],
-              const Spacer(),
-              if (vocab.cefrLevel != null && vocab.cefrLevel!.isNotEmpty) ...[
-                MewChip(
-                  label: vocab.cefrLevel!,
-                  customBgColor: colors.ink,
-                  customTextColor: colors.eggshell,
-                ),
-                const SizedBox(width: 6),
-              ],
-              if (vocab.partOfSpeech != null &&
-                  vocab.partOfSpeech!.isNotEmpty) ...[
-                MewChip(
-                  label: vocab.partOfSpeech!,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (vocab.cefrLevel != null &&
+                        vocab.cefrLevel!.isNotEmpty) ...[
+                      MewChip(
+                        label: vocab.cefrLevel!,
+                        customBgColor: colors.ink,
+                        customTextColor: colors.eggshell,
+                      ),
+                      if (vocab.partOfSpeech != null &&
+                          vocab.partOfSpeech!.isNotEmpty)
+                        const SizedBox(width: 6),
+                    ],
+                    if (vocab.partOfSpeech != null &&
+                        vocab.partOfSpeech!.isNotEmpty)
+                      MewChip(
+                        label: vocab.partOfSpeech!,
+                      ),
+                  ],
                 ),
               ],
             ],

@@ -277,6 +277,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerSubtitle => 'Start smart vocabulary retention';
 
   @override
+  String get orDivider => 'or';
+
+  @override
+  String get signInWithGoogle => 'Sign in with Google';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get confirmPasswordHint => 'Re-enter your password';
+
+  @override
+  String get passwordMismatch => 'Passwords do not match';
+
+  @override
+  String get confirmPasswordRequired => 'Please confirm your password';
+
+  @override
+  String get fullName => 'Full Name';
+
+  @override
+  String get fullNameHint => 'e.g. Alex Nguyen';
+
+  @override
+  String get passwordHint => 'At least 6 characters';
+
+  @override
+  String get fullNameRequired => 'Please enter your full name';
+
+  @override
+  String get fullNameMinLength => 'Full name must be at least 2 characters';
+
+  @override
+  String get signUpSuccessNotice =>
+      'Registration successful! Please check your email to activate your account.';
+
+  @override
+  String get signInFailed => 'Sign in failed';
+
+  @override
+  String get signUpFailed => 'Registration failed';
+
+  @override
+  String get googleSignInFailed => 'Google sign-in failed';
+
+  @override
+  String get googleSignInUnavailable => 'Unable to open Google sign-in.';
+
+  @override
+  String get syncingData => 'Syncing data...';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override

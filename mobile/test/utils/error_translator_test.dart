@@ -106,5 +106,29 @@ void main() {
         'Đã xảy ra lỗi không xác định. Vui lòng thử lại.',
       );
     });
+
+    test('translates invalid login credentials to English when locale is en', () {
+      const error = AuthException('Invalid login credentials', statusCode: '400');
+      expect(
+        ErrorTranslator.translate(error, locale: 'en'),
+        'Incorrect email or password.',
+      );
+    });
+
+    test('translates user already registered to English when locale is en', () {
+      const error = AuthException('User already registered', statusCode: '422');
+      expect(
+        ErrorTranslator.translate(error, locale: 'en', prefix: 'Registration failed'),
+        'Registration failed: This email is already registered. Please sign in.',
+      );
+    });
+
+    test('translates network error to English when locale is en', () {
+      const error = SocketException('Failed host lookup');
+      expect(
+        ErrorTranslator.translate(error, locale: 'en'),
+        'Cannot connect to server. Please check your network connection.',
+      );
+    });
   });
 }

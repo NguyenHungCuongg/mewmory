@@ -48,9 +48,19 @@ dev_dependencies:
   drift_dev: ^2.18.0
   custom_lint: ^0.8.1
   riverpod_lint: ^3.1.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/branding/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#fdfcfc"
+  adaptive_icon_foreground: "assets/branding/app_icon.png"
 
 flutter:
   generate: true
   uses-material-design: true
   assets:
     - .env
+    - assets/branding/

@@ -2,17 +2,26 @@ import db from "../db/database";
 
 export const collectionService = {
   async create(data) {
-    const id = crypto.randomUUID();
+    const name = data.name.trim();
     const now = new Date().toISOString();
+
+    // The server keeps soft-deleted rows under UNIQUE (user_id, name):
+    // reuse the deleted collection instead of creating a clashing one.
+    const deleted = await db.collections
+      .where("user_id")
+      .equals(data.user_id)
+      .and((c) => c.is_deleted && c.name === name)
+      .first();
+    const id = deleted?.id ?? crypto.randomUUID();
 
     const collection = {
       id,
       user_id: data.user_id,
-      name: data.name.trim(),
+      name,
       description: data.description?.trim() || null,
       is_default: data.is_default || false,
       is_ai_generated: data.is_ai_generated || false,
-      created_at: now,
+      created_at: deleted?.created_at ?? now,
       updated_at: now,
       is_deleted: false,
     };
@@ -143,14 +152,23 @@ export const collectionService = {
   },
 
   async assignWord(vocabularyId, collectionId) {
-    const id = crypto.randomUUID();
+    // Reuse the pair's existing (possibly soft-deleted) link: the server keeps
+    // it under UNIQUE (vocabulary_id, collection_id).
+    const existing = await db.vocabulary_collections
+      .where("vocabulary_id")
+      .equals(vocabularyId)
+      .and((vc) => vc.collection_id === collectionId)
+      .first();
+    if (existing && !existing.is_deleted) return;
+
+    const id = existing?.id ?? crypto.randomUUID();
     const now = new Date().toISOString();
 
     const link = {
       id,
       vocabulary_id: vocabularyId,
       collection_id: collectionId,
-      created_at: now,
+      created_at: existing?.created_at ?? now,
       updated_at: now,
       is_deleted: false,
     };

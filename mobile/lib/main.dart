@@ -10,9 +10,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'config/supabase_config.dart';
 import 'providers/theme_provider.dart';
+import 'widgets/common/app_crash_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Global error widget boundary
+  ErrorWidget.builder = (FlutterErrorDetails details) => AppCrashView(details: details);
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+  };
 
   if (Platform.isAndroid) {
     try {

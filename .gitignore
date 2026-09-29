@@ -1,16 +1,21 @@
 # Dependencies
 node_modules/
 web/node_modules/
+admin/node_modules/
 
 # Production build
 dist/
 web/dist/
+admin/dist/
 
 # Environment variables
 .env
 .env.local
 web/.env
 web/.env.local
+admin/.env
+admin/.env.local
+
 
 # Supabase local cache & temp
 .temp/
@@ -24,6 +29,5 @@ Thumbs.db
 #Development documents
 dev-docs/
 docs/superpowers/
-
 # Git Worktrees
 .worktrees/

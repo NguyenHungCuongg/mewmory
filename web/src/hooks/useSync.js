@@ -3,6 +3,9 @@ import { useOnlineStatus } from "./useOnlineStatus";
 import { useAuthStore } from "../stores/auth.store";
 import { syncEngine } from "../db/sync";
 
+// How often to push local changes made while online.
+export const PENDING_SYNC_INTERVAL_MS = 10000;
+
 export function useSync() {
   const { isOnline } = useOnlineStatus();
   const { user } = useAuthStore();
@@ -49,6 +52,15 @@ export function useSync() {
     }
     prevOnlineRef.current = isOnline;
   }, [isOnline, user, triggerSync]);
+
+  // Push writes made while online (services only enqueue them)
+  useEffect(() => {
+    if (!user || !isOnline) return;
+    const timer = setInterval(async () => {
+      if ((await syncEngine.pendingCount()) > 0) triggerSync();
+    }, PENDING_SYNC_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [user, isOnline, triggerSync]);
 
   return {
     isSyncing,

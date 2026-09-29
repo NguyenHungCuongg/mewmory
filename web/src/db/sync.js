@@ -1,11 +1,22 @@
 import db from "./database";
 import { supabase } from "../config/supabase";
 
+// Entries the server rejected this many times stop being retried.
+export const MAX_PUSH_ATTEMPTS = 5;
+
+const isRetryable = (item) =>
+  !item.synced && (item.attempts ?? 0) < MAX_PUSH_ATTEMPTS;
+
+// Re-read this much before the cursor: a row stamped just before the newest one
+// we saw may commit after we read. Re-pulling a row is harmless (last-write-wins).
+export const SYNC_CURSOR_OVERLAP_MS = 60_000;
+
+// PostgREST errors carry a code ("23505", "PGRST116", ...); a failed fetch has none.
+const isNetworkError = (err) => !err?.code;
+
 export const syncEngine = {
   async pushChanges() {
-    const queue = await db.sync_queue
-      .filter((item) => !item.synced)
-      .sortBy("id");
+    const queue = await db.sync_queue.filter(isRetryable).sortBy("id");
 
     let pushed = 0;
     const errors = [];
@@ -25,7 +36,25 @@ export const syncEngine = {
           };
         }
 
-        if (operation === "CREATE") {
+        if (table_name === "user_settings" && operation === "CREATE") {
+          // Queued by older builds with default values; pushing them now would
+          // overwrite the user's real settings. Only UPDATEs carry user changes.
+          await db.sync_queue.update(id, { synced: true });
+          continue;
+        } else if (table_name === "user_settings") {
+          // One row per user already exists server-side; the local id may differ.
+          const { id: _localId, ...row } = pushPayload;
+          const { error } = await supabase
+            .from(table_name)
+            .upsert(row, { onConflict: "user_id" });
+          if (error) throw error;
+        } else if (operation === "CREATE" && table_name === "vocabulary_collections") {
+          // Server has UNIQUE (vocabulary_id, collection_id), including soft-deleted rows.
+          const { error } = await supabase
+            .from(table_name)
+            .upsert(pushPayload, { onConflict: "vocabulary_id,collection_id" });
+          if (error) throw error;
+        } else if (operation === "CREATE") {
           const { error } = await supabase.from(table_name).upsert(pushPayload);
           if (error) throw error;
         } else if (operation === "UPDATE") {
@@ -48,10 +77,26 @@ export const syncEngine = {
       } catch (err) {
         console.error(`Sync push error for ${table_name} (${record_id}):`, err);
         errors.push(`${table_name}:${record_id} - ${err.message}`);
+        // Network down: stop and keep order for the next sync.
+        if (isNetworkError(err)) break;
+        await db.sync_queue.update(id, {
+          attempts: (entry.attempts ?? 0) + 1,
+          last_error: err.message,
+        });
       }
     }
 
     return { pushed, errors };
+  },
+
+  /** Entries that the next push will try to send. */
+  pendingCount() {
+    return db.sync_queue.filter(isRetryable).count();
+  },
+
+  /** Every local change not on the server yet, including ones that gave up. */
+  unsyncedCount() {
+    return db.sync_queue.filter((item) => !item.synced).count();
   },
 
   async pullChanges(userId, lastSyncTimestamp = null) {
@@ -66,7 +111,9 @@ export const syncEngine = {
     ];
 
     let totalPulled = 0;
-    const now = new Date().toISOString();
+    // Cursor = newest server updated_at seen; the device clock may be skewed.
+    let cursorMs = lastSyncTimestamp ? Date.parse(lastSyncTimestamp) : null;
+    let failed = false;
 
     for (const tableName of tables) {
       try {
@@ -78,15 +125,32 @@ export const syncEngine = {
         }
 
         if (lastSyncTimestamp) {
-          query = query.gt("updated_at", lastSyncTimestamp);
+          const since = Date.parse(lastSyncTimestamp) - SYNC_CURSOR_OVERLAP_MS;
+          query = query.gt("updated_at", new Date(since).toISOString());
         }
 
         const { data, error } = await query;
         if (error) throw error;
 
+        for (const row of data ?? []) {
+          const rowMs = Date.parse(row.updated_at);
+          if (!Number.isNaN(rowMs) && (cursorMs === null || rowMs > cursorMs)) {
+            cursorMs = rowMs;
+          }
+        }
+
         if (data && data.length > 0) {
           // Last-write-wins conflict resolution
           for (const remoteRecord of data) {
+            if (tableName === "user_settings") {
+              // Drop any locally created default row: the server row is the real one.
+              await db.user_settings
+                .where("user_id")
+                .equals(remoteRecord.user_id)
+                .and((s) => s.id !== remoteRecord.id)
+                .delete();
+            }
+
             const localRecord = await db[tableName].get(remoteRecord.id);
 
             if (!localRecord) {
@@ -106,10 +170,17 @@ export const syncEngine = {
         }
       } catch (err) {
         console.error(`Sync pull error for table ${tableName}:`, err);
+        failed = true;
       }
     }
 
-    localStorage.setItem(`last_sync_${userId}`, now);
+    // A failed table must be re-read next time, so only advance when all succeeded.
+    if (!failed && cursorMs !== null) {
+      localStorage.setItem(
+        `last_sync_${userId}`,
+        new Date(cursorMs).toISOString(),
+      );
+    }
     return { pulled: totalPulled };
   },
 

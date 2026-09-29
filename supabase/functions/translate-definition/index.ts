@@ -1,4 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import {
+  getUserIdFromJWT,
+  checkBanned,
+  logUsage,
+  updateLastActive,
+  checkAndFlagSpam,
+  createAdminClient,
+} from "../_shared/admin-utils.ts";
+import {
+  isRateLimited,
+  MAX_TEXT_LENGTH,
+  MAX_WORD_LENGTH,
+  RATE_LIMIT_PER_HOUR,
+  sanitizeModel,
+} from "../_shared/ai-guard.ts";
+import { geminiGenerate } from "../_shared/gemini.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,6 +36,10 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  let currentUserId: string | null = null;
+  let currentAdminClient: any = null;
+  let currentWord: string | null = null;
+
   try {
     // Verify auth
     const authHeader = req.headers.get("Authorization");
@@ -30,17 +50,68 @@ serve(async (req) => {
       });
     }
 
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const userId = await getUserIdFromJWT(authHeader, supabaseUrl, supabaseAnonKey);
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const adminClient = createAdminClient();
+    currentUserId = userId;
+    currentAdminClient = adminClient;
+
+    const banned = await checkBanned(userId, adminClient);
+    if (banned) {
+      await logUsage(userId, "translate_definition", null, "banned", adminClient);
+      return new Response(
+        JSON.stringify({ error: "Tài khoản của bạn đã bị khóa." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if (await isRateLimited(userId, adminClient)) {
+      await logUsage(userId, "translate_definition", null, "rate_limited", adminClient);
+      return new Response(
+        JSON.stringify({
+          error: `Bạn đã dùng hết ${RATE_LIMIT_PER_HOUR} lượt AI trong 1 giờ. Vui lòng thử lại sau.`,
+        }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    await updateLastActive(userId, adminClient);
+
     const {
       word = "",
       text,
       part_of_speech = "",
       provider = "gemini",
-      model,
+      model: requestedModel,
     }: TranslateRequest = await req.json();
+    const model = sanitizeModel(provider, requestedModel);
 
-    if (!text || typeof text !== "string" || text.trim().length === 0) {
+    // All of these end up in the AI prompt: bound their size.
+    const invalidExtras =
+      typeof word !== "string" ||
+      word.length > MAX_WORD_LENGTH ||
+      typeof part_of_speech !== "string" ||
+      part_of_speech.length > MAX_WORD_LENGTH;
+    currentWord = typeof word === "string" && word ? word.slice(0, MAX_WORD_LENGTH) : null;
+
+    if (
+      !text ||
+      typeof text !== "string" ||
+      text.trim().length === 0 ||
+      text.length > MAX_TEXT_LENGTH ||
+      invalidExtras
+    ) {
+      await logUsage(userId, "translate_definition", currentWord, "error", adminClient);
       return new Response(
-        JSON.stringify({ error: "Definition text is required" }),
+        JSON.stringify({
+          error: `Definition text is required (max ${MAX_TEXT_LENGTH} characters; word/part of speech max ${MAX_WORD_LENGTH})`,
+        }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -67,18 +138,28 @@ Rules:
   "translation": "<Vietnamese equivalent>"
 }`;
 
+    // Primary provider first; if all its (free-tier) models fail, try the other one.
     let translation = "";
-    if (provider === "gemini") {
-      translation = await callGemini(prompt, model);
-    } else {
-      translation = await callOpenRouter(prompt, model);
+    try {
+      translation = provider === "gemini"
+        ? await callGemini(prompt, model)
+        : await callOpenRouter(prompt, model);
+    } catch (err: any) {
+      console.warn(`[translate-definition] ${provider} failed, trying the other provider:`, err?.message || err);
+      translation = provider === "gemini" ? await callOpenRouter(prompt) : await callGemini(prompt);
     }
+
+    await logUsage(userId, "translate_definition", word || null, "success", adminClient);
+    await checkAndFlagSpam(userId, adminClient);
 
     return new Response(JSON.stringify({ translation }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
+    if (currentUserId && currentAdminClient) {
+      await logUsage(currentUserId, "translate_definition", currentWord, "error", currentAdminClient);
+    }
     return new Response(
       JSON.stringify({
         error: error.message || "Internal translation error",
@@ -95,32 +176,8 @@ async function callGemini(prompt: string, model?: string): Promise<string> {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY not set");
 
-  const modelName = model || "gemini-3.6-flash";
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
-      }),
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(`Gemini API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!rawText) return "";
-
-  try {
-    return extractTranslation(rawText);
-  } catch {
-    return rawText.trim();
-  }
+  // Empty answer = failure, so the next fallback model gets a turn.
+  return geminiGenerate(apiKey, prompt, model, (raw) => extractTranslation(raw) || null);
 }
 
 function extractTranslation(raw: string): string {

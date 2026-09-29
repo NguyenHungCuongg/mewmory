@@ -120,9 +120,9 @@ export const vocabularyService = {
     if (search) {
       const searchLower = search.toLowerCase();
       // Also search in definitions
+      // Booleans aren't valid IndexedDB keys, so is_deleted can't be queried via where().
       const allDefinitions = await db.definitions
-        .where("is_deleted")
-        .equals(0)
+        .filter((d) => !d.is_deleted)
         .toArray();
       const vocabIdsWithMatchingDefs = new Set(
         allDefinitions
@@ -309,11 +309,11 @@ export const vocabularyService = {
         }
 
         // 3. Handle collections
-        const existingLinks = await db.vocabulary_collections
+        const allLinks = await db.vocabulary_collections
           .where("vocabulary_id")
           .equals(id)
-          .and((l) => !l.is_deleted)
           .toArray();
+        const existingLinks = allLinks.filter((l) => !l.is_deleted);
 
         const currentLinkColIds = new Set(existingLinks.map((l) => l.collection_id));
         const targetColIds = new Set(collectionIds);
@@ -339,12 +339,15 @@ export const vocabularyService = {
         // Add newly selected
         for (const colId of collectionIds) {
           if (!currentLinkColIds.has(colId)) {
-            const linkId = crypto.randomUUID();
+            // Reuse a soft-deleted link for this pair: the server keeps it
+            // under UNIQUE (vocabulary_id, collection_id).
+            const oldLink = allLinks.find((l) => l.collection_id === colId);
+            const linkId = oldLink?.id ?? crypto.randomUUID();
             const linkRecord = {
               id: linkId,
               vocabulary_id: id,
               collection_id: colId,
-              created_at: now,
+              created_at: oldLink?.created_at ?? now,
               updated_at: now,
               is_deleted: false,
             };

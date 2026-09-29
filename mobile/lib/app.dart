@@ -12,6 +12,7 @@ import 'pages/collection_detail_page.dart';
 import 'pages/collections_page.dart';
 import 'pages/dashboard_page.dart';
 import 'pages/login_page.dart';
+import 'pages/not_found_page.dart';
 import 'pages/register_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/vocabulary_list_page.dart';
@@ -37,6 +38,7 @@ GoRouter createRouter({
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: initialLocation,
+    errorBuilder: (context, state) => NotFoundPage(error: state.error),
     redirect: (context, state) {
       if (!enableAuthRedirect) return null;
 

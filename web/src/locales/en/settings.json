@@ -50,6 +50,7 @@
   "saveError": "Error saving settings",
   "signOutSuccess": "Signed out",
   "signOutError": "Sign out error",
+  "signOutUnsynced": "{{count}} changes haven't synced yet. Signing out now will discard them. Sign out anyway?",
   "about": {
     "title": "About Mewmory",
     "version": "Version",

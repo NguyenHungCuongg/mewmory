@@ -23,7 +23,9 @@ export function isCacheable(result: any): boolean {
     !!result?.source?.dictionary &&
     !!result?.source?.ai &&
     Array.isArray(result.meanings) &&
-    result.meanings.length > 0
+    result.meanings.length > 0 &&
+    // AI can "succeed" with `{}`; cefr_level proves it actually answered.
+    !!result.meanings[0].cefr_level
   );
 }
 

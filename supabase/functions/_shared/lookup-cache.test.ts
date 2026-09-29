@@ -43,7 +43,7 @@ function fakeClient(
 
 const complete = {
   word: "run",
-  meanings: [{ part_of_speech: "verb", definitions: [] }],
+  meanings: [{ part_of_speech: "verb", cefr_level: "A1", definitions: [] }],
   source: { dictionary: true, ai: true },
 };
 
@@ -117,4 +117,12 @@ Deno.test("putCachedLookup upserts word, result and created_at", async () => {
 Deno.test("putCachedLookup never throws", async () => {
   await putCachedLookup(fakeClient(null, { error: { message: "boom" } }).client, "run", complete);
   await putCachedLookup(fakeClient(null, { throws: true }).client, "run", complete);
+});
+
+Deno.test("isCacheable rejects an empty AI reply (no cefr_level)", () => {
+  const junk = {
+    ...complete,
+    meanings: [{ part_of_speech: "verb", cefr_level: null, definitions: [] }],
+  };
+  assertEquals(isCacheable(junk), false);
 });

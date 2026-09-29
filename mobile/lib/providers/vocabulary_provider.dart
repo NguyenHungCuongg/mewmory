@@ -84,8 +84,11 @@ class VocabularyFilterNotifier extends Notifier<VocabularyFilters> {
   VocabularyFilters build() => const VocabularyFilters();
 
   void setSearchQuery(String query) {
-    state =
-        state.copyWith(searchQuery: query.trim().isEmpty ? null : query.trim());
+    final trimmed = query.trim();
+    // copyWith treats null as "keep", so an empty box must clear explicitly.
+    state = trimmed.isEmpty
+        ? state.copyWith(clearSearch: true)
+        : state.copyWith(searchQuery: trimmed);
   }
 
   void setCefrLevel(String? level) {

@@ -49,6 +49,8 @@ class _VocabularyListPageState extends ConsumerState<VocabularyListPage> {
   }
 
   void _clearSearch() {
+    // A pending debounced query would otherwise re-apply the old text.
+    _debounceTimer?.cancel();
     _searchController.clear();
     ref.read(vocabularyFilterProvider.notifier).setSearchQuery('');
   }

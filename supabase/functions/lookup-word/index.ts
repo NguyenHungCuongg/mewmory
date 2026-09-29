@@ -9,6 +9,12 @@ import {
   createAdminClient,
 } from "../_shared/admin-utils.ts";
 import {
+  getCachedLookup,
+  isCacheable,
+  normalizeWord,
+  putCachedLookup,
+} from "../_shared/lookup-cache.ts";
+import {
   isRateLimited,
   MAX_WORD_LENGTH,
   RATE_LIMIT_PER_HOUR,
@@ -106,7 +112,20 @@ serve(async (req) => {
       );
     }
 
-    const trimmedWord = word.trim().toLowerCase();
+    const trimmedWord = normalizeWord(word);
+
+    const cached = await getCachedLookup(adminClient, trimmedWord);
+    if (cached) {
+      await logUsage(userId, "lookup_word", trimmedWord, "success", adminClient);
+      await checkAndFlagSpam(userId, adminClient);
+      return new Response(
+        JSON.stringify({ ...cached, source: { ...cached.source, cached: true } }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
 
     const [dictResult, aiResult] = await Promise.allSettled([
       fetchDictionary(trimmedWord),
@@ -148,6 +167,9 @@ serve(async (req) => {
 
     // Merge results
     const result = mergeResults(trimmedWord, dictData, aiData);
+    if (isCacheable(result)) {
+      await putCachedLookup(adminClient, trimmedWord, result);
+    }
 
     await logUsage(userId, "lookup_word", trimmedWord, "success", adminClient);
     await checkAndFlagSpam(userId, adminClient);

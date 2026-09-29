@@ -14,6 +14,7 @@ import {
   normalizeWord,
   putCachedLookup,
 } from "../_shared/lookup-cache.ts";
+import { geminiGenerate } from "../_shared/gemini.ts";
 import {
   isRateLimited,
   MAX_WORD_LENGTH,
@@ -227,71 +228,21 @@ Rules:
 - definitions should provide 1 to 3 primary meanings (used as fallback if dictionary is unavailable).
 - Return ONLY valid JSON, no markdown formatting or extra text.`;
 
-  if (provider === "gemini") {
-    return callGemini(prompt, model);
-  } else {
-    return callOpenRouter(prompt, model);
+  // Primary provider first; if all its (free-tier) models fail, try the other one.
+  try {
+    return provider === "gemini"
+      ? await callGemini(prompt, model)
+      : await callOpenRouter(prompt, model);
+  } catch (err: any) {
+    console.warn(`[lookup-word] ${provider} failed, trying the other provider:`, err?.message || err);
+    return provider === "gemini" ? callOpenRouter(prompt) : callGemini(prompt);
   }
 }
 
 async function callGemini(prompt: string, model?: string) {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY not set");
-
-  const requestedModel = model || "gemini-3.5-flash-lite";
-  const candidateModels = [
-    requestedModel,
-    "gemini-3.5-flash-lite",
-    "gemini-3.1-flash-lite",
-    "gemini-3.6-flash",
-  ].filter((m, idx, arr) => arr.indexOf(m) === idx);
-
-  let lastError: any = null;
-  for (const modelName of candidateModels) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: "application/json" },
-          }),
-          signal: AbortSignal.timeout(15000),
-        },
-      );
-
-      if (!response.ok) {
-        const errText = await response.text().catch(() => "");
-        lastError = new Error(
-          `Gemini API error (${modelName}): ${response.status} - ${errText}`,
-        );
-        // If high demand (503), rate limit (429), or discontinued model (404), try fallback model
-        if (
-          response.status === 503 ||
-          response.status === 429 ||
-          response.status === 404
-        ) {
-          console.warn(
-            `Gemini model ${modelName} returned ${response.status}. Trying next fallback model...`,
-          );
-          continue;
-        }
-        throw lastError;
-      }
-
-      const data = await response.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      const parsed = extractJSON(text);
-      if (parsed) return parsed;
-    } catch (err: any) {
-      lastError = err;
-      console.warn(`Gemini model ${modelName} failed:`, err?.message || err);
-    }
-  }
-
-  throw lastError || new Error("All Gemini candidate models failed");
+  return geminiGenerate(apiKey, prompt, model, extractJSON);
 }
 
 function extractJSON(raw: string): any {

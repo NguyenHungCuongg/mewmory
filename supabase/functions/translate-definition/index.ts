@@ -14,6 +14,7 @@ import {
   RATE_LIMIT_PER_HOUR,
   sanitizeModel,
 } from "../_shared/ai-guard.ts";
+import { geminiGenerate } from "../_shared/gemini.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -137,11 +138,15 @@ Rules:
   "translation": "<Vietnamese equivalent>"
 }`;
 
+    // Primary provider first; if all its (free-tier) models fail, try the other one.
     let translation = "";
-    if (provider === "gemini") {
-      translation = await callGemini(prompt, model);
-    } else {
-      translation = await callOpenRouter(prompt, model);
+    try {
+      translation = provider === "gemini"
+        ? await callGemini(prompt, model)
+        : await callOpenRouter(prompt, model);
+    } catch (err: any) {
+      console.warn(`[translate-definition] ${provider} failed, trying the other provider:`, err?.message || err);
+      translation = provider === "gemini" ? await callOpenRouter(prompt) : await callGemini(prompt);
     }
 
     await logUsage(userId, "translate_definition", word || null, "success", adminClient);
@@ -171,32 +176,8 @@ async function callGemini(prompt: string, model?: string): Promise<string> {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY not set");
 
-  const modelName = model || "gemini-3.6-flash";
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
-      }),
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(`Gemini API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!rawText) return "";
-
-  try {
-    return extractTranslation(rawText);
-  } catch {
-    return rawText.trim();
-  }
+  // Empty answer = failure, so the next fallback model gets a turn.
+  return geminiGenerate(apiKey, prompt, model, (raw) => extractTranslation(raw) || null);
 }
 
 function extractTranslation(raw: string): string {

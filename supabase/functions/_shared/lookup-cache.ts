@@ -17,10 +17,12 @@ export function isFresh(
   return now.getTime() - new Date(createdAt).getTime() < ttlDays * DAY_MS;
 }
 
-/** Only cache results where both sources answered — never pin a degraded result. */
+/**
+ * Cache once AI answered properly. Dictionary is optional: it's too slow/unreliable
+ * to gate on, and requiring it meant nothing was ever cached.
+ */
 export function isCacheable(result: any): boolean {
   return (
-    !!result?.source?.dictionary &&
     !!result?.source?.ai &&
     Array.isArray(result.meanings) &&
     result.meanings.length > 0 &&

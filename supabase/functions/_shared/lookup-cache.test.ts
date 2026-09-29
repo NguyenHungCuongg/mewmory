@@ -64,10 +64,10 @@ Deno.test("isFresh is true inside TTL and false at/after it", () => {
   assertEquals(isFresh(at(45), now), false);
 });
 
-Deno.test("isCacheable only accepts complete results with meanings", () => {
+Deno.test("isCacheable needs an AI answer with meanings; dictionary is optional", () => {
   assertEquals(isCacheable(complete), true);
   assertEquals(isCacheable({ ...complete, source: { dictionary: true, ai: false } }), false);
-  assertEquals(isCacheable({ ...complete, source: { dictionary: false, ai: true } }), false);
+  assertEquals(isCacheable({ ...complete, source: { dictionary: false, ai: true } }), true);
   assertEquals(isCacheable({ ...complete, meanings: [] }), false);
   assertEquals(isCacheable(null), false);
 });
